@@ -166,7 +166,7 @@ Ensure you have the following installed:
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/your-username/learnhub.git
+   git clone https://github.com/zaid-khan-code/learnHub-ai-powered-online-learning-platform-lms.git
    cd learnhub
    ```
 
