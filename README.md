@@ -157,7 +157,7 @@ The platform supports a **multi-role architecture** (Students, Instructors, and 
 
 Ensure you have the following installed:
 
-- [**Node.js**](https://nodejs.org) 20.x or later
+- [**Node.js**](https://nodejs.org) 20.x or later or use recommended one 24.14.1
 - [**npm**](https://www.npmjs.com), [**yarn**](https://yarnpkg.com), or [**pnpm**](https://pnpm.io)
 - [**PostgreSQL**](https://www.postgresql.org/download/) 14+ or [**Prisma Postgres**](https://www.prisma.io/docs/getting-started/quickstart-prismaPostgres)
 
