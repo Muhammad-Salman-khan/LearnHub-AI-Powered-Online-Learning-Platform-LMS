@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Roboto } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/themeProvider/theme-provider";
+import Header from "@/components/themeProvider/Header/page";
 
 const geistHeading = Geist({ subsets: ["latin"], variable: "--font-heading" });
 
@@ -142,6 +143,7 @@ export default function RootLayout({
       )}
     >
       <body className="min-h-full flex bg-background text-foreground flex-col max-w-screen">
+      <Header />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
