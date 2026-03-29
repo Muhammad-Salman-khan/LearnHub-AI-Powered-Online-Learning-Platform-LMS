@@ -27,7 +27,7 @@ export const POST = async (req: NextRequest) => {
       data: {
         name,
         email,
-        password: encryptedPassword,
+        password : encryptedPassword
       },
     });
     if (!newUser) {
@@ -46,12 +46,10 @@ export const POST = async (req: NextRequest) => {
       { status: 201 },
     );
   } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      {
-        message: error,
-      },
-      {},
-    );
-  }
+  console.error(error);
+  return NextResponse.json(
+    { message: "Internal Server Error" },
+    { status: 500 }
+  );
+}
 };
