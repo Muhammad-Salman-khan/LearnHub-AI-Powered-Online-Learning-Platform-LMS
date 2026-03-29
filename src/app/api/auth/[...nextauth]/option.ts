@@ -9,8 +9,8 @@ const GENERIC_ERROR = "Invalid email or password.";
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     }),
     CredentialsProvider({
       id: "credentials",
@@ -36,7 +36,7 @@ export const authOptions: NextAuthOptions = {
           }
           const isValid = await bcrypt.compare(
             credentials?.password,
-            user.password,
+            user?.password,
           );
           if (!isValid) {
             throw new Error(GENERIC_ERROR);
