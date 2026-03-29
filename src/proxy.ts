@@ -49,8 +49,5 @@ export async function proxy(request: NextRequest) {
 }
 // these files are the file/folder where this file wont work
 export const config = {
-  matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|public).*)",
-    "/about",
-  ],
+  matcher: ["/about"],
 };
