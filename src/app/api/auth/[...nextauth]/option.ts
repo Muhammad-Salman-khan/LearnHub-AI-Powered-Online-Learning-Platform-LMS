@@ -5,12 +5,13 @@ import CredentialsProvider, {
 } from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import FindUser from "@/services/FindEmail";
+import { prisma } from "@/lib/prisma";
 const GENERIC_ERROR = "Invalid email or password.";
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     }),
     CredentialsProvider({
       id: "credentials",
@@ -36,7 +37,7 @@ export const authOptions: NextAuthOptions = {
           }
           const isValid = await bcrypt.compare(
             credentials?.password,
-            user.password,
+            user?.password,
           );
           if (!isValid) {
             throw new Error(GENERIC_ERROR);
@@ -49,6 +50,28 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
+    async signIn({ user, account }: any) {
+      if (account?.provider === "google") {
+        try {
+          const existAcc = await FindUser(user.email);
+
+          if (!existAcc) {
+            await prisma.user.create({
+              data: {
+                name: user.name,
+                email: user.email,
+                image: user?.image,
+                password: "",
+              },
+            });
+          }
+          return true;
+        } catch (error) {
+          console.log("Google signIn DB error:", error);
+          return false;
+        }
+      }
+    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
@@ -74,9 +97,6 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60,
   },
-  // pages: {
-  //   signIn: "/sign-in",
-  // },
   secret: process.env.NEXTAUTH_SECRET,
   useSecureCookies: true,
 };
