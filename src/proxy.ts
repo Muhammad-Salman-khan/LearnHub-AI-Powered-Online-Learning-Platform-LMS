@@ -25,20 +25,20 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isLoggedIn = !!token;
   const role = token?.role as string | undefined;
-  if (!isLoggedIn) {
-    if (!isPublicRoutes(pathname)) {
-      return NextResponse.redirect(new URL("/signup", request.url));
-    }
-    return NextResponse.next();
-  }
-  if (isAuth(pathname)) {
-    if (role === "instructor") {
-      return NextResponse.redirect(
-        new URL("/dashboard/instructor", request.url),
-      );
-    }
-    return NextResponse.redirect(new URL("/dashboard/student", request.url));
-  }
+  // if (!isLoggedIn) {
+  //   if (!isPublicRoutes(pathname)) {
+  //     return NextResponse.redirect(new URL("/signup", request.url));
+  //   }
+  //   return NextResponse.next();
+  // }
+  // if (isAuth(pathname)) {
+  //   if (role === "instructor") {
+  //     return NextResponse.redirect(
+  //       new URL("/dashboard/instructor", request.url),
+  //     );
+  //   }
+  //   return NextResponse.redirect(new URL("/dashboard/student", request.url));
+  // }
   if (isInstructorRoute(pathname) && role !== "instructor") {
     return NextResponse.redirect(new URL("/dashboard/student", request.url));
   }
