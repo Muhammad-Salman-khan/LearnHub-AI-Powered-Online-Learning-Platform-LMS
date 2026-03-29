@@ -27,7 +27,7 @@ export const POST = async (req: NextRequest) => {
       data: {
         name,
         email,
-        // password: encryptedPassword,
+        password: encryptedPassword,
       },
     });
     if (!newUser) {
