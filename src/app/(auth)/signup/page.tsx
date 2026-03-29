@@ -20,8 +20,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 // ✅ Custom icons
-import LogInIcon from "@/components/icons/LogInIcon";
-import GoogleIcon from "@/components/icons/GoogleIcon";
+import LogInIcon from "@/components/ui/loginicon";
+import GoogleIcon from "@/components/ui/GoogleIcon";
 
 /**
  * SignUpPage - Merged version: Beautiful UI + Working Auth Logic
