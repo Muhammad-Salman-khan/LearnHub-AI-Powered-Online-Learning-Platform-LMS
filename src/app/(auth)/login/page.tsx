@@ -64,7 +64,8 @@ export default function LoginPage() {
       });
 
       if (res?.ok) {
-        router.push("/dashboard");
+        
+        router.push("/dashboard/student");
         router.refresh();
       } else {
         alert(`Error: ${res?.error || "Invalid Credentials"}`);
@@ -120,7 +121,7 @@ export default function LoginPage() {
           </CardHeader>
 
           <CardContent>
-            <form onSubmit={handleLogin}>
+            <form onSubmit={handleLogin} id="login-form">
               <div className="flex flex-col gap-4 sm:gap-6">
                 
                 {/* 📧 EMAIL FIELD */}
@@ -174,7 +175,7 @@ export default function LoginPage() {
           <CardFooter className="flex flex-col gap-3 pt-2">
             {/* ✅ PRIMARY LOGIN BUTTON with LogInIcon + Loading State */}
             <Button
-              type="submit"
+              type="submit" form="login-form"
               disabled={loading}
               className="w-full h-10 sm:h-11 text-sm sm:text-base transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100 gap-2"
             >
@@ -185,7 +186,7 @@ export default function LoginPage() {
                 </>
               ) : (
                 <>
-                  <LogInIcon size={16} color="currentColor" strokeWidth={2.5} className="flex-shrink-0" />
+                  <LogInIcon size={16} color="currentColor" strokeWidth={2.5} className="shrink-0" />
                   <span>Login</span>
                 </>
               )}

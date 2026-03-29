@@ -62,6 +62,7 @@ export const authOptions: NextAuthOptions = {
                 email: user.email,
                 image: user?.image,
                 password: "",
+                role: "STUDENT",
               },
             });
           }
@@ -71,6 +72,7 @@ export const authOptions: NextAuthOptions = {
           return false;
         }
       }
+      return true;
     },
     async jwt({ token, user }) {
       if (user) {
@@ -98,5 +100,5 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60,
   },
   secret: process.env.NEXTAUTH_SECRET,
-  useSecureCookies: true,
+  useSecureCookies: process.env.NODE_ENV === "production",
 };
