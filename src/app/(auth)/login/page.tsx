@@ -24,7 +24,7 @@ import GoogleIcon from "@/components/ui/GoogleIcon";
 
 /**
  * LoginPage - Merged version: Beautiful UI + Working Auth Logic
- * 
+ *
  * Features:
  * - NextAuth.js credentials + Google OAuth sign-in
  * - Loading states with disabled buttons
@@ -39,11 +39,11 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  
+
   // 🔹 UI state
   const [isMounted, setIsMounted] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  
+
   const router = useRouter();
 
   // ✅ Prevent hydration mismatch: only animate after client mount
@@ -64,7 +64,7 @@ export default function LoginPage() {
       });
 
       if (res?.ok) {
-        router.push("/dashboard");
+        router.push("/dashboard/student/");
         router.refresh();
       } else {
         alert(`Error: ${res?.error || "Invalid Credentials"}`);
@@ -98,7 +98,6 @@ export default function LoginPage() {
 
       {/* 🔹 MAIN CONTAINER - Centers the card */}
       <div className="flex min-h-screen items-center justify-center p-4">
-        
         {/* 🔹 LOGIN CARD - Slides up on mount */}
         <Card
           className={`w-full max-w-sm sm:max-w-md shadow-lg border-0 sm:border transition-all duration-500 ${
@@ -113,7 +112,11 @@ export default function LoginPage() {
               Enter your credentials to login to your account
             </CardDescription>
             <CardAction>
-              <Button variant="link" className="px-0 text-sm sm:text-base" asChild>
+              <Button
+                variant="link"
+                className="px-0 text-sm sm:text-base"
+                asChild
+              >
                 <a href="/signup">Don't have an account? Sign Up</a>
               </Button>
             </CardAction>
@@ -122,10 +125,11 @@ export default function LoginPage() {
           <CardContent>
             <form onSubmit={handleLogin}>
               <div className="flex flex-col gap-4 sm:gap-6">
-                
                 {/* 📧 EMAIL FIELD */}
                 <div className="grid gap-2">
-                  <Label htmlFor="email" className="text-sm">Email Address</Label>
+                  <Label htmlFor="email" className="text-sm">
+                    Email Address
+                  </Label>
                   <Input
                     id="email"
                     name="email"
@@ -143,13 +147,17 @@ export default function LoginPage() {
                 {/* 🔒 PASSWORD FIELD with visibility toggle */}
                 <div className="grid gap-2">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="password" className="text-sm">Password</Label>
+                    <Label htmlFor="password" className="text-sm">
+                      Password
+                    </Label>
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="text-xs text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
                       disabled={loading}
-                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
                     >
                       {showPassword ? "Hide" : "Show"}
                     </button>
@@ -166,31 +174,34 @@ export default function LoginPage() {
                     autoComplete="current-password"
                   />
                 </div>
-
               </div>
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full h-10 sm:h-11 text-sm sm:text-base transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100 gap-2"
+              >
+                {loading ?
+                  <>
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    <span>Signing in...</span>
+                  </>
+                : <>
+                    <LogInIcon
+                      size={16}
+                      color="currentColor"
+                      strokeWidth={2.5}
+                      className="flex-shrink-0"
+                    />
+                    <span>Login</span>
+                  </>
+                }
+              </Button>
             </form>
           </CardContent>
 
           <CardFooter className="flex flex-col gap-3 pt-2">
             {/* ✅ PRIMARY LOGIN BUTTON with LogInIcon + Loading State */}
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full h-10 sm:h-11 text-sm sm:text-base transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100 gap-2"
-            >
-              {loading ? (
-                <>
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                  <span>Signing in...</span>
-                </>
-              ) : (
-                <>
-                  <LogInIcon size={16} color="currentColor" strokeWidth={2.5} className="flex-shrink-0" />
-                  <span>Login</span>
-                </>
-              )}
-            </Button>
-            
+
             {/* 🔹 DIVIDER */}
             <div className="relative w-full py-2">
               <div className="absolute inset-0 flex items-center">
@@ -214,7 +225,6 @@ export default function LoginPage() {
               <GoogleIcon size={16} />
               <span>Continue with Google</span>
             </Button>
-
           </CardFooter>
         </Card>
       </div>

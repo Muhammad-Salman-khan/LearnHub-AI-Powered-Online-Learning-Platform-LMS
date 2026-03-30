@@ -1,3 +1,5 @@
-export const page = () => {
-  return <div>Student page</div>;
+const page = () => {
+  return <div>student Page</div>;
 };
+
+export default page;
