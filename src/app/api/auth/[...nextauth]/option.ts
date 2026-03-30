@@ -35,6 +35,7 @@ export const authOptions: NextAuthOptions = {
           if (!user) {
             throw new Error(`no user found with this email && password`);
           }
+          if (!user.password) throw new Error(GENERIC_ERROR);
           const isValid = await bcrypt.compare(
             credentials?.password,
             user?.password,
@@ -45,6 +46,7 @@ export const authOptions: NextAuthOptions = {
           return user;
         } catch (error: any) {
           console.log(error);
+          return null;
         }
       },
     }),
@@ -72,7 +74,7 @@ export const authOptions: NextAuthOptions = {
           return false;
         }
       }
-      return true;
+      return user;
     },
     async jwt({ token, user }) {
       if (user) {
@@ -100,5 +102,5 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60,
   },
   secret: process.env.NEXTAUTH_SECRET,
-  useSecureCookies: process.env.NODE_ENV === "production",
+  // useSecureCookies: true,
 };
