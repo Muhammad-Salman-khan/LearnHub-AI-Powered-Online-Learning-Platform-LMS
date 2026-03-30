@@ -3,7 +3,7 @@ import { Geist, Geist_Mono, Roboto } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/themeProvider/theme-provider";
-import Header from "@/components/themeProvider/Header/page";
+// Header import removed so it doesn't show on auth pages
 
 const geistHeading = Geist({ subsets: ["latin"], variable: "--font-heading" });
 
@@ -142,8 +142,15 @@ export default function RootLayout({
         geistHeading.variable,
       )}
     >
+      <head>
+        {/* Material Symbols Font */}
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        />
+      </head>
       <body className="min-h-full flex bg-background text-foreground flex-col max-w-screen">
-      <Header />
+        {/* Header removed from here - now only in page.tsx */}
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
