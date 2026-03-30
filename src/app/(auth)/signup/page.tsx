@@ -173,7 +173,7 @@ export default function SignUpPage() {
               </div>
             )}
 
-            <form onSubmit={handleSignup}>
+            <form onSubmit={handleSignup} id="signup-form">
               <div className="flex flex-col gap-4 sm:gap-5">
                 {/* 👤 FULL NAME FIELD */}
                 <div className="grid gap-2">
@@ -276,12 +276,10 @@ export default function SignUpPage() {
                     required
                     disabled={loading}
                     className={`h-10 sm:h-11 transition-all duration-300 focus:ring-2 focus:ring-offset-2 disabled:opacity-50 ${
-                      (
-                        formData.confirmPassword &&
-                        formData.password !== formData.confirmPassword
-                      ) ?
-                        "focus:ring-red-500 border-red-300"
-                      : "focus:ring-primary"
+                      formData.confirmPassword &&
+                      formData.password !== formData.confirmPassword
+                        ? "focus:ring-red-500 border-red-300"
+                        : "focus:ring-primary"
                     }`}
                     autoComplete="new-password"
                     placeholder="Re-enter password"
@@ -358,6 +356,29 @@ export default function SignUpPage() {
 
           <CardFooter className="flex flex-col gap-3 pt-2">
             {/* ✅ PRIMARY SIGNUP BUTTON with Loading State */}
+            <Button
+              type="submit"
+              form="signup-form"
+              disabled={loading || !acceptedTerms}
+              className="w-full h-10 sm:h-11 text-sm sm:text-base transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100 gap-2"
+            >
+              {loading ? (
+                <>
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  <span>Creating Account...</span>
+                </>
+              ) : (
+                <>
+                  <LogInIcon
+                    size={16}
+                    color="currentColor"
+                    strokeWidth={2.5}
+                    className="shrink-0"
+                  />
+                  <span>Sign Up</span>
+                </>
+              )}
+            </Button>
 
             {/* 🔹 DIVIDER */}
             <div className="relative w-full py-2">

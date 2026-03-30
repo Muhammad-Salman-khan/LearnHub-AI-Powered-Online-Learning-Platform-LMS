@@ -123,7 +123,7 @@ export default function LoginPage() {
           </CardHeader>
 
           <CardContent>
-            <form onSubmit={handleLogin}>
+            <form onSubmit={handleLogin} id="login-form">
               <div className="flex flex-col gap-4 sm:gap-6">
                 {/* 📧 EMAIL FIELD */}
                 <div className="grid gap-2">
@@ -201,7 +201,24 @@ export default function LoginPage() {
 
           <CardFooter className="flex flex-col gap-3 pt-2">
             {/* ✅ PRIMARY LOGIN BUTTON with LogInIcon + Loading State */}
-
+            <Button
+              type="submit" form="login-form"
+              disabled={loading}
+              className="w-full h-10 sm:h-11 text-sm sm:text-base transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100 gap-2"
+            >
+              {loading ? (
+                <>
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  <span>Signing in...</span>
+                </>
+              ) : (
+                <>
+                  <LogInIcon size={16} color="currentColor" strokeWidth={2.5} className="shrink-0" />
+                  <span>Login</span>
+                </>
+              )}
+            </Button>
+            
             {/* 🔹 DIVIDER */}
             <div className="relative w-full py-2">
               <div className="absolute inset-0 flex items-center">
