@@ -1,42 +1,114 @@
-import { courses } from "@/lib/data";
-import Link from "next/link";
+"use client";
+import React, { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
 
-interface PageProps {
-  params: Promise<{ courseId: string }>;
-}
+export default function CourseDetails() {
+  const params = useParams();
+  const courseId = params.courseId; 
 
-export default async function CourseDetail({ params }: PageProps) {
-  const { courseId } = await params;
-  const course = courses.find((c) => c.id === Number(courseId));
+  const [course, setCourse] = useState<any>(null);
+  const [isEnrolled, setIsEnrolled] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  if (!course) return <h1 className="p-10 text-center text-2xl font-bold">Course Not Found</h1>;
+  useEffect(() => {
+    const fetchCourseData = async () => {
+      try {
+        setLoading(true);
+        // Backend API call
+        const response = await fetch(`/api/courses/${courseId}`);
+
+        if (!response.ok) throw new Error("Course not found or server error");
+
+        const data = await response.json();
+        setCourse(data.course);
+        setIsEnrolled(data.isEnrolled);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (courseId) fetchCourseData();
+  }, [courseId]);
+  const handleEnroll = async () => {
+    try {
+      const response = await fetch(`/api/enroll`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ courseId: courseId }),
+      });
+
+      if (response.ok) {
+        alert("Successfully enrolled!");
+        setIsEnrolled(true); 
+      } else {
+        const errorData = await response.json();
+        alert("Enrollment failed: " + (errorData.message || "Unknown error"));
+      }
+    } catch (err) {
+      console.error("Enrollment error:", err);
+      alert("Network error. Please try again.");
+    }
+  };
+
+  // --- VALIDATIONS & STATES ---
+  if (loading) return <div>Loading course details...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (!course) return <div>No course data found.</div>;
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
-      <div className="mb-10">
-        <h1 className="text-4xl font-extrabold text-gray-900">{course.title}</h1>
-        <p className="mt-4 text-lg text-gray-600 leading-relaxed">{course.description}</p>
-      </div>
+    <div style={{ padding: "20px" }}>
+      {/* --- COURSE HEADER --- */}
+      <h1>{course.title}</h1>
+      <p>
+        <b>Instructor:</b> {course.instructor?.name || "Unknown"}
+      </p>
+      <p>
+        <b>Description:</b> {course.description}
+      </p>
+      <p>
+        <b>Level:</b> {course.level}
+      </p>
+      <p>
+        <b>Category:</b> {course.category}
+      </p>
 
-      <h2 className="text-2xl font-bold mb-6 border-b pb-2">Course Curriculum</h2>
-      <div className="space-y-4">
-        {course.chapters.map((chapter, index) => (
-          <Link 
-            key={chapter.id} 
-            href={`/courses/${courseId}/learn/${chapter.id}`}
-            className="flex items-center p-4 border rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-all group"
-          >
-            <span className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full mr-4 group-hover:bg-blue-200 font-bold text-sm">
-              {index + 1}
-            </span>
-            <div className="flex-1">
-              <h3 className="font-semibold text-gray-800">{chapter.title}</h3>
-              <p className="text-sm text-gray-500">Video Lesson</p>
-            </div>
-            <span className="text-blue-600 font-medium text-sm">Start Learning</span>
-          </Link>
-        ))}
-      </div>
+      <hr />
+
+      {isEnrolled ? (
+        <div>
+          <h2>You are enrolled in this course</h2>
+          <h3>Curriculum (Chapters)</h3>
+          {course.chapters && course.chapters.length > 0 ? (
+            <ul>
+              {course.chapters.map((chapter: any) => (
+                <li key={chapter.id}>
+                  <strong>{chapter.title}</strong>
+                  <p>{chapter.description}</p>
+                  {/* Agar video hai to link dikha sakte hain */}
+                  {chapter.videoUrl && (
+                    <a href={chapter.videoUrl} target="_blank">
+                      Watch Video
+                    </a>
+                  )}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No chapters available yet.</p>
+          )}
+        </div>
+      ) : (
+        <div>
+          <p>Price: {course.price === 0 ? "Free" : `Rs. ${course.price}`}</p>
+          <p>
+            Please enroll to access chapters and videos.
+          </p>
+          <button onClick={handleEnroll}>Enroll Now</button>
+        </div>
+      )}
     </div>
   );
 }

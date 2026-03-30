@@ -25,7 +25,7 @@ import GoogleIcon from "@/components/ui/GoogleIcon";
 
 /**
  * SignUpPage - Merged version: Beautiful UI + Working Auth Logic
- * 
+ *
  * Features:
  * - API registration with /api/auth/register
  * - Password validation (min 8 chars) + confirm password match
@@ -45,7 +45,7 @@ export default function SignUpPage() {
     password: "",
     confirmPassword: "",
   });
-  
+
   // 🔹 UI state
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -53,7 +53,7 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
-  
+
   const router = useRouter();
 
   // ✅ Prevent hydration mismatch: only animate after client mount
@@ -73,18 +73,18 @@ export default function SignUpPage() {
   async function handleSignup(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
-    
+
     // ✅ Client-side validations
     if (formData.password.length < 8) {
       setError("Password must be at least 8 characters");
       return;
     }
-    
+
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
       return;
     }
-    
+
     if (!acceptedTerms) {
       setError("Please accept the Terms & Conditions to continue");
       return;
@@ -141,7 +141,6 @@ export default function SignUpPage() {
 
       {/* 🔹 MAIN CONTAINER - Centers the card */}
       <div className="flex min-h-screen items-center justify-center p-4">
-        
         {/* 🔹 SIGNUP CARD - Slides up on mount */}
         <Card
           className={`w-full max-w-sm sm:max-w-md shadow-lg border-0 sm:border transition-all duration-500 ${
@@ -156,7 +155,11 @@ export default function SignUpPage() {
               Enter your details to get started
             </CardDescription>
             <CardAction>
-              <Button variant="link" className="px-0 text-sm sm:text-base" asChild>
+              <Button
+                variant="link"
+                className="px-0 text-sm sm:text-base"
+                asChild
+              >
                 <Link href="/login">Already have an account? Login</Link>
               </Button>
             </CardAction>
@@ -170,12 +173,13 @@ export default function SignUpPage() {
               </div>
             )}
 
-            <form onSubmit={handleSignup}>
+            <form onSubmit={handleSignup} id="signup-form">
               <div className="flex flex-col gap-4 sm:gap-5">
-                
                 {/* 👤 FULL NAME FIELD */}
                 <div className="grid gap-2">
-                  <Label htmlFor="name" className="text-sm">Full Name</Label>
+                  <Label htmlFor="name" className="text-sm">
+                    Full Name
+                  </Label>
                   <Input
                     id="name"
                     name="name"
@@ -193,7 +197,9 @@ export default function SignUpPage() {
 
                 {/* 📧 EMAIL FIELD */}
                 <div className="grid gap-2">
-                  <Label htmlFor="email" className="text-sm">Email Address</Label>
+                  <Label htmlFor="email" className="text-sm">
+                    Email Address
+                  </Label>
                   <Input
                     id="email"
                     name="email"
@@ -211,13 +217,17 @@ export default function SignUpPage() {
                 {/* 🔒 PASSWORD FIELD with visibility toggle */}
                 <div className="grid gap-2">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="password" className="text-sm">Password</Label>
+                    <Label htmlFor="password" className="text-sm">
+                      Password
+                    </Label>
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="text-xs text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
                       disabled={loading}
-                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
                     >
                       {showPassword ? "Hide" : "Show"}
                     </button>
@@ -240,13 +250,19 @@ export default function SignUpPage() {
                 {/* 🔐 CONFIRM PASSWORD FIELD */}
                 <div className="grid gap-2">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="confirmPassword" className="text-sm">Confirm Password</Label>
+                    <Label htmlFor="confirmPassword" className="text-sm">
+                      Confirm Password
+                    </Label>
                     <button
                       type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
                       className="text-xs text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
                       disabled={loading}
-                      aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                      aria-label={
+                        showConfirmPassword ? "Hide password" : "Show password"
+                      }
                     >
                       {showConfirmPassword ? "Hide" : "Show"}
                     </button>
@@ -260,7 +276,8 @@ export default function SignUpPage() {
                     required
                     disabled={loading}
                     className={`h-10 sm:h-11 transition-all duration-300 focus:ring-2 focus:ring-offset-2 disabled:opacity-50 ${
-                      formData.confirmPassword && formData.password !== formData.confirmPassword
+                      formData.confirmPassword &&
+                      formData.password !== formData.confirmPassword
                         ? "focus:ring-red-500 border-red-300"
                         : "focus:ring-primary"
                     }`}
@@ -268,9 +285,12 @@ export default function SignUpPage() {
                     placeholder="Re-enter password"
                   />
                   {/* Real-time password match feedback */}
-                  {formData.confirmPassword && formData.password !== formData.confirmPassword && (
-                    <p className="text-xs text-red-500 mt-1">Passwords do not match</p>
-                  )}
+                  {formData.confirmPassword &&
+                    formData.password !== formData.confirmPassword && (
+                      <p className="text-xs text-red-500 mt-1">
+                        Passwords do not match
+                      </p>
+                    )}
                 </div>
 
                 {/* ✅ TERMS & CONDITIONS CHECKBOX */}
@@ -309,8 +329,28 @@ export default function SignUpPage() {
                     </Link>
                   </Label>
                 </div>
-
               </div>
+              <Button
+                type="submit"
+                disabled={loading || !acceptedTerms}
+                className="w-full h-10 sm:h-11 text-sm sm:text-base transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100 gap-2"
+              >
+                {loading ?
+                  <>
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    <span>Creating Account...</span>
+                  </>
+                : <>
+                    <LogInIcon
+                      size={16}
+                      color="currentColor"
+                      strokeWidth={2.5}
+                      className="shrink-0"
+                    />
+                    <span>Sign Up</span>
+                  </>
+                }
+              </Button>
             </form>
           </CardContent>
 
@@ -318,6 +358,7 @@ export default function SignUpPage() {
             {/* ✅ PRIMARY SIGNUP BUTTON with Loading State */}
             <Button
               type="submit"
+              form="signup-form"
               disabled={loading || !acceptedTerms}
               className="w-full h-10 sm:h-11 text-sm sm:text-base transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100 gap-2"
             >
@@ -328,12 +369,17 @@ export default function SignUpPage() {
                 </>
               ) : (
                 <>
-                  <LogInIcon size={16} color="currentColor" strokeWidth={2.5} className="flex-shrink-0" />
+                  <LogInIcon
+                    size={16}
+                    color="currentColor"
+                    strokeWidth={2.5}
+                    className="shrink-0"
+                  />
                   <span>Sign Up</span>
                 </>
               )}
             </Button>
-            
+
             {/* 🔹 DIVIDER */}
             <div className="relative w-full py-2">
               <div className="absolute inset-0 flex items-center">
@@ -357,7 +403,6 @@ export default function SignUpPage() {
               <GoogleIcon size={16} />
               <span>Sign up with Google</span>
             </Button>
-
           </CardFooter>
         </Card>
       </div>
