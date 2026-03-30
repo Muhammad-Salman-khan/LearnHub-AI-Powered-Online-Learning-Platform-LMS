@@ -1,132 +1,140 @@
 "use client";
-
 import React, { useState } from "react";
-import titleCase from "@/components/titleCase";
 
-export default function CreateCourse() {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("");
-  const [price, setPrice] = useState("");
+const CreateCourse = () => {
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    category: "",
+    price: 0,
+    level: "BEGINNER",
+    instructorId: "user_clt12345",
+    chapters: [{ title: "", description: "", position: 1 }],
+  });
 
-  const [chapters, setChapters] = useState([{ title: "" }]);
-
-  const [loading, setLoading] = useState(false);
-
-  const addChapterField = () => {
-    setChapters([...chapters, { title: "" }]);
+  const handleChange = (e: any) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
-  const handleChapterChange = (index: number, value: string) => {
-    const updatedChapters = [...chapters];
-    updatedChapters[index].title = value;
-    setChapters(updatedChapters);
+  const handleChapterChange = (index: any, e: any) => {
+    const newChapters = [...formData.chapters];
+    (newChapters[index] as any)[e.target.name] = e.target.value;
+    setFormData({ ...formData, chapters: newChapters });
   };
 
-  const removeChapterField = (index: number) => {
-    const updatedChapters = chapters.filter((_, i) => i !== index);
-    setChapters(updatedChapters);
+  const addChapter = () => {
+    setFormData({
+      ...formData,
+      chapters: [
+        ...formData.chapters,
+        { title: "", description: "", position: formData.chapters.length + 1 },
+      ],
+    });
   };
 
-  async function handleCreateCourse(e: React.FormEvent<HTMLFormElement>) {
+  const removeChapter = (index: number) => {
+    if (formData.chapters.length <= 1) {
+      alert("At least one chapter is required!");
+      return;
+    }
+
+    const filteredChapters = formData.chapters.filter((_, i) => i !== index);
+
+    const updatedChapters = filteredChapters.map((chapter, i) => ({
+      ...chapter,
+      position: i + 1,
+    }));
+
+    setFormData({ ...formData, chapters: updatedChapters });
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
-    const filterdChapters = chapters.filter((ch) => ch.title !== "");
+
     try {
       const response = await fetch("/api/courses", {
         method: "POST",
-        body: JSON.stringify({
-          title: titleCase(title),
-          description: titleCase(description),
-          category: titleCase(category),
-          price,
-          chapters: filterdChapters,
-        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
       });
 
       if (response.ok) {
-        alert("Course with Chapters Created!");
-        setTitle("");
-        setDescription("");
-        setCategory("");
-        setPrice("");
-        setChapters([{ title: "" }]);
+        alert("Course created successfully!");
       } else {
-        alert("Something went wrong");
+        alert("Server error: " + response.statusText);
       }
     } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
+      alert("Failed to connect to the server.");
     }
-  }
+  };
 
   return (
     <div>
-      <h1>Add Course</h1>
-      <form
-        onSubmit={handleCreateCourse}
-        className="flex flex-col gap-4 max-w-md"
-      >
-        <input
-          placeholder="Course Title"
-          onChange={(e) => setTitle(e.target.value)}
-          value={title}
-          required
-        />
-        <textarea
-          placeholder="Description"
-          onChange={(e) => setDescription(e.target.value)}
-          value={description}
-        />
-        <input
-          placeholder="Category"
-          onChange={(e) => setCategory(e.target.value)}
-          value={category}
-        />
-        <input
-          type="number"
-          placeholder="Price"
-          onChange={(e) => setPrice(e.target.value)}
-          value={price}
-        />
+      <h1>Create New Course</h1>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Course Title: </label>
+          <input name="title" onChange={handleChange} required />
+        </div>
+        <div>
+          <label>Description: </label>
+          <textarea name="description" onChange={handleChange} required />
+        </div>
+        <div>
+          <label>Category: </label>
+          <input name="category" onChange={handleChange} required />
+        </div>
+        <div>
+          <label>Course Level: </label>
+          <select name="level" onChange={handleChange}>
+            <option value="BEGINNER">Beginner</option>
+            <option value="INTERMEDIATE">Intermediate</option>
+            <option value="ADVANCED">Advanced</option>
+          </select>
+        </div>
 
         <hr />
-        <h3>Course Chapters</h3>
 
-        {chapters.map((chapter, index) => (
-          <div
-            key={index}
-            style={{ display: "flex", gap: "10px", marginBottom: "5px" }}
-          >
+        <h2>Course Curriculum (Chapters)</h2>
+        {formData.chapters.map((chapter, index) => (
+          <div key={index}>
+            <strong>Chapter {index + 1}: </strong>
             <input
-              placeholder={`Chapter ${index + 1} Title`}
+              placeholder="Chapter Title"
+              name="title"
               value={chapter.title}
-              onChange={(e) => handleChapterChange(index, e.target.value)}
+              onChange={(e) => handleChapterChange(index, e)}
               required
             />
-            {chapters.length > 1 && (
-              <button
-                type="button"
-                onClick={() => removeChapterField(index)}
-                style={{ color: "red" }}
-              >
-                Remove
-              </button>
-            )}
+            <input
+              placeholder="Short Description"
+              name="description"
+              value={chapter.description}
+              onChange={(e) => handleChapterChange(index, e)}
+            />
+
+            <button type="button" onClick={() => removeChapter(index)}>
+              Remove
+            </button>
           </div>
         ))}
 
-        <button type="button" onClick={addChapterField}>
-          + Add More Chapter
+        <button type="button" onClick={addChapter}>
+          + Add New Chapter
         </button>
 
-        <hr />
+        <br />
+        <br />
 
-        <button disabled={loading} type="submit">
-          {loading ? "Creating..." : "Create Course & Chapters"}
-        </button>
+        <button type="submit">Submit Full Course</button>
       </form>
     </div>
   );
-}
+};
+
+export default CreateCourse;
