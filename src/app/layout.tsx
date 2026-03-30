@@ -4,6 +4,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/themeProvider/theme-provider";
 import Header from "@/components/themeProvider/Header/page";
+import AuthProvider from "@/components/AuthProvider";
 
 const geistHeading = Geist({ subsets: ["latin"], variable: "--font-heading" });
 
@@ -123,6 +124,7 @@ export const metadata: Metadata = {
   ),
 };
 
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -143,15 +145,18 @@ export default function RootLayout({
       )}
     >
       <body className="min-h-full flex bg-background text-foreground flex-col max-w-screen">
-      <Header />
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </ThemeProvider>
+        {/* 2. AuthProvider ko yahan wrap karein */}
+        <AuthProvider> 
+          <Header />
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );
