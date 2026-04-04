@@ -9,7 +9,6 @@ interface DashboardSidebarProps {
   onClose?: () => void;
 }
 
-// Spec Page 17: Sidebar Contents Per Role
 const sidebarLinks = {
   student: [
     { label: "My Courses", href: "/dashboard/student", icon: "library_books" },
@@ -17,17 +16,18 @@ const sidebarLinks = {
       label: "Progress",
       href: "/dashboard/student/progress",
       icon: "analytics",
+      phase: 2,
     },
     {
       label: "Certificates",
       href: "/dashboard/student/certificates",
       icon: "card_membership",
+      phase: 2,
     },
-    { label: "Notes", href: "/dashboard/student/notes", icon: "note" },
     {
-      label: "Wishlist",
-      href: "/dashboard/student/wishlist",
-      icon: "favorite",
+      label: "Notes",
+      href: "/dashboard/student/notes",
+      icon: "note",
       phase: 2,
     },
   ],
@@ -86,7 +86,7 @@ export function DashboardSidebar({ role, onClose }: DashboardSidebarProps) {
 
   return (
     <div
-      className="flex flex-col h-full bg-background border-r border-border transition-all duration-300 ease-in-out"
+      className="flex flex-col h-full bg-background border-r border-border transition-all duration-300 ease-in-out overflow-hidden"
       style={{ width: isHovered ? "240px" : "80px" }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -102,7 +102,7 @@ export function DashboardSidebar({ role, onClose }: DashboardSidebarProps) {
             L
           </div>
           <span
-            className={`font-bold text-xl text-foreground group-hover:text-primary transition-all duration-300 whitespace-nowrap overflow-hidden ${
+            className={`font-bold text-xl text-foreground group-hover:text-primary transition-all duration-300 overflow-hidden whitespace-nowrap ${
               isHovered ? "w-auto opacity-100" : "w-0 opacity-0"
             }`}
           >
@@ -111,7 +111,7 @@ export function DashboardSidebar({ role, onClose }: DashboardSidebarProps) {
         </Link>
       </div>
 
-      {/* Primary Nav Links */}
+      {/* Nav Links */}
       <nav className="flex-1 p-2 space-y-1 overflow-y-auto sidebar-scroll">
         {links.map((link) => {
           const isActive = pathname === link.href;
@@ -135,14 +135,16 @@ export function DashboardSidebar({ role, onClose }: DashboardSidebarProps) {
             >
               {/* Icon - Always Visible */}
               <span
-                className={`material-symbols-outlined text-base shrink-0 ${isActive ? "text-primary" : ""}`}
+                className={`material-symbols-outlined text-base shrink-0 transition-all duration-300 ${
+                  isActive ? "text-primary" : ""
+                }`}
               >
                 {link.icon}
               </span>
 
               {/* Label - Hidden by Default, Shows on Hover */}
               <span
-                className={`whitespace-nowrap overflow-hidden transition-all duration-300 ${
+                className={`overflow-hidden whitespace-nowrap transition-all duration-300 ${
                   isHovered ? "w-auto opacity-100" : "w-0 opacity-0"
                 }`}
               >
@@ -155,24 +157,12 @@ export function DashboardSidebar({ role, onClose }: DashboardSidebarProps) {
                   Phase 2
                 </span>
               )}
-
-              {/* Tooltip for Collapsed State */}
-              {!isHovered && (
-                <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-3 py-1.5 bg-background border border-border rounded-lg text-xs text-foreground whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
-                  {link.label}
-                  {isPhase2 && (
-                    <span className="text-muted-foreground ml-1">
-                      (Phase 2)
-                    </span>
-                  )}
-                </div>
-              )}
             </Link>
           );
         })}
       </nav>
 
-      {/* Bottom Section - User Profile */}
+      {/* User Profile */}
       <div className="p-3 border-t border-border">
         <div
           className={`glass-card-no-glow rounded-xl p-3 border border-border transition-all duration-300 ${
@@ -185,7 +175,9 @@ export function DashboardSidebar({ role, onClose }: DashboardSidebarProps) {
             </div>
             <div
               className={`flex-1 min-w-0 transition-all duration-300 ${
-                isHovered ? "opacity-100" : "opacity-0 w-0"
+                isHovered
+                  ? "opacity-100 max-h-20"
+                  : "opacity-0 max-h-0 overflow-hidden"
               }`}
             >
               <p className="text-sm font-semibold text-foreground truncate">
