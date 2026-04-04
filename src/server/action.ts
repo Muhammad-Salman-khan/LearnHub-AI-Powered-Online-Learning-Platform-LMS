@@ -8,6 +8,7 @@ import { redirect } from "next/navigation";
 type ActionResponse =
   | { success: true; message: string }
   | { success: false; error: any };
+
 export const CreateCourse = async (
   data: CourseInput,
 ): Promise<ActionResponse> => {
@@ -48,5 +49,6 @@ export const CreateCourse = async (
     return { success: true, message: "Course Created Succssfully" };
   } catch (error) {
     console.error(`got error`, error);
+    return { success: false, error: "something went wrong" };
   }
 };
