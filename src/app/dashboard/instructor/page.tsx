@@ -1,5 +1,5 @@
 const page = () => {
-  return <div>page</div>;
+  return <div>page newwww</div>;
 };
 
 export default page;

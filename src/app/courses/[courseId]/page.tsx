@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 
 export default function CourseDetails() {
   const params = useParams();
-  const courseId = params.courseId; 
+  const courseId = params.courseId;
 
   const [course, setCourse] = useState<any>(null);
   const [isEnrolled, setIsEnrolled] = useState(false);
@@ -42,7 +42,7 @@ export default function CourseDetails() {
 
       if (response.ok) {
         alert("Successfully enrolled!");
-        setIsEnrolled(true); 
+        setIsEnrolled(true);
       } else {
         const errorData = await response.json();
         alert("Enrollment failed: " + (errorData.message || "Unknown error"));
@@ -77,11 +77,11 @@ export default function CourseDetails() {
 
       <hr />
 
-      {isEnrolled ? (
+      {isEnrolled ?
         <div>
           <h2>You are enrolled in this course</h2>
           <h3>Curriculum (Chapters)</h3>
-          {course.chapters && course.chapters.length > 0 ? (
+          {course.chapters && course.chapters.length > 0 ?
             <ul>
               {course.chapters.map((chapter: any) => (
                 <li key={chapter.id}>
@@ -96,19 +96,14 @@ export default function CourseDetails() {
                 </li>
               ))}
             </ul>
-          ) : (
-            <p>No chapters available yet.</p>
-          )}
+          : <p>No chapters available yet.</p>}
         </div>
-      ) : (
-        <div>
+      : <div>
           <p>Price: {course.price === 0 ? "Free" : `Rs. ${course.price}`}</p>
-          <p>
-            Please enroll to access chapters and videos.
-          </p>
+          <p>Please enroll to access chapters and videos.</p>
           <button onClick={handleEnroll}>Enroll Now</button>
         </div>
-      )}
+      }
     </div>
   );
 }
