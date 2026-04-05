@@ -27,7 +27,7 @@ export const CreateCourse = async (
     if (!valid.success) {
       return {
         success: false,
-        error: valid.error?.cause || `something not working`,
+        error: valid?.error?.flatten() || `something not working`,
       };
     }
     const {
@@ -41,6 +41,7 @@ export const CreateCourse = async (
     } = valid.data;
 
     const Thumb = thumbnail ? await UploadCourseThumbnail(thumbnail) : null;
+
     await prisma.course.create({
       data: {
         title,
