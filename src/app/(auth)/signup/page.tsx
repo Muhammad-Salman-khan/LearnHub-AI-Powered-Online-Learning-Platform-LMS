@@ -24,7 +24,7 @@ import LogInIcon from "@/components/ui/loginicon";
 import GoogleIcon from "@/components/ui/GoogleIcon";
 
 /**
- * SignUpPage - Merged version: Beautiful UI + Working Auth Logic
+ * SignUpPage - User Registration
  *
  * Features:
  * - API registration with /api/auth/register
@@ -32,10 +32,15 @@ import GoogleIcon from "@/components/ui/GoogleIcon";
  * - Terms & conditions checkbox requirement
  * - Google OAuth sign-up option
  * - Loading states with disabled buttons + spinner
- * - Error handling with user-friendly alerts
+ * - Inline error popup (no browser alerts) - better UX
  * - Blurred animated background with hydration-safe animations
  * - Responsive design with shadcn/ui components
  * - Password visibility toggle for both fields
+ *
+ * Error Handling:
+ * - Errors display in a dismissible banner at top of form
+ * - Auto-dismiss after 5 seconds (optional)
+ * - Clear error when user starts typing in any field
  */
 export default function SignUpPage() {
   // 🔹 Form state
@@ -47,7 +52,7 @@ export default function SignUpPage() {
   });
 
   // 🔹 UI state
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -61,18 +66,26 @@ export default function SignUpPage() {
     setIsMounted(true);
   }, []);
 
+  // 🔹 Auto-dismiss error after 5 seconds (optional UX improvement)
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
   // 🔹 Handle form input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear error when user starts typing
-    if (error) setError("");
+    // ✅ Clear error when user starts typing
+    if (error) setError(null);
   };
 
   // 🔹 Handle credentials signup
   async function handleSignup(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setError("");
+    setError(null); // Clear previous errors
 
     // ✅ Client-side validations
     if (formData.password.length < 8) {
@@ -106,14 +119,18 @@ export default function SignUpPage() {
       const data = await res.json();
 
       if (res.ok) {
-        alert("Account created successfully! Please login.");
+        // ✅ Show success inline instead of alert (optional)
+        setError(null);
+        // Optional: Show success message or redirect
         router.push("/login");
         router.refresh();
       } else {
+        // ✅ Show inline error instead of alert
         setError(data.message || "Something went wrong. Please try again.");
       }
     } catch (err) {
       console.error("Signup error:", err);
+      // ✅ Show inline error instead of alert
       setError("Network error. Please check your connection and try again.");
     } finally {
       setLoading(false);
@@ -126,6 +143,7 @@ export default function SignUpPage() {
       await signIn("google", { callbackUrl: "/dashboard" });
     } catch (error) {
       console.error("Google sign-up error:", error);
+      // ✅ Show inline error instead of alert
       setError("Google sign-up failed. Please try again.");
     }
   };
@@ -166,10 +184,30 @@ export default function SignUpPage() {
           </CardHeader>
 
           <CardContent>
-            {/* ✅ Error Message Display */}
+            {/* ✅ INLINE ERROR POPUP - Dismissible banner */}
             {error && (
-              <div className="mb-4 p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg">
-                {error}
+              <div className="mb-4 p-3 rounded-lg border border-destructive/30 bg-destructive/10 flex items-start gap-3 animate-fade-in">
+                <span className="material-symbols-outlined text-destructive text-lg shrink-0 mt-0.5">
+                  error
+                </span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-destructive">
+                    {error}
+                  </p>
+                  <p className="text-xs text-destructive/80 mt-0.5">
+                    Please check your information and try again.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setError(null)}
+                  className="text-destructive/60 hover:text-destructive transition-colors shrink-0"
+                  aria-label="Dismiss error"
+                >
+                  <span className="material-symbols-outlined text-base">
+                    close
+                  </span>
+                </button>
               </div>
             )}
 
@@ -276,12 +314,10 @@ export default function SignUpPage() {
                     required
                     disabled={loading}
                     className={`h-10 sm:h-11 transition-all duration-300 focus:ring-2 focus:ring-offset-2 disabled:opacity-50 ${
-                      (
-                        formData.confirmPassword &&
-                        formData.password !== formData.confirmPassword
-                      ) ?
-                        "focus:ring-red-500 border-red-300"
-                      : "focus:ring-primary"
+                      formData.confirmPassword &&
+                      formData.password !== formData.confirmPassword
+                        ? "focus:ring-red-500 border-red-300"
+                        : "focus:ring-primary"
                     }`}
                     autoComplete="new-password"
                     placeholder="Re-enter password"
@@ -295,15 +331,15 @@ export default function SignUpPage() {
                     )}
                 </div>
 
-                {/* ✅ TERMS & CONDITIONS CHECKBOX */}
-                <div className="flex items-start gap-2 pt-1">
+                {/* ✅ TERMS & CONDITIONS CHECKBOX - Extra padding for clarity */}
+                <div className="flex items-start gap-2 pt-2 pb-3">
                   <input
                     type="checkbox"
                     id="terms"
                     checked={acceptedTerms}
                     onChange={(e) => {
                       setAcceptedTerms(e.target.checked);
-                      if (error) setError("");
+                      if (error) setError(null);
                     }}
                     disabled={loading}
                     className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary disabled:opacity-50"
@@ -331,39 +367,42 @@ export default function SignUpPage() {
                     </Link>
                   </Label>
                 </div>
+
+                {/* ✅ SUBMIT BUTTON - Extra top padding for separation */}
+                <Button
+                  type="submit"
+                  disabled={loading || !acceptedTerms}
+                  className="w-full h-11 sm:h-12 mt-1 mb-2 text-sm sm:text-base transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100 gap-2 px-6"
+                >
+                  {loading ? (
+                    <>
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                      <span>Creating Account...</span>
+                    </>
+                  ) : (
+                    <>
+                      <LogInIcon
+                        size={16}
+                        color="currentColor"
+                        strokeWidth={2.5}
+                        className="shrink-0"
+                      />
+                      <span>Sign Up</span>
+                    </>
+                  )}
+                </Button>
               </div>
-              <Button
-                type="submit"
-                disabled={loading || !acceptedTerms}
-                className="w-full h-10 sm:h-11 mt-2 text-sm sm:text-base transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100 gap-2"
-              >
-                {loading ?
-                  <>
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                    <span>Creating Account...</span>
-                  </>
-                : <>
-                    <LogInIcon
-                      size={16}
-                      color="currentColor"
-                      strokeWidth={2.5}
-                      className="shrink-0"
-                    />
-                    <span>Sign Up</span>
-                  </>
-                }
-              </Button>
             </form>
           </CardContent>
 
-          <CardFooter className="flex flex-col gap-3 pt-2">
-            {/* 🔹 DIVIDER */}
-            <div className="relative w-full py-2">
+          <CardFooter className="flex flex-col gap-4 pt-4">
+            {/* 🔹 DIVIDER - Extra top padding for separation */}
+            <div className="relative w-full py-3">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-border" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">
+                <span className="bg-card px-3 text-muted-foreground">
                   Or sign up with
                 </span>
               </div>
@@ -374,7 +413,7 @@ export default function SignUpPage() {
               variant="outline"
               type="button"
               disabled={loading}
-              className="w-full h-10 sm:h-11 gap-2 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+              className="w-full h-11 sm:h-12 gap-2 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 px-6"
               onClick={handleGoogleSignup}
             >
               <GoogleIcon size={16} />
