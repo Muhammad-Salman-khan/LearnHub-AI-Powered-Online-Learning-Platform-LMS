@@ -70,6 +70,7 @@ export const courseSchema = z.object({
     .max(50000, "Price seems too high"),
   isPublished: z.boolean().default(true),
   category: z.string().min(1, "Please select a category"),
+  content: z.string().optional(),
   level: z.enum(["BEGINNER", "INTERMEDIATE", "ADVANCED"], {
     message: "Please select a valid level",
   }),
@@ -89,6 +90,9 @@ export const chapterSchema = z.object({
     .url("Must be a valid video URL")
     .optional()
     .or(z.literal("")),
+  content: z.string().optional(),
+  position: z.number().int(),
+  isPublished: z.boolean().optional(),
   isFree: z.boolean().default(false),
 });
 export type ChapterInput = z.infer<typeof chapterSchema>;

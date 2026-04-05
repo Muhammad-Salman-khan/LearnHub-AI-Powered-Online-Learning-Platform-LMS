@@ -6,6 +6,8 @@ import { StatsOverview } from "@/components/instructor/stats-overview";
 import { CoursesTable } from "@/components/instructor/courses-table";
 import { EmptyState } from "@/components/instructor/empty-state";
 import { CreateCourseBtn } from "@/components/instructor/create-course-btn";
+import { useSession } from "next-auth/react";
+import { authOptions } from "@/app/api/auth/[...nextauth]/option";
 
 // ⚠️ MOCK DATA
 const mockInstructor = {
@@ -34,10 +36,9 @@ const mockInstructor = {
     },
   ],
 };
-
 export default function InstructorDashboardPage() {
   const { name, stats, courses } = mockInstructor;
-
+  const session = useSession();
   return (
     <div className="flex h-screen bg-background text-foreground overflow-hidden">
       {/* Desktop Sidebar - Spec: 240px Fixed Left */}
@@ -57,7 +58,7 @@ export default function InstructorDashboardPage() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <h1 className="text-3xl font-bold text-foreground">
-                  Welcome back, {name.split(" ")[0]} 👋
+                  Welcome back, {session.data?.user.name} 👋
                 </h1>
                 <p className="text-muted-foreground mt-1">
                   Manage your courses and track student progress
@@ -70,11 +71,9 @@ export default function InstructorDashboardPage() {
             <StatsOverview stats={stats} />
 
             {/* Spec Page 7: My Courses Table or Empty State */}
-            {courses.length > 0 ? (
+            {courses.length > 0 ?
               <CoursesTable courses={courses} />
-            ) : (
-              <EmptyState />
-            )}
+            : <EmptyState />}
           </div>
         </div>
       </div>

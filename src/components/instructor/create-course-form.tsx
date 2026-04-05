@@ -12,7 +12,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
+import { CreateCourse } from "@/server/action";
+// this is a function that you'll be using to create course
+// name CreateCourse
 const CATEGORIES = [
   "Web Dev",
   "Data Science",
@@ -46,6 +48,7 @@ export function CreateCourseForm() {
     e.preventDefault();
     if (!isValid) return;
     setIsSubmitting(true);
+
     setTimeout(() => {
       setIsSubmitting(false);
       alert("Course created! (Mock)");
@@ -124,9 +127,9 @@ export function CreateCourseForm() {
           <div className="flex justify-between text-xs">
             <span
               className={
-                formData.title.length < 5
-                  ? "text-destructive"
-                  : "text-primary/70"
+                formData.title.length < 5 ?
+                  "text-destructive"
+                : "text-primary/70"
               }
             >
               Min 5 characters
@@ -163,9 +166,9 @@ export function CreateCourseForm() {
           <div className="flex justify-between text-xs">
             <span
               className={
-                formData.fullDescription.length < 20
-                  ? "text-destructive"
-                  : "text-primary/70"
+                formData.fullDescription.length < 20 ?
+                  "text-destructive"
+                : "text-primary/70"
               }
             >
               Min 20 characters
@@ -186,12 +189,12 @@ export function CreateCourseForm() {
             {/* Preview Box */}
             <div
               className={`aspect-video rounded-lg border-2 transition-all duration-300 overflow-hidden flex items-center justify-center ${
-                thumbnailPreview
-                  ? "border-primary amber-glow"
-                  : "border-border bg-muted/30"
+                thumbnailPreview ?
+                  "border-primary amber-glow"
+                : "border-border bg-muted/30"
               }`}
             >
-              {thumbnailPreview ? (
+              {thumbnailPreview ?
                 <div className="relative w-full h-full group">
                   <img
                     src={thumbnailPreview}
@@ -209,8 +212,7 @@ export function CreateCourseForm() {
                     </span>
                   </button>
                 </div>
-              ) : (
-                <div className="text-center p-3 flex flex-col items-center justify-center">
+              : <div className="text-center p-3 flex flex-col items-center justify-center">
                   <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mb-2">
                     <span className="material-symbols-outlined text-xl text-primary">
                       image
@@ -221,7 +223,7 @@ export function CreateCourseForm() {
                   </p>
                   <p className="text-[10px] text-muted-foreground">Max 5MB</p>
                 </div>
-              )}
+              }
             </div>
 
             {/* Upload Button Box */}
@@ -237,9 +239,9 @@ export function CreateCourseForm() {
               <Label
                 htmlFor="thumbnail-upload"
                 className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 cursor-pointer transition-all duration-300 font-medium ${
-                  thumbnailPreview
-                    ? "bg-muted/30 border-border text-muted-foreground hover:border-primary/50 hover:text-primary"
-                    : "bg-primary/10 border-primary/50 text-primary hover:bg-primary/20 amber-glow hover:scale-[1.02]"
+                  thumbnailPreview ?
+                    "bg-muted/30 border-border text-muted-foreground hover:border-primary/50 hover:text-primary"
+                  : "bg-primary/10 border-primary/50 text-primary hover:bg-primary/20 amber-glow hover:scale-[1.02]"
                 }`}
               >
                 <span className="material-symbols-outlined text-xl">
@@ -356,7 +358,11 @@ export function CreateCourseForm() {
                   >
                     <div className="flex items-center gap-2">
                       <span
-                        className={`w-2 h-2 rounded-full ${level === "Beginner" ? "bg-green-500" : level === "Intermediate" ? "bg-primary" : "bg-red-500"}`}
+                        className={`w-2 h-2 rounded-full ${
+                          level === "Beginner" ? "bg-green-500"
+                          : level === "Intermediate" ? "bg-primary"
+                          : "bg-red-500"
+                        }`}
                       />
                       {level}
                     </div>
@@ -406,26 +412,25 @@ export function CreateCourseForm() {
           type="submit"
           disabled={!isValid || isSubmitting}
           className={`h-14 px-10 font-bold text-base transition-all duration-300 rounded-xl ${
-            isValid && !isSubmitting
-              ? "bg-primary text-primary-foreground hover:opacity-90 amber-glow hover:scale-[1.02]"
-              : "bg-muted text-muted-foreground cursor-not-allowed opacity-50"
+            isValid && !isSubmitting ?
+              "bg-primary text-primary-foreground hover:opacity-90 amber-glow hover:scale-[1.02]"
+            : "bg-muted text-muted-foreground cursor-not-allowed opacity-50"
           }`}
         >
-          {isSubmitting ? (
+          {isSubmitting ?
             <span className="flex items-center gap-2">
               <span className="material-symbols-outlined animate-spin text-primary">
                 progress_activity
               </span>
               Creating...
             </span>
-          ) : (
-            <span className="flex items-center gap-2">
+          : <span className="flex items-center gap-2">
               <span className="material-symbols-outlined text-lg">
                 add_circle
               </span>
               Create Course
             </span>
-          )}
+          }
         </Button>
 
         <div className="flex items-center gap-2 text-xs">

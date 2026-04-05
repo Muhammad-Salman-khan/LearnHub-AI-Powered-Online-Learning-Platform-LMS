@@ -1,7 +1,12 @@
 "use server";
 import { authOptions } from "@/app/api/auth/[...nextauth]/option";
 import { prisma } from "@/lib/prisma";
-import { CourseInput, courseSchema } from "@/lib/validations";
+import {
+  ChapterInput,
+  chapterSchema,
+  CourseInput,
+  courseSchema,
+} from "@/lib/validations";
 import { UploadCourseThumbnail } from "@/services/UploadFile";
 import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
@@ -110,6 +115,10 @@ export const courseUpdateFields = async (id: string, data: CourseInput) => {
   try {
     const session = await getServerSession(authOptions);
 
+    if (!session?.user) redirect("/login");
+    if (session.user.role !== "INSTRUCTOR") {
+      redirect("/dashboard/student/");
+    }
     if (!id) return notFound();
 
     const valid = courseSchema.safeParse(data);
@@ -132,7 +141,8 @@ export const courseUpdateFields = async (id: string, data: CourseInput) => {
         level,
       },
     });
-    if (!FindPost) return { success: false, error: "404 Course not found" };
+    if (FindPost.count === 0)
+      return { success: false, error: "Course not found" };
     revalidatePath("/courses/");
     return {
       success: true,
@@ -144,3 +154,212 @@ export const courseUpdateFields = async (id: string, data: CourseInput) => {
   }
 };
 // update Course By id' (end!)
+
+// Get Instructor Id
+export const getInstructorId = async (Id: string) => {
+  try {
+    if (!Id) {
+      return {
+        success: false,
+        error: `No Id found `,
+      };
+    }
+    const InstructorId = await prisma.user.findUnique({
+      where: { id: Id, role: "INSTRUCTOR" },
+    });
+    if (!InstructorId) {
+      return {
+        success: false,
+        error: `Instructor not Found`,
+      };
+    }
+    return {
+      success: true,
+      data: InstructorId,
+    };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "Something went wrong" };
+  }
+};
+// Get Instructor Id End
+
+// GetAllUsers (start!)
+export const getAllUsers = async () => {
+  try {
+    const allTheUsers = await prisma.user.findMany();
+    if (allTheUsers.length === 0) {
+      return {
+        success: false,
+        error: `No user's found`,
+      };
+    }
+    return {
+      success: true,
+      data: allTheUsers,
+    };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "something went wrong" };
+  }
+};
+// GetAllUsers (end!)
+
+// GetAllCourses (Start!)
+export const getAllCourses = async () => {
+  try {
+    const allCourse = await prisma.course.findMany({
+      where: { isPublished: true },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+    });
+    if (allCourse.length === 0) {
+      return {
+        success: false,
+        error: `No Course's found`,
+      };
+    }
+    return {
+      success: true,
+      data: allCourse,
+    };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "Something went wrong" };
+  }
+};
+// GetAllCourses (end!)
+
+//  get Course By Instructor
+export const getCourseByInstructor = async () => {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session) redirect("/login");
+    if (session.user.role !== "INSTRUCTOR") redirect("/dashboard/student/");
+
+    const InstructorCourses = await prisma.course.findMany({
+      where: { instructorId: session.user.id },
+    });
+
+    if (InstructorCourses.length === 0)
+      return { success: false, error: `No Course's found` };
+
+    return {
+      success: true,
+      data: InstructorCourses,
+    };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "something went wrong" };
+  }
+};
+// End InstructorCourses
+
+// Find userByName (start!)
+export const findUserByName = async (name: string) => {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session) redirect("/login");
+    const searchedUser = await prisma.user.findMany({
+      where: { name: name },
+    });
+    if (searchedUser.length === 0) {
+      return {
+        success: false,
+        error: `No User found`,
+      };
+    }
+    return {
+      success: true,
+      data: searchedUser,
+    };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "Something went wrong" };
+  }
+};
+// all Instructor's
+export const getAllInstructors = async () => {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session) redirect("/login");
+    if (session.user.role !== "ADMIN") redirect(`/dashboard/student`);
+    const AllInstructors = await prisma.user.findMany({
+      where: { role: "INSTRUCTOR" },
+    });
+    if (AllInstructors.length === 0) {
+      return {
+        success: false,
+        error: `No Instructor found`,
+      };
+    }
+    return {
+      success: true,
+      data: AllInstructors,
+    };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "Something went wrong" };
+  }
+};
+// Get all the instructor (end!)
+
+// create Chapter  inside Course (Start!)
+export const CreateChapters = async (CourseId: string, data: ChapterInput) => {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session) redirect("/login");
+    if (session.user.role !== "INSTRUCTOR") redirect(`/dashboard/student`);
+    const valid = chapterSchema.safeParse(data);
+    if (valid.error) {
+      return {
+        success: false,
+        error: "validation error",
+      };
+    }
+    const {
+      title,
+      description,
+      videoUrl,
+      position,
+      isFree,
+      isPublished,
+      content,
+    } = valid.data;
+    const checkInstructorId = await prisma.course.findFirst({
+      where: { id: CourseId, instructorId: session.user.id },
+      select: { id: true },
+    });
+    if (!checkInstructorId) return { success: false, message: "access denied" };
+    const createdData = await prisma.chapter.create({
+      data: {
+        title,
+        description,
+        videoUrl,
+        position,
+        content,
+        isFree,
+        isPublished,
+        courseId: CourseId,
+      },
+    });
+    if (!createdData) {
+      return {
+        success: false,
+        error: `Failed to create chapter`,
+      };
+    }
+    return {
+      success: true,
+      data: createdData,
+    };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "Something went wrong" };
+  }
+};
+// create Chapter  inside Course (end!)

@@ -1,67 +1,34 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
 import { getCourseById, deleteCourseById } from "@/server/action";
+import InstructorNameBadge from "@/components/InstructorNameBadge";
+import { revalidatePath } from "next/cache";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/option";
 
-export default function CourseDetailPage() {
-  const params = useParams();
-  const router = useRouter();
-  const courseId = params.courseId as string;
-  const { data: session, status } = useSession();
+interface PageProps {
+  params: Promise<{ courseId: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}
 
-  const [course, setCourse] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
+export default async function CourseDetailPage({ params }: PageProps) {
+  const { courseId } = await params;
+  const session = await getServerSession(authOptions);
+
+  const result = await getCourseById(courseId);
+  if (!result || !result.success) {
+    redirect("/dashboard/instructor");
+  }
+  const course = result.data;
 
   const isInstructor = session?.user?.id === course?.instructorId;
 
-  useEffect(() => {
-    const fetchCourse = async () => {
-      try {
-        setLoading(true);
-        const result = await getCourseById(courseId);
-        if (!result || !result.success) {
-          setError(result?.error || "Course not found");
-          return;
-        }
-        setCourse(result.data);
-        console.log(result.data?.title);
-      } catch {
-        setError("Failed to load course data");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (courseId) fetchCourse();
-  }, [courseId]);
-
-  const handleDelete = async () => {
-    try {
-      setIsDeleting(true);
-      setDeleteError(null);
-      const result = await deleteCourseById(courseId);
-      if (result && result.success) {
-        router.push("/dashboard/instructor");
-      } else {
-        setDeleteError(result?.error || "Failed to delete course");
-      }
-    } catch {
-      setDeleteError("An unexpected error occurred");
-    } finally {
-      setIsDeleting(false);
-      setShowDeleteConfirm(false);
-    }
-  };
-
-  const handleEdit = () => {
-    router.push(`/dashboard/instructor/courses/${courseId}/edit`);
-  };
+  async function handleDelete(formData: FormData) {
+    "use server";
+    const courseIdToDelete = formData.get("courseId") as string;
+    await deleteCourseById(courseIdToDelete);
+    revalidatePath("/dashboard/instructor");
+    redirect("/dashboard/instructor");
+  }
 
   const getLevelColor = (level: string) => {
     switch (level) {
@@ -90,75 +57,38 @@ export default function CourseDetailPage() {
         </span>;
   };
 
-  if (status === "loading" || loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <span className="material-symbols-outlined text-6xl text-primary animate-spin">
-            progress_activity
-          </span>
-          <p className="mt-4 text-muted-foreground">
-            Loading course details...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !course) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="glass-card rounded-xl p-8 max-w-md text-center">
-          <span className="material-symbols-outlined text-6xl text-destructive">
-            error
-          </span>
-          <h2 className="mt-4 text-xl font-semibold text-foreground">Error</h2>
-          <p className="mt-2 text-muted-foreground">
-            {error || "Course not found"}
-          </p>
-          <button
-            onClick={() => router.push("/dashboard/instructor")}
-            className="mt-6 px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-          >
-            Back to Dashboard
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-background py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <button
-            onClick={() => router.push("/dashboard/instructor")}
+          <a
+            href="/dashboard/instructor"
             className="hover:text-primary transition-colors"
           >
             Dashboard
-          </button>
+          </a>
           <span className="material-symbols-outlined text-sm">
             chevron_right
           </span>
-          <button
-            onClick={() => router.push("/dashboard/instructor/courses")}
+          <a
+            href="/dashboard/instructor/courses"
             className="hover:text-primary transition-colors"
           >
             Courses
-          </button>
+          </a>
           <span className="material-symbols-outlined text-sm">
             chevron_right
           </span>
           <span className="text-foreground font-medium truncate">
-            {course.title}
+            {course?.title}
           </span>
         </div>
 
         {/* Course Header Card */}
         <div className="glass-card rounded-xl overflow-hidden animate-fade-in">
           {/* Thumbnail */}
-          {course.thumbnail ?
+          {course?.thumbnail ?
             <div className="relative w-full h-64 sm:h-80 overflow-hidden">
               <img
                 src={course.thumbnail}
@@ -186,15 +116,16 @@ export default function CourseDetailPage() {
               </span>
               <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
                 <div className="flex flex-wrap items-center gap-3 mb-3">
-                  {getPublishedBadge(course.isPublished)}
+                  {course?.isPublished &&
+                    getPublishedBadge(course?.isPublished)}
                   <span
-                    className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${getLevelColor(course.level)}`}
+                    className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${course?.level && getLevelColor(course?.level)}`}
                   >
-                    {course.level}
+                    {course?.level}
                   </span>
                 </div>
                 <h1 className="text-3xl sm:text-4xl font-bold text-white">
-                  {course.title}
+                  {course?.title}
                 </h1>
               </div>
             </div>
@@ -203,22 +134,25 @@ export default function CourseDetailPage() {
           {/* Action Buttons - Only for Instructor */}
           {isInstructor && (
             <div className="px-6 sm:px-8 py-4 border-t border-border/50 flex flex-wrap items-center gap-3">
-              <button
-                onClick={handleEdit}
+              <a
+                href={`/dashboard/instructor/courses/${courseId}/edit`}
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all duration-200 hover:shadow-lg hover:shadow-primary/20"
               >
                 <span className="material-symbols-outlined text-sm">edit</span>
                 Edit Course
-              </button>
-              <button
-                onClick={() => setShowDeleteConfirm(true)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-destructive/20 text-destructive border border-destructive/30 rounded-lg hover:bg-destructive/30 transition-all duration-200"
-              >
-                <span className="material-symbols-outlined text-sm">
-                  delete
-                </span>
-                Delete Course
-              </button>
+              </a>
+              <form action={handleDelete}>
+                <input type="hidden" name="courseId" value={courseId} />
+                <button
+                  type="submit"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-destructive/20 text-destructive border border-destructive/30 rounded-lg hover:bg-destructive/30 transition-all duration-200"
+                >
+                  <span className="material-symbols-outlined text-sm">
+                    delete
+                  </span>
+                  Delete Course
+                </button>
+              </form>
             </div>
           )}
         </div>
@@ -238,7 +172,7 @@ export default function CourseDetailPage() {
                 </h2>
               </div>
               <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                {course.description}
+                {course?.description && course.description}
               </p>
             </div>
 
@@ -254,12 +188,12 @@ export default function CourseDetailPage() {
                   </h2>
                 </div>
                 <span className="text-sm text-muted-foreground">
-                  {course.chapters?.length || 0} chapters
+                  {(course?.chapters && course?.chapters?.length) || 0} chapters
                 </span>
               </div>
-              {course.chapters && course.chapters.length > 0 ?
+              {course?.chapters && course?.chapters?.length > 0 ?
                 <div className="space-y-3">
-                  {course.chapters
+                  {course?.chapters
                     .sort((a: any, b: any) => a.position - b.position)
                     .map((chapter: any, index: number) => (
                       <div
@@ -336,7 +270,7 @@ export default function CourseDetailPage() {
                     <span className="text-sm">Category</span>
                   </div>
                   <span className="text-sm font-medium text-foreground capitalize">
-                    {course.category}
+                    {course?.category && course.category}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
@@ -347,7 +281,7 @@ export default function CourseDetailPage() {
                     <span className="text-sm">Level</span>
                   </div>
                   <span className="text-sm font-medium text-foreground">
-                    {course.level}
+                    {course?.level && course.level}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
@@ -358,7 +292,7 @@ export default function CourseDetailPage() {
                     <span className="text-sm">Price</span>
                   </div>
                   <span className="text-sm font-semibold text-primary">
-                    {course.price === 0 ? "Free" : `Rs. ${course.price}`}
+                    {course?.price === 0 ? "Free" : `Rs. ${course?.price}`}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
@@ -369,7 +303,7 @@ export default function CourseDetailPage() {
                     <span className="text-sm">Rating</span>
                   </div>
                   <span className="text-sm font-medium text-foreground">
-                    {course.rating || "No ratings yet"}
+                    {course?.rating || "No ratings yet"}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
@@ -380,11 +314,12 @@ export default function CourseDetailPage() {
                     <span className="text-sm">Created</span>
                   </div>
                   <span className="text-sm text-foreground">
-                    {new Date(course.createdAt).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })}
+                    {course?.createdAt &&
+                      new Date(course?.createdAt).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
                   </span>
                 </div>
               </div>
@@ -402,23 +337,18 @@ export default function CourseDetailPage() {
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full kinetic-gradient flex items-center justify-center text-white font-semibold text-lg flex-shrink-0">
-                  {course.instructor?.name?.charAt(0).toUpperCase() || "I"}
+                  {(course?.instructorId &&
+                    course?.instructorId?.charAt(0).toUpperCase()) ||
+                    "I"}
                 </div>
-                <div>
-                  <p className="font-medium text-foreground">
-                    {course.instructor?.name || "Unknown Instructor"}
-                  </p>
-                  {course.instructor?.bio && (
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {course.instructor.bio}
-                    </p>
-                  )}
-                </div>
+                {/* add instructor name here  */}
+                <InstructorNameBadge instructorId={!!course?.instructorId} />
+                {/* end instructor name here  */}
               </div>
             </div>
 
             {/* Not Instructor Message */}
-            {!isInstructor && status === "authenticated" && (
+            {!isInstructor && session && (
               <div className="glass-card-no-glow rounded-xl p-6 border border-primary/20">
                 <div className="flex items-start gap-3">
                   <span className="material-symbols-outlined text-primary text-2xl flex-shrink-0">
@@ -436,67 +366,6 @@ export default function CourseDetailPage() {
             )}
           </div>
         </div>
-
-        {/* Delete Confirmation Modal */}
-        {showDeleteConfirm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-            <div className="glass-card rounded-xl p-6 max-w-md w-full animate-slide-up">
-              <div className="flex items-center gap-3 mb-4">
-                <span className="material-symbols-outlined text-destructive text-3xl">
-                  warning
-                </span>
-                <h3 className="text-xl font-semibold text-foreground">
-                  Delete Course
-                </h3>
-              </div>
-              <p className="text-muted-foreground mb-2">
-                Are you sure you want to delete{" "}
-                <strong className="text-foreground">{course.title}</strong>?
-              </p>
-              <p className="text-sm text-muted-foreground mb-6">
-                This action cannot be undone. All chapters, enrollments, and
-                progress will be permanently deleted.
-              </p>
-              {deleteError && (
-                <div className="mb-4 p-3 rounded-lg bg-destructive/20 border border-destructive/30 text-sm text-destructive">
-                  {deleteError}
-                </div>
-              )}
-              <div className="flex items-center justify-end gap-3">
-                <button
-                  onClick={() => {
-                    setShowDeleteConfirm(false);
-                    setDeleteError(null);
-                  }}
-                  disabled={isDeleting}
-                  className="px-5 py-2.5 rounded-lg bg-muted text-muted-foreground hover:bg-muted/80 transition-colors disabled:opacity-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleDelete}
-                  disabled={isDeleting}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isDeleting ?
-                    <>
-                      <span className="material-symbols-outlined text-sm animate-spin">
-                        progress_activity
-                      </span>
-                      Deleting...
-                    </>
-                  : <>
-                      <span className="material-symbols-outlined text-sm">
-                        delete
-                      </span>
-                      Delete
-                    </>
-                  }
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
