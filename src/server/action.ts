@@ -18,11 +18,11 @@ type ActionResponse =
 export const CreateCourse = async (
   data: CourseInput,
 ): Promise<ActionResponse> => {
-  try {
-    const session = await getServerSession(authOptions);
+  const session = await getServerSession(authOptions);
 
-    if (!session) redirect("/login");
-    if (session.user.role !== "INSTRUCTOR") redirect("/dashboard/student/");
+  if (!session) redirect("/login");
+  if (session.user.role !== "INSTRUCTOR") redirect("/dashboard/student/");
+  try {
     const valid = courseSchema.safeParse(data);
     if (!valid.success) {
       return {
@@ -68,11 +68,10 @@ export const CreateCourse = async (
 
 // Get Course By id (Start!)
 export const getCourseById = async (id: string) => {
+  const session = await getServerSession(authOptions);
+
+  if (!session) redirect("/login");
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session) redirect("/login");
-
     if (!id) return notFound();
     const FindPost = await prisma.course.findUnique({
       where: { id: id },
@@ -88,12 +87,12 @@ export const getCourseById = async (id: string) => {
 
 // delete course by id
 export const deleteCourseById = async (id: string) => {
-  try {
-    const session = await getServerSession(authOptions);
+  const session = await getServerSession(authOptions);
+  if (!session) redirect("/login");
+  if (session.user.role !== "INSTRUCTOR") redirect("/dashboard/student/");
 
-    if (!id) return notFound();
-    if (!session) redirect("/login");
-    if (session.user.role !== "INSTRUCTOR") redirect("/dashboard/student/");
+  if (!id) return notFound();
+  try {
     const FindPost = await prisma.course.deleteMany({
       where: { id: id, instructorId: session?.user.id },
     });
@@ -113,20 +112,19 @@ export const deleteCourseById = async (id: string) => {
 
 // update Course By id' (start!)
 export const courseUpdateFields = async (id: string, data: CourseInput) => {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user) redirect("/login");
+  if (session.user.role !== "INSTRUCTOR") {
+    redirect("/dashboard/student/");
+  }
+  if (!id) return notFound();
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) redirect("/login");
-    if (session.user.role !== "INSTRUCTOR") {
-      redirect("/dashboard/student/");
-    }
-    if (!id) return notFound();
-
     const valid = courseSchema.safeParse(data);
     if (!valid.success) {
       return {
         success: false,
-        error: valid.error?.cause || `something not working`,
+        error: valid?.error?.flatten() || `something not working`,
       };
     }
     const { title, description, price, isPublished, category, level } =
@@ -233,12 +231,11 @@ export const getAllCourses = async () => {
 
 //  get Course By Instructor
 export const getCourseByInstructor = async () => {
+  const session = await getServerSession(authOptions);
+
+  if (!session) redirect("/login");
+  if (session.user.role !== "INSTRUCTOR") redirect("/dashboard/student/");
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session) redirect("/login");
-    if (session.user.role !== "INSTRUCTOR") redirect("/dashboard/student/");
-
     const InstructorCourses = await prisma.course.findMany({
       where: { instructorId: session.user.id },
     });
@@ -259,10 +256,9 @@ export const getCourseByInstructor = async () => {
 
 // Find userByName (start!)
 export const findUserByName = async (name: string) => {
+  const session = await getServerSession(authOptions);
+  if (!session) redirect("/login");
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session) redirect("/login");
     const searchedUser = await prisma.user.findMany({
       where: { name: name },
     });
@@ -283,11 +279,11 @@ export const findUserByName = async (name: string) => {
 };
 // all Instructor's
 export const getAllInstructors = async () => {
-  try {
-    const session = await getServerSession(authOptions);
+  const session = await getServerSession(authOptions);
 
-    if (!session) redirect("/login");
-    if (session.user.role !== "ADMIN") redirect(`/dashboard/student`);
+  if (!session) redirect("/login");
+  if (session.user.role !== "ADMIN") redirect(`/dashboard/student`);
+  try {
     const AllInstructors = await prisma.user.findMany({
       where: { role: "INSTRUCTOR" },
     });
@@ -310,13 +306,13 @@ export const getAllInstructors = async () => {
 
 // create Chapter  inside Course (Start!)
 export const CreateChapters = async (CourseId: string, data: ChapterInput) => {
-  try {
-    const session = await getServerSession(authOptions);
+  const session = await getServerSession(authOptions);
 
-    if (!session) redirect("/login");
-    if (session.user.role !== "INSTRUCTOR") redirect(`/dashboard/student`);
+  if (!session) redirect("/login");
+  if (session.user.role !== "INSTRUCTOR") redirect(`/dashboard/student`);
+  try {
     const valid = chapterSchema.safeParse(data);
-    if (valid.error) {
+    if (!valid?.success) {
       return {
         success: false,
         error: "validation error",
