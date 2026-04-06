@@ -54,7 +54,7 @@ export default function Header() {
           {/* Right: Account */}
           <div className="flex items-center gap-4">
             <Link
-              href="/auth/account"
+              href="/login"
               className="p-2 text-[#f97316] hover:bg-muted rounded-full transition-colors"
               aria-label="Account"
               style={{ filter: "drop-shadow(0 0 8px rgba(249, 115, 22, 0.5))" }}

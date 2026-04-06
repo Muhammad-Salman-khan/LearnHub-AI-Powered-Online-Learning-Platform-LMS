@@ -1,5 +1,3 @@
-const loading = () => {
-  return <div>loading....</div>;
-};
+import LoadingScreen from "@/components/loading/loading-screen";
 
-export default loading;
+export default LoadingScreen;
