@@ -58,7 +58,7 @@ export default function InstructorDashboardPage() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <h1 className="text-3xl font-bold text-foreground">
-                  Welcome back, {session.data?.user.name} 👋
+                  Welcome back, {session.data?.user.name}
                 </h1>
                 <p className="text-muted-foreground mt-1">
                   Manage your courses and track student progress

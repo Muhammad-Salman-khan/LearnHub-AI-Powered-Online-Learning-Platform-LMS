@@ -1,42 +1,25 @@
-"use client";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Link from "next/link";
+import { Metadata } from "next"; 
+import { getAllCourses } from "@/server/action";
 
-export default function CoursesPage() {
-  const [courses, setCourses] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+export const metadata: Metadata = {
+  title: "Available Courses | LearnHub",
+  description: "Explore our wide range of AI-powered online courses and start learning today.",
+  openGraph: {
+    title: "LearnHub Courses",
+    description: "Browse all available courses on our platform.",
+  },
+};
 
-  useEffect(() => {
-    const getAllCourses = async () => {
-      try {
-        setLoading(true);
-        // Backend API endpoint for getting all published courses
-        const response = await fetch("/api/courses");
+export default async function CoursesPage() {
+  const response = await getAllCourses();
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch courses");
-        }
-
-        const data = await response.json();
-        setCourses(data);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getAllCourses();
-  }, []);
-
-  if (loading) {
-    return <div>Loading courses...</div>;
+  if (!response.success) {
+    return <div>Error: {response.error}</div>;
   }
 
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
+  const courses = response.data || [];
 
   return (
     <div>
@@ -50,22 +33,20 @@ export default function CoursesPage() {
             <tr>
               <th>Course Title</th>
               <th>Category</th>
-              <th>Instructor</th>
               <th>Price</th>
-              <th>Status</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody>
-            {courses.map((course) => (
+            {courses.map((course: any) => (
               <tr key={course.id}>
                 <td>
                   <strong>{course.title}</strong>
                 </td>
                 <td>{course.category}</td>
-                <td>{course.instructor?.name || "Unknown"}</td>
-                <td>{course.price === 0 ? "Free" : `Rs. ${course.price}`}</td>
-                <td>{course.isEnrolled ? "Enrolled" : "Not Enrolled"}</td>
+                <td>
+                  {course.price === 0 ? "Free" : `Rs. ${course.price}`}
+                </td>
                 <td>
                   <Link href={`/courses/${course.id}`}>
                     <button>View Details</button>
