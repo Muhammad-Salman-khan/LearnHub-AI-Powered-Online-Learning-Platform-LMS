@@ -1,109 +1,170 @@
-"use client";
-import React, { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+/**
+ * Course Detail Page - LearnHub
+ *
+ * Design: Obsidian & Amber Editorial ("The Kinetic Monolith")
+ * Features:
+ * - Server-side course fetching with Prisma
+ * - Sticky enrollment sidebar
+ * - Expandable curriculum
+ * - Tabbed content (Overview, Reviews, Q&A)
+ * - DESIGN.md compliant: No-Line Rule, Amber Radiance, Editorial spacing
+ */
 
-export default function CourseDetails() {
-  const params = useParams();
-  const courseId = params.courseId;
+import { prisma } from "@/lib/prisma"
+import { notFound } from "next/navigation"
+import { CourseHeader } from "@/components/courses/course-header"
+import { CourseSidebar } from "@/components/courses/course-sidebar"
+import { CourseCurriculum } from "@/components/courses/course-curriculum"
+import { CourseTabs } from "@/components/courses/course-tabs"
 
-  const [course, setCourse] = useState<any>(null);
-  const [isEnrolled, setIsEnrolled] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+// ✅ REMOVED: import { auth } from "@/lib/auth" — doesn't exist yet
 
-  useEffect(() => {
-    const fetchCourseData = async () => {
-      try {
-        setLoading(true);
-        // Backend API call
-        const response = await fetch(`/api/courses/${courseId}`);
+// Metadata for SEO
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ courseId: string }>
+}) {
+  const { courseId } = await params
+  const course = await prisma.course.findUnique({
+    where: { id: courseId },
+    select: { title: true, description: true },
+  })
 
-        if (!response.ok) throw new Error("Course not found or server error");
+  if (!course) return { title: "Course Not Found | LearnHub" }
 
-        const data = await response.json();
-        setCourse(data.course);
-        setIsEnrolled(data.isEnrolled);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  return {
+    title: `${course.title} | LearnHub`,
+    description: course.description,
+  }
+}
 
-    if (courseId) fetchCourseData();
-  }, [courseId]);
-  const handleEnroll = async () => {
-    try {
-      const response = await fetch(`/api/enroll`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ courseId: courseId }),
-      });
+// Fetch course data - Matches your Prisma schema (chapters, not lessons)
+async function getCourse(courseId: string) {
+  const course = await prisma.course.findUnique({
+    where: { id: courseId },
+    include: {
+      instructor: { select: { name: true, image: true, bio: true } },
+      // ✅ Chapters ARE the lessons in your schema
+      chapters: {
+        where: { isPublished: true },
+        orderBy: { position: "asc" },
+      },
+      // ❌ REMOVED: reviews - doesn't exist in your schema yet
+      // ❌ REMOVED: enrollments - not needed for public view
+    },
+  });
 
-      if (response.ok) {
-        alert("Successfully enrolled!");
-        setIsEnrolled(true);
-      } else {
-        const errorData = await response.json();
-        alert("Enrollment failed: " + (errorData.message || "Unknown error"));
-      }
-    } catch (err) {
-      console.error("Enrollment error:", err);
-      alert("Network error. Please try again.");
-    }
-  };
+  if (!course || !course.isPublished) notFound();
 
-  // --- VALIDATIONS & STATES ---
-  if (loading) return <div>Loading course details...</div>;
-  if (error) return <div>Error: {error}</div>;
-  if (!course) return <div>No course data found.</div>;
+  return course;
+}
+
+// ✅ TEMPORARY: Assume not enrolled (will connect to auth when ready)
+// async function checkEnrollment(courseId: string) { ... }
+
+export default async function CourseDetailPage({
+  params,
+}: {
+  params: Promise<{ courseId: string }>
+}) {
+  const { courseId } = await params
+  const course = await getCourse(courseId)
+
+  // ✅ TEMPORARY: Assume not enrolled
+  const enrolled = false
+  const progress = 0
+
+  // ✅ Calculate stats based on CHAPTERS (your schema), not lessons
+  const totalChapters = course.chapters.length
+  const totalDuration = course.chapters.reduce(
+    (acc, ch) => acc + (ch.videoUrl ? 15 : 5), // Estimate: 15min video, 5min reading
+    0
+  )
 
   return (
-    <div style={{ padding: "20px" }}>
-      {/* --- COURSE HEADER --- */}
-      <h1>{course.title}</h1>
-      <p>
-        <b>Instructor:</b> {course.instructor?.name || "Unknown"}
-      </p>
-      <p>
-        <b>Description:</b> {course.description}
-      </p>
-      <p>
-        <b>Level:</b> {course.level}
-      </p>
-      <p>
-        <b>Category:</b> {course.category}
-      </p>
+    <main className="min-h-screen bg-[#131313] text-[#e2e2e2]">
+      {/* Hero Section - Course Header */}
+      <CourseHeader course={course} />
 
-      <hr />
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
+          {/* Left Content - 70% width */}
+          <section className="flex-1 min-w-0">
+            {/* What You'll Learn */}
+            <div className="bg-[#1b1b1b] rounded-[min(var(--radius-md),4px)] p-6 sm:p-8 mb-8">
+              <h2 className="text-xl font-bold text-[#e2e2e2] mb-4">What You'll Learn</h2>
+              <ul className="grid sm:grid-cols-2 gap-3">
+                {(
+                  course.learningOutcomes || [
+                    "Master core concepts",
+                    "Build real projects",
+                    "Industry best practices",
+                    "Portfolio-ready skills",
+                  ]
+                ).map((item, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <span className="material-symbols-outlined text-[#f97316] text-lg shrink-0 mt-0.5">
+                      check_circle
+                    </span>
+                    <span className="text-sm text-[#e0c0b1]">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-      {isEnrolled ?
-        <div>
-          <h2>You are enrolled in this course</h2>
-          <h3>Curriculum (Chapters)</h3>
-          {course.chapters && course.chapters.length > 0 ?
-            <ul>
-              {course.chapters.map((chapter: any) => (
-                <li key={chapter.id}>
-                  <strong>{chapter.title}</strong>
-                  <p>{chapter.description}</p>
-                  {/* Agar video hai to link dikha sakte hain */}
-                  {chapter.videoUrl && (
-                    <a href={chapter.videoUrl} target="_blank">
-                      Watch Video
-                    </a>
+            {/* Course Curriculum */}
+            <CourseCurriculum chapters={course.chapters} />
+
+            {/* Instructor Section */}
+            <div className="bg-[#1b1b1b] rounded-[min(var(--radius-md),4px)] p-6 sm:p-8 mt-8">
+              <h2 className="text-xl font-bold text-[#e2e2e2] mb-6">Your Instructor</h2>
+              <div className="flex flex-col sm:flex-row gap-6">
+                <div className="w-20 h-20 rounded-full bg-[#0e0e0e] overflow-hidden flex-shrink-0">
+                  {course.instructor.image ? (
+                    <img
+                      src={course.instructor.image}
+                      alt={course.instructor.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-[#2a2a2a] flex items-center justify-center">
+                      <span className="material-symbols-outlined text-[#8a8a8a] text-3xl">
+                        person
+                      </span>
+                    </div>
                   )}
-                </li>
-              ))}
-            </ul>
-          : <p>No chapters available yet.</p>}
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-[#e2e2e2] mb-1">
+                    {course.instructor.name}
+                  </h3>
+                  <p className="text-sm text-[#f97316] mb-3">Senior Engineer & Educator</p>
+                  <p className="text-sm text-[#e0c0b1]">
+                    {course.instructor.bio ||
+                      "Industry veteran with 10+ years of experience building scalable systems."}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Tabs: Overview, Reviews, Q&A */}
+            <CourseTabs course={course} enrolled={enrolled} />
+          </section>
+
+          {/* Right Sidebar - 30% width (sticky) */}
+          <aside className="lg:w-96 flex-shrink-0">
+            <CourseSidebar
+              course={course}
+              enrolled={enrolled}
+              progress={progress}
+              totalChapters={totalChapters}
+              totalDuration={totalDuration}
+            />
+          </aside>
         </div>
-      : <div>
-          <p>Price: {course.price === 0 ? "Free" : `Rs. ${course.price}`}</p>
-          <p>Please enroll to access chapters and videos.</p>
-          <button onClick={handleEnroll}>Enroll Now</button>
-        </div>
-      }
-    </div>
-  );
+      </div>
+    </main>
+  )
 }
