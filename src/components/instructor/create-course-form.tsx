@@ -2,22 +2,25 @@
 
 import { CreateCourse } from "@/server/action";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export function CreateCourseForm() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     thumbnail: null as File | null,
     price: "",
     category: "",
-    level: "beginner",
+    level: "BEGINNER",
     isPublished: false,
   });
 
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
+    >
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -25,39 +28,63 @@ export function CreateCourseForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Course data:", formData);
-    await CreateCourse(formData);
+    setLoading(true);
+
+    try {
+      // Backend connectivity logic
+      const dataToSubmit = {
+        ...formData,
+        price: Number(formData.price), // Prisma/Zod price number mangta hai
+      };
+
+      const response = await CreateCourse(dataToSubmit as any);
+
+      if (response?.success) {
+        alert("Course created successfully!");
+        router.push("/dashboard/instructor");
+        router.refresh();
+      } else {
+        alert(response?.error || "Kuch ghalat hogaya!");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Server se connect nahi ho saka");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Create New Course</h1>
+      <h1 className="text-3xl font-bold mb-6 text-foreground">Create New Course</h1>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label className="block text-sm font-medium mb-2">Title</label>
+          <label className="block text-sm font-medium mb-2 text-foreground">Title</label>
           <input
             type="text"
             name="title"
+            required
             value={formData.title}
             onChange={handleChange}
             placeholder="Enter course title"
-            className="w-full px-3 py-2 border rounded-md"
+            className="w-full px-3 py-2 border rounded-md bg-transparent"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">Description</label>
+          <label className="block text-sm font-medium mb-2 text-foreground">Description</label>
           <textarea
             name="description"
+            required
             value={formData.description}
             onChange={handleChange}
             placeholder="Enter course description"
-            className="w-full px-3 py-2 border rounded-md min-h-[120px]"
+            className="w-full px-3 py-2 border rounded-md min-h-[120px] bg-transparent"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">Thumbnail</label>
+          <label className="block text-sm font-medium mb-2 text-foreground">Thumbnail</label>
           <input
             type="file"
             name="thumbnail"
@@ -68,31 +95,33 @@ export function CreateCourseForm() {
                 setFormData((prev) => ({ ...prev, thumbnail: file }));
               }
             }}
-            className="w-full px-3 py-2 border rounded-md"
+            className="w-full px-3 py-2 border rounded-md bg-transparent"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">Price ($)</label>
+          <label className="block text-sm font-medium mb-2 text-foreground">Price ($)</label>
           <input
             type="number"
             name="price"
-            value={Number(formData.price)}
+            required
+            value={formData.price}
             onChange={handleChange}
             placeholder="0.00"
             min="0"
             step="0.01"
-            className="w-full px-3 py-2 border rounded-md"
+            className="w-full px-3 py-2 border rounded-md bg-transparent"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">Category</label>
+          <label className="block text-sm font-medium mb-2 text-foreground">Category</label>
           <select
             name="category"
+            required
             value={formData.category}
             onChange={handleChange}
-            className="w-full px-3 py-2 border rounded-md"
+            className="w-full px-3 py-2 border rounded-md bg-transparent"
           >
             <option value="">Select a category</option>
             <option value="Development">Development</option>
@@ -107,12 +136,12 @@ export function CreateCourseForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">Level</label>
+          <label className="block text-sm font-medium mb-2 text-foreground">Level</label>
           <select
             name="level"
             value={formData.level}
             onChange={handleChange}
-            className="w-full px-3 py-2 border rounded-md"
+            className="w-full px-3 py-2 border rounded-md bg-transparent"
           >
             <option value="BEGINNER">Beginner</option>
             <option value="INTERMEDIATE">Intermediate</option>
@@ -133,16 +162,17 @@ export function CreateCourseForm() {
             }
             className="w-4 h-4"
           />
-          <label htmlFor="isPublished" className="text-sm font-medium">
+          <label htmlFor="isPublished" className="text-sm font-medium text-foreground">
             Publish Course
           </label>
         </div>
 
         <button
           type="submit"
-          className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          disabled={loading}
+          className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
         >
-          Create Course
+          {loading ? "Creating..." : "Create Course"}
         </button>
       </form>
     </div>

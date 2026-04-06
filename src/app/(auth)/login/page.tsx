@@ -68,26 +68,38 @@ export default function LoginPage() {
   // 🔹 Handle credentials login
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setError(null); // Clear previous errors
+    setError(null);
     setLoading(true);
 
     try {
       const res = await signIn("credentials", {
         email: email.toLowerCase(),
         password: password,
-        redirect: false,
+        redirect: false, // Hum khud redirect handle karenge
       });
 
       if (res?.ok) {
-        router.push("/dashboard/student/");
+        // ✅ Role-based redirection fetch karne ke liye session check
+        const sessionRes = await fetch("/api/auth/session");
+        const session = await sessionRes.json();
+
+        const userRole = session?.user?.role?.toLowerCase();
+
+        // ✅ Role ke hisab se dashboard set karna
+        if (userRole === "admin") {
+          router.push("/dashboard/admin");
+        } else if (userRole === "instructor") {
+          router.push("/dashboard/instructor");
+        } else {
+          router.push("/dashboard/student");
+        }
+
         router.refresh();
       } else {
-        // ✅ Show inline error instead of alert
         setError(res?.error || "Invalid Credentials");
       }
     } catch (error) {
       console.error("Login error:", error);
-      // ✅ Show inline error instead of alert
       setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
