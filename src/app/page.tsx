@@ -1,44 +1,77 @@
 "use client";
 
+/**
+ * LearnHub - Homepage
+ *
+ * Structure:
+ * - Hero Section: Main CTA with headline + buttons
+ * - Features Section: 3-column grid showcasing platform capabilities
+ * - Stats Bar: Key metrics displayed in 4-column grid
+ * - Course Tracks: Featured courses with images and metadata
+ * - CTA Section: Final conversion prompt with gradient background
+ * - Footer: Navigation links and branding
+ *
+ * Theme: Dark Amber (oklch color space)
+ * Components: glass-card, glass-card-no-glow, Material Symbols, shadcn/ui
+ */
+
 import Link from "next/link";
 import Header from "@/components/themeProvider/Header/page";
 import { useState } from "react";
 
 export default function HomePage() {
+
+
   return (
     <main className="min-h-screen bg-background text-foreground relative overflow-hidden">
-      {/* Header included only on homepage */}
+      {/* 
+        Header Component
+        - Contains navigation, auth buttons, mobile menu
+        - Included only on homepage per design spec
+      */}
       <Header />
 
-      {/* Hero Section */}
+      {/* 
+        ========================================
+        HERO SECTION
+        ========================================
+        - Full-width hero with gradient background accents
+        - Primary headline with amber accent text
+        - Dual CTA buttons (primary + secondary)
+        - Background glows use low opacity for subtlety
+      */}
       <section className="pt-32 pb-16 px-4 sm:px-6 lg:px-8 relative">
+        {/* Background accent glows - subtle, low opacity */}
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-br from-primary/30 via-primary/20 to-transparent pointer-events-none blur-xl" />
         <div className="absolute top-20 right-40 w-[400px] h-[400px] bg-primary/25 rounded-sm pointer-events-none blur-lg" />
 
         <div className="max-w-7xl mx-auto relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted/50 border border-border text-xs font-medium mb-6 uppercase tracking-wider text-primary">
-            <span className="material-symbols-outlined text-[14px]">bolt</span>
-            Evolutionary Education
-          </div>
-
+          {/* Hero Headline */}
           <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight mb-6 leading-tight">
             Master the <span className="text-primary text-glow">Future</span>
             <br />
             of Human Capital.
           </h1>
 
+          {/* Hero Subheadline */}
           <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 sm:mb-10 max-w-2xl">
             A deep-tech learning environment designed for precision, speed, and
             absolute mastery. Curated by industry titans for the next generation
             of engineers.
           </p>
 
+          {/* 
+            Primary Action Buttons
+            - Primary button: Solid amber with subtle hover shadow
+            - Secondary button: Transparent with border, hover fill
+            - Responsive: Stack on mobile, row on desktop
+          */}
           <div className="flex flex-col sm:flex-row items-start gap-4 mb-12 sm:mb-16 w-full sm:w-auto">
             <Link
               href="/auth/signup"
-              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-all kinetic-gradient"
+              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors shadow-[0_2px_10px_rgba(249,115,22,0.15)] hover:shadow-[0_4px_16px_rgba(249,115,22,0.25)]"
             >
-              Begin Initiation
+              Start Learning
             </Link>
             <Link
               href="#curriculum"
@@ -50,11 +83,19 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* 
+        ========================================
+        FEATURES SECTION
+        ========================================
+        - 3-column grid on desktop, stacked on mobile
+        - Each feature card uses glass-card styling
+        - Icons from Material Symbols library
+        - Hover effects: subtle border color change
+      */}
       <section id="curriculum" className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Feature 1 */}
+            {/* Feature 1: Neural Curriculum Design */}
             <div className="glass-card rounded-xl p-6 border border-border/50">
               <span className="material-symbols-outlined text-primary text-3xl mb-4">
                 neurology
@@ -68,7 +109,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            {/* Feature 2 */}
+            {/* Feature 2: Hyper-Speed Mentoring */}
             <div className="glass-card rounded-xl p-6 border border-border/50">
               <span className="material-symbols-outlined text-primary text-3xl mb-4">
                 bolt
@@ -81,6 +122,7 @@ export default function HomePage() {
                 feedback, code reviews, and career guidance when you need it
                 most.
               </p>
+              {/* Mentor avatars stack */}
               <div className="flex -space-x-2">
                 <div className="w-10 h-10 rounded-full bg-muted border-2 border-background overflow-hidden flex-shrink-0">
                   <img
@@ -102,8 +144,9 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Feature 3 */}
+            {/* Feature 3: Split layout for stats + engine */}
             <div className="grid grid-rows-2 gap-6">
+              {/* Stat Card: Latency */}
               <div className="glass-card-no-glow rounded-xl p-6 border border-border/50 flex items-center justify-between">
                 <div>
                   <h3 className="font-heading font-semibold text-lg mb-1">
@@ -117,6 +160,7 @@ export default function HomePage() {
                   public
                 </span>
               </div>
+              {/* Engine Card: Obsidian */}
               <div className="glass-card rounded-xl p-6 border border-border/50 flex items-center gap-4">
                 <div className="w-24 h-24 rounded-lg overflow-hidden border border-border flex-shrink-0">
                   <img
@@ -140,10 +184,19 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Stats Bar */}
+      {/* 
+        ========================================
+        STATS BAR
+        ========================================
+        - Dark background section with 4 key metrics
+        - Each stat: icon + value + label
+        - Uses glass-card-no-glow for subtle depth
+        - Responsive: 2-col mobile, 4-col desktop
+      */}
       <section className="py-12 px-4 sm:px-6 lg:px-8 border-y border-border/50 bg-black/95">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8">
+            {/* Stat: Latency */}
             <div className="text-center glass-card-no-glow p-4 rounded-xl">
               <div className="flex items-center justify-center gap-1 text-primary mb-1">
                 <span className="material-symbols-outlined text-sm">speed</span>
@@ -153,6 +206,7 @@ export default function HomePage() {
               </div>
               <p className="text-xs text-muted-foreground">Latency</p>
             </div>
+            {/* Stat: Global Regions */}
             <div className="text-center glass-card-no-glow p-4 rounded-xl">
               <div className="flex items-center justify-center gap-1 text-primary mb-1">
                 <span className="material-symbols-outlined text-sm">
@@ -164,6 +218,7 @@ export default function HomePage() {
               </div>
               <p className="text-xs text-muted-foreground">Global Regions</p>
             </div>
+            {/* Stat: Active Learners */}
             <div className="text-center glass-card-no-glow p-4 rounded-xl">
               <div className="flex items-center justify-center gap-1 text-primary mb-1">
                 <span className="material-symbols-outlined text-sm">
@@ -175,6 +230,7 @@ export default function HomePage() {
               </div>
               <p className="text-xs text-muted-foreground">Active Learners</p>
             </div>
+            {/* Stat: Success Rate */}
             <div className="text-center glass-card-no-glow p-4 rounded-xl">
               <div className="flex items-center justify-center gap-1 text-primary mb-1">
                 <span className="material-symbols-outlined text-sm">
@@ -190,9 +246,18 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Course Tracks */}
+      {/* 
+        ========================================
+        COURSE TRACKS SECTION
+        ========================================
+        - Section header with title + "View All" link
+        - 3-column grid of course cards
+        - Each card: image, tag, title, description, metadata
+        - Hover effects: image scale + border color change
+      */}
       <section className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
+          {/* Section Header */}
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8 sm:mb-12">
             <div>
               <p className="text-xs uppercase tracking-wider text-primary mb-2">
@@ -213,8 +278,9 @@ export default function HomePage() {
             </Link>
           </div>
 
+          {/* Course Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Course 1 */}
+            {/* Course 1: Quantum Security */}
             <Link
               href="#"
               className="glass-card rounded-xl overflow-hidden border border-border/50 hover:border-primary/50 transition-all group block"
@@ -246,7 +312,7 @@ export default function HomePage() {
               </div>
             </Link>
 
-            {/* Course 2 */}
+            {/* Course 2: Neural Network Architecture */}
             <Link
               href="#"
               className="glass-card rounded-xl overflow-hidden border border-border/50 hover:border-primary/50 transition-all group block"
@@ -278,7 +344,7 @@ export default function HomePage() {
               </div>
             </Link>
 
-            {/* Course 3 */}
+            {/* Course 3: Systematic Algo-Trading */}
             <Link
               href="#"
               className="glass-card rounded-xl overflow-hidden border border-border/50 hover:border-primary/50 transition-all group block"
@@ -313,13 +379,23 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* 
+        ========================================
+        CTA SECTION
+        ========================================
+        - Full-width conversion section with gradient background
+        - Headline with amber accent text
+        - Single primary CTA button with subtle shadow
+        - Background glows use blur + low opacity for depth
+      */}
       <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        {/* Background accent glows - subtle, layered */}
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[500px] bg-gradient-to-t from-[#f97316]/50 via-[#f97316]/20 to-transparent pointer-events-none blur-2xl" />
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[400px] h-[300px] bg-[#f97316]/30 rounded-full pointer-events-none blur-xl" />
         <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-[300px] h-[200px] bg-[#ffb690]/40 rounded-full pointer-events-none blur-lg" />
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
+          {/* CTA Headline */}
           <h2 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 leading-tight">
             Ready to leave the <br className="sm:hidden" />
             <span
@@ -333,37 +409,52 @@ export default function HomePage() {
             </span>{" "}
             behind?
           </h2>
+
+          {/* CTA Subheadline */}
           <p className="text-muted-foreground mb-6 sm:mb-8 max-w-2xl mx-auto text-base sm:text-lg">
             The next intake begins in{" "}
             <span className="text-[#f97316] font-semibold">72 hours</span>. Your
             transformation into a technical architect starts with a single
             click.
           </p>
+
+          {/* 
+            Primary CTA Button
+            - Solid amber background with subtle hover shadow
+            - No kinetic-gradient or intense glow per design feedback
+          */}
           <Link
             href="/auth/signup"
-            className="inline-flex items-center justify-center w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-5 bg-gradient-to-r from-[#ffb690] to-[#f97316] text-white rounded-lg font-bold text-base sm:text-lg hover:opacity-90 transition-all kinetic-gradient relative"
-            style={{
-              boxShadow:
-                "0 0 60px rgba(249, 115, 22, 0.6), 0 0 120px rgba(249, 115, 22, 0.3)",
-            }}
+            className="inline-flex items-center justify-center w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-5 bg-primary text-primary-foreground rounded-lg font-bold text-base sm:text-lg hover:bg-primary/90 transition-colors shadow-[0_2px_10px_rgba(249,115,22,0.15)] hover:shadow-[0_4px_16px_rgba(249,115,22,0.25)]"
           >
             SECURE YOUR SPOT
           </Link>
         </div>
       </section>
 
-      {/* Footer */}
+      {/* 
+        ========================================
+        FOOTER
+        ========================================
+        - Branding + navigation links
+        - Logo uses clean amber text (no glow)
+        - Social/utility icons on right
+        - Subtle top gradient accent
+      */}
       <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-border/50 relative">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[100px] bg-gradient-to-b from-primary/10 to-transparent pointer-events-none blur-xl" />
 
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
+            {/* Branding */}
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <span className="material-symbols-outlined text-primary logo-glow">
+                {/* Logo Icon - clean amber, no glow */}
+                <span className="material-symbols-outlined text-primary">
                   school
                 </span>
-                <span className="font-heading font-bold text-primary logo-glow">
+                {/* Logo Text - clean amber, no glow */}
+                <span className="font-heading font-bold text-primary">
                   LearnHub
                 </span>
               </div>
@@ -372,6 +463,7 @@ export default function HomePage() {
               </p>
             </div>
 
+            {/* Navigation Links */}
             <div className="flex flex-wrap items-center justify-center md:justify-end gap-4 sm:gap-6 text-sm">
               {["Curriculum", "Mentors", "Pricing", "Privacy"].map((item) => (
                 <Link
@@ -384,6 +476,7 @@ export default function HomePage() {
               ))}
             </div>
 
+            {/* Utility Icons */}
             <div className="flex items-center justify-center md:justify-end gap-4 text-muted-foreground">
               <span className="material-symbols-outlined text-sm">
                 language

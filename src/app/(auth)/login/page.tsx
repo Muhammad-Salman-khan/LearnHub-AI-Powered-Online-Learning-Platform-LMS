@@ -23,16 +23,21 @@ import LogInIcon from "@/components/ui/loginicon";
 import GoogleIcon from "@/components/ui/GoogleIcon";
 
 /**
- * LoginPage - Merged version: Beautiful UI + Working Auth Logic
+ * LoginPage - User Authentication
  *
  * Features:
  * - NextAuth.js credentials + Google OAuth sign-in
  * - Loading states with disabled buttons
- * - Error handling with user-friendly alerts
+ * - Inline error popup (no browser alerts)
  * - Blurred animated background
  * - Responsive design with shadcn/ui components
  * - Password visibility toggle
  * - Hydration-safe animations
+ *
+ * Error Handling:
+ * - Errors display in a dismissible banner at top of form
+ * - Auto-dismiss after 5 seconds (optional)
+ * - Clear error when user starts typing
  */
 export default function LoginPage() {
   // 🔹 Auth state
@@ -43,6 +48,7 @@ export default function LoginPage() {
   // 🔹 UI state
   const [isMounted, setIsMounted] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const router = useRouter();
 
@@ -51,9 +57,18 @@ export default function LoginPage() {
     setIsMounted(true);
   }, []);
 
+  // 🔹 Auto-dismiss error after 5 seconds (optional UX improvement)
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
   // 🔹 Handle credentials login
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setError(null); // Clear previous errors
     setLoading(true);
 
     try {
@@ -67,11 +82,13 @@ export default function LoginPage() {
         router.push("/dashboard/student/");
         router.refresh();
       } else {
-        alert(`Error: ${res?.error || "Invalid Credentials"}`);
+        // ✅ Show inline error instead of alert
+        setError(res?.error || "Invalid Credentials");
       }
     } catch (error) {
       console.error("Login error:", error);
-      alert("Something went wrong. Please try again.");
+      // ✅ Show inline error instead of alert
+      setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -80,10 +97,11 @@ export default function LoginPage() {
   // 🔹 Handle Google OAuth login
   const handleGoogleLogin = async () => {
     try {
-      await signIn("google", { callbackUrl: "/dashboard" });
+      await signIn("google", { callbackUrl: "/dashboard/student" });
     } catch (error) {
       console.error("Google sign-in error:", error);
-      alert("Google sign-in failed. Please try again.");
+      // ✅ Show inline error instead of alert
+      setError("Google sign-in failed. Please try again.");
     }
   };
 
@@ -123,6 +141,33 @@ export default function LoginPage() {
           </CardHeader>
 
           <CardContent>
+            {/* ✅ INLINE ERROR POPUP - Dismissible banner */}
+            {error && (
+              <div className="mb-4 p-3 rounded-lg border border-destructive/30 bg-destructive/10 flex items-start gap-3 animate-fade-in">
+                <span className="material-symbols-outlined text-destructive text-lg shrink-0 mt-0.5">
+                  error
+                </span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-destructive">
+                    {error}
+                  </p>
+                  <p className="text-xs text-destructive/80 mt-0.5">
+                    Please check your credentials and try again.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setError(null)}
+                  className="text-destructive/60 hover:text-destructive transition-colors shrink-0"
+                  aria-label="Dismiss error"
+                >
+                  <span className="material-symbols-outlined text-base">
+                    close
+                  </span>
+                </button>
+              </div>
+            )}
+
             <form onSubmit={handleLogin} id="login-form">
               <div className="flex flex-col gap-4 sm:gap-6">
                 {/* 📧 EMAIL FIELD */}
@@ -136,7 +181,10 @@ export default function LoginPage() {
                     type="email"
                     placeholder="name@example.com"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (error) setError(null); // Clear error on input
+                    }}
                     required
                     disabled={loading}
                     className="h-10 sm:h-11 transition-all duration-300 focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50"
@@ -167,7 +215,10 @@ export default function LoginPage() {
                     name="password"
                     type={showPassword ? "text" : "password"}
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (error) setError(null); // Clear error on input
+                    }}
                     required
                     disabled={loading}
                     className="h-10 sm:h-11 transition-all duration-300 focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50"
@@ -180,12 +231,13 @@ export default function LoginPage() {
                 disabled={loading}
                 className="w-full h-10 sm:h-11 mt-4 text-sm sm:text-base transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100 gap-2"
               >
-                {loading ?
+                {loading ? (
                   <>
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
                     <span>Signing in...</span>
                   </>
-                : <>
+                ) : (
+                  <>
                     <LogInIcon
                       size={16}
                       color="currentColor"
@@ -194,14 +246,12 @@ export default function LoginPage() {
                     />
                     <span>Login</span>
                   </>
-                }
+                )}
               </Button>
             </form>
           </CardContent>
 
           <CardFooter className="flex flex-col gap-3 pt-2">
-            {/* ✅ PRIMARY LOGIN BUTTON with LogInIcon + Loading State */}
-
             {/* 🔹 DIVIDER */}
             <div className="relative w-full py-2">
               <div className="absolute inset-0 flex items-center">
