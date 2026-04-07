@@ -1,79 +1,170 @@
-import React from "react";
-import { notFound } from "next/navigation";
-import { getCourseById } from "@/server/action";
-import EnrollButton from "./_components/EnrollButton";
-import BackButton from "./_components/BackButton"; // Import Back Button
-import { Metadata } from "next";
+/**
+ * Course Detail Page - LearnHub
+ *
+ * Design: Obsidian & Amber Editorial ("The Kinetic Monolith")
+ * Features:
+ * - Server-side course fetching with Prisma
+ * - Sticky enrollment sidebar
+ * - Expandable curriculum
+ * - Tabbed content (Overview, Reviews, Q&A)
+ * - DESIGN.md compliant: No-Line Rule, Amber Radiance, Editorial spacing
+ */
 
-interface PageProps {
-  params: Promise<{ courseId: string }>;
-}
+import { prisma } from "@/lib/prisma"
+import { notFound } from "next/navigation"
+import { CourseHeader } from "@/components/courses/course-header"
+import { CourseSidebar } from "@/components/courses/course-sidebar"
+import { CourseCurriculum } from "@/components/courses/course-curriculum"
+import { CourseTabs } from "@/components/courses/course-tabs"
 
+// ✅ REMOVED: import { auth } from "@/lib/auth" — doesn't exist yet
+
+// Metadata for SEO
 export async function generateMetadata({
   params,
-}: PageProps): Promise<Metadata> {
-  const { courseId } = await params;
-  const response = await getCourseById(courseId);
+}: {
+  params: Promise<{ courseId: string }>
+}) {
+  const { courseId } = await params
+  const course = await prisma.course.findUnique({
+    where: { id: courseId },
+    select: { title: true, description: true },
+  })
 
-  if (!response.success || !response.data) {
-    return { title: "Course Not Found | LearnHub" };
-  }
+  if (!course) return { title: "Course Not Found | LearnHub" }
 
   return {
-    title: `${response.data.title} | LearnHub`,
-    description: response.data.description,
-  };
+    title: `${course.title} | LearnHub`,
+    description: course.description,
+  }
 }
 
-export default async function CourseDetailsPage({ params }: PageProps) {
-  const { courseId } = await params;
-  const response = await getCourseById(courseId);
+// Fetch course data - Matches your Prisma schema (chapters, not lessons)
+async function getCourse(courseId: string) {
+  const course = await prisma.course.findUnique({
+    where: { id: courseId },
+    include: {
+      instructor: { select: { name: true, image: true, bio: true } },
+      // ✅ Chapters ARE the lessons in your schema
+      chapters: {
+        where: { isPublished: true },
+        orderBy: { position: "asc" },
+      },
+      // ❌ REMOVED: reviews - doesn't exist in your schema yet
+      // ❌ REMOVED: enrollments - not needed for public view
+    },
+  });
 
-  if (!response.success || !response.data) {
-    return (
-      <div style={{ padding: "40px", textAlign: "center" }}>
-        <BackButton />
-        <h1>404 - Course Not Found</h1>
-        <p>
-          Sorry, the course you are looking for does not exist or has been
-          removed.
-        </p>
-      </div>
-    );
-  }
+  if (!course || !course.isPublished) notFound();
 
-  const course = response.data;
+  return course;
+}
+
+// ✅ TEMPORARY: Assume not enrolled (will connect to auth when ready)
+// async function checkEnrollment(courseId: string) { ... }
+
+export default async function CourseDetailPage({
+  params,
+}: {
+  params: Promise<{ courseId: string }>
+}) {
+  const { courseId } = await params
+  const course = await getCourse(courseId)
+
+  // ✅ TEMPORARY: Assume not enrolled
+  const enrolled = false
+  const progress = 0
+
+  // ✅ Calculate stats based on CHAPTERS (your schema), not lessons
+  const totalChapters = course.chapters.length
+  const totalDuration = course.chapters.reduce(
+    (acc, ch) => acc + (ch.videoUrl ? 15 : 5), // Estimate: 15min video, 5min reading
+    0
+  )
 
   return (
-    <div>
-      <BackButton />
+    <main className="min-h-screen bg-[#131313] text-[#e2e2e2]">
+      {/* Hero Section - Course Header */}
+      <CourseHeader course={course} />
 
-      <section>
-        <h1>{course.title}</h1>
-        <p>
-          <b>Description:</b> {course.description}
-        </p>
-        <p>
-          <b>Category:</b> {course.category}
-        </p>
-        <p>
-          <b>Level:</b> {course.level}
-        </p>
-        <p>
-          <b>Price:</b> {course.price === 0 ? "Free" : `Rs. ${course.price}`}
-        </p>
-      </section>
-      <hr />
-      <section>
-        <EnrollButton courseId={course.id} price={course.price} />
-      </section>
-      <section>
-        <h3>Course Curriculum</h3>
-        <p>
-          Full access to chapters and video lectures will be granted upon
-          successful enrollment.
-        </p>
-      </section>
-    </div>
-  );
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
+          {/* Left Content - 70% width */}
+          <section className="flex-1 min-w-0">
+            {/* What You'll Learn */}
+            <div className="bg-[#1b1b1b] rounded-[min(var(--radius-md),4px)] p-6 sm:p-8 mb-8">
+              <h2 className="text-xl font-bold text-[#e2e2e2] mb-4">What You'll Learn</h2>
+              <ul className="grid sm:grid-cols-2 gap-3">
+                {(
+                  course.learningOutcomes || [
+                    "Master core concepts",
+                    "Build real projects",
+                    "Industry best practices",
+                    "Portfolio-ready skills",
+                  ]
+                ).map((item, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <span className="material-symbols-outlined text-[#f97316] text-lg shrink-0 mt-0.5">
+                      check_circle
+                    </span>
+                    <span className="text-sm text-[#e0c0b1]">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Course Curriculum */}
+            <CourseCurriculum chapters={course.chapters} />
+
+            {/* Instructor Section */}
+            <div className="bg-[#1b1b1b] rounded-[min(var(--radius-md),4px)] p-6 sm:p-8 mt-8">
+              <h2 className="text-xl font-bold text-[#e2e2e2] mb-6">Your Instructor</h2>
+              <div className="flex flex-col sm:flex-row gap-6">
+                <div className="w-20 h-20 rounded-full bg-[#0e0e0e] overflow-hidden flex-shrink-0">
+                  {course.instructor.image ? (
+                    <img
+                      src={course.instructor.image}
+                      alt={course.instructor.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-[#2a2a2a] flex items-center justify-center">
+                      <span className="material-symbols-outlined text-[#8a8a8a] text-3xl">
+                        person
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-[#e2e2e2] mb-1">
+                    {course.instructor.name}
+                  </h3>
+                  <p className="text-sm text-[#f97316] mb-3">Senior Engineer & Educator</p>
+                  <p className="text-sm text-[#e0c0b1]">
+                    {course.instructor.bio ||
+                      "Industry veteran with 10+ years of experience building scalable systems."}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Tabs: Overview, Reviews, Q&A */}
+            <CourseTabs course={course} enrolled={enrolled} />
+          </section>
+
+          {/* Right Sidebar - 30% width (sticky) */}
+          <aside className="lg:w-96 flex-shrink-0">
+            <CourseSidebar
+              course={course}
+              enrolled={enrolled}
+              progress={progress}
+              totalChapters={totalChapters}
+              totalDuration={totalDuration}
+            />
+          </aside>
+        </div>
+      </div>
+    </main>
+  )
 }

@@ -20,8 +20,6 @@ import Header from "@/components/themeProvider/Header/page";
 import { useState } from "react";
 
 export default function HomePage() {
-
-
   return (
     <main className="min-h-screen bg-background text-foreground relative overflow-hidden">
       {/* 
@@ -32,50 +30,59 @@ export default function HomePage() {
       <Header />
 
       {/* 
-        ========================================
-        HERO SECTION
-        ========================================
-        - Full-width hero with gradient background accents
-        - Primary headline with amber accent text
-        - Dual CTA buttons (primary + secondary)
-        - Background glows use low opacity for subtlety
-      */}
-      <section className="pt-32 pb-16 px-4 sm:px-6 lg:px-8 relative">
-        {/* Background accent glows - subtle, low opacity */}
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-br from-primary/30 via-primary/20 to-transparent pointer-events-none blur-xl" />
-        <div className="absolute top-20 right-40 w-[400px] h-[400px] bg-primary/25 rounded-sm pointer-events-none blur-lg" />
+  ========================================
+  HERO SECTION
+  ========================================
+  - Responsive background image (smaller, contained)
+  - Primary headline with amber accent text
+  - Dual CTA buttons (primary + secondary)
+  - ✅ Image sized appropriately for each breakpoint
+*/}
+      <section className="pt-32 pb-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        {/* 🔹 HERO BACKGROUND IMAGE CONTAINER - Add spacing so it's not jammed */}
+        <div className="absolute top-8 sm:top-12 md:top-16 right-4 sm:right-8 md:right-12 w-[400px] h-[400px] sm:w-[500px] sm:h-[500px] md:w-[600px] md:h-[600px] lg:w-[700px] lg:h-[700px] pointer-events-none overflow-hidden">
+          {/* Main Hero Image */}
+          <img
+            src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExY2NkaDQ1cjdsNWN2cTh4dXNvOWV0dmxndWNibXlydHV2Zzk0OWlveCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/gXXFrjHFJIMoqKr8UT/giphy.gif"
+            alt="Abstract obsidian texture with amber light"
+            className="absolute top-0 right-0 w-full h-full object-cover opacity-40 mix-blend-screen"
+          />
+          {/* Amber Overlay for brand cohesion */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[#f97316]/10 via-transparent to-transparent" />
+          {/* Blur for atmospheric depth */}
+          <div className="absolute inset-0 blur-3xl" />
+        </div>
 
+        {/* 🔹 SECONDARY GLOW - Align with new spacing */}
+        <div className="absolute top-24 sm:top-32 md:top-40 right-8 sm:right-16 md:right-24 w-[200px] h-[200px] sm:w-[300px] sm:h-[300px] md:w-[400px] md:h-[400px] bg-[#f97316]/10 rounded-full pointer-events-none blur-2xl" />
+
+        {/* Hero Content - Higher z-index to stay above background */}
         <div className="max-w-7xl mx-auto relative z-10">
           {/* Hero Headline */}
           <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight mb-6 leading-tight">
-            Master the <span className="text-primary text-glow">Future</span>
+            Master the <span className="text-[#f97316] text-glow">Future</span>
             <br />
             of Human Capital.
           </h1>
 
           {/* Hero Subheadline */}
-          <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 sm:mb-10 max-w-2xl">
+          <p className="text-base sm:text-lg md:text-xl text-[#e0c0b1] mb-8 sm:mb-10 max-w-2xl">
             A deep-tech learning environment designed for precision, speed, and
             absolute mastery. Curated by industry titans for the next generation
             of engineers.
           </p>
 
-          {/* 
-            Primary Action Buttons
-            - Primary button: Solid amber with subtle hover shadow
-            - Secondary button: Transparent with border, hover fill
-            - Responsive: Stack on mobile, row on desktop
-          */}
+          {/* Primary Action Buttons */}
           <div className="flex flex-col sm:flex-row items-start gap-4 mb-12 sm:mb-16 w-full sm:w-auto">
             <Link
               href="/auth/signup"
-              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors shadow-[0_2px_10px_rgba(249,115,22,0.15)] hover:shadow-[0_4px_16px_rgba(249,115,22,0.25)]"
+              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-gradient-to-br from-[#ffb690] to-[#f97316] text-[#131313] rounded-lg font-medium hover:opacity-90 transition-all shadow-[0_0_40px_rgba(249,115,22,0.08)]"
             >
               Start Learning
             </Link>
             <Link
               href="#curriculum"
-              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-transparent text-foreground rounded-lg font-medium hover:bg-muted/50 transition-all border border-border"
+              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-transparent text-[#e2e2e2] rounded-lg font-medium hover:bg-[#1b1b1b] transition-all border border-[#584237]/15"
             >
               Explore Curriculum
             </Link>
