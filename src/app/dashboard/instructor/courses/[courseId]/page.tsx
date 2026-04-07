@@ -19,6 +19,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
     redirect("/dashboard/instructor");
   }
   const course = result.data;
+  const instructorID = course?.instructorId;
 
   const isInstructor = session?.user?.id === course?.instructorId;
 
@@ -342,7 +343,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
                     "I"}
                 </div>
                 {/* add instructor name here  */}
-                <InstructorNameBadge instructorId={!!course?.instructorId} />
+                <InstructorNameBadge instructorId={instructorID} />
                 {/* end instructor name here  */}
               </div>
             </div>

@@ -1,9 +1,19 @@
 "use client";
 
+import { CreateCourse } from "@/server/action";
 import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
+
+// ✅ shadcn/ui components
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -12,443 +22,362 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CreateCourse } from "@/server/action";
-// this is a function that you'll be using to create course
-// name CreateCourse
-const CATEGORIES = [
-  "Web Dev",
-  "Data Science",
-  "Design",
-  "Backend",
-  "DevOps",
-  "Mobile",
-];
-const LEVELS = ["Beginner", "Intermediate", "Advanced"];
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+
+// ✅ Icons
+import { Upload, Image, DollarSign, BookOpen, Trophy, Tags, TrendingUp } from "lucide-react";
 
 export function CreateCourseForm() {
+  const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+  
   const [formData, setFormData] = useState({
     title: "",
-    fullDescription: "",
+    description: "",
+    thumbnail: null as File | null,
+    price: "",
     category: "",
-    level: "Beginner",
-    price: "0",
+    level: "BEGINNER",
+    isPublished: false,
   });
 
-  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
-  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const isValid =
-    formData.title.length >= 5 &&
-    formData.fullDescription.length >= 20 &&
-    formData.category !== "";
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!isValid) return;
-    setIsSubmitting(true);
-
-    setTimeout(() => {
-      setIsSubmitting(false);
-      alert("Course created! (Mock)");
-    }, 1500);
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (error) setError(null);
   };
 
-  const updateField = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       if (!file.type.startsWith("image/")) {
-        alert("Please upload an image file (JPG, PNG, WebP)");
+        setError("Please upload a valid image file (JPG, PNG, WebP)");
         return;
       }
       if (file.size > 5 * 1024 * 1024) {
-        alert("File size must be less than 5MB");
+        setError("Image size must be less than 5MB");
         return;
       }
-      setThumbnailFile(file);
-      setThumbnailPreview(URL.createObjectURL(file));
+      setFormData((prev) => ({ ...prev, thumbnail: file }));
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setThumbnailPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      if (error) setError(null);
     }
   };
 
-  const handleRemoveFile = () => {
-    setThumbnailFile(null);
-    setThumbnailPreview(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+  const handleLevelChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, level: value }));
+  };
+
+  const handleCategoryChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, category: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    if (!formData.title.trim()) {
+      setError("Course title is required");
+      return;
+    }
+    if (formData.title.length < 10) {
+      setError("Course title must be at least 10 characters");
+      return;
+    }
+    if (!formData.description.trim()) {
+      setError("Course description is required");
+      return;
+    }
+    if (!formData.category) {
+      setError("Please select a category");
+      return;
+    }
+    if (!formData.thumbnail) {
+      setError("Please upload a course thumbnail");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await CreateCourse(formData);
+      router.push("/dashboard/instructor/courses");
+      router.refresh();
+    } catch (err) {
+      console.error("Create course error:", err);
+      setError("Failed to create course. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Main Details Card */}
-      <div className="glass-card-no-glow rounded-xl border border-border p-6 space-y-6 relative overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-orange-500 to-primary opacity-80" />
-
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center amber-glow">
-            <span className="material-symbols-outlined text-primary text-xl">
-              edit
+    <div className="max-w-4xl mx-auto p-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* 🔹 ERROR BANNER */}
+        {error && (
+          <div className="p-4 rounded-lg border border-destructive/30 bg-destructive/10 flex items-start gap-3">
+            <span className="material-symbols-outlined text-destructive text-lg shrink-0 mt-0.5">
+              error
             </span>
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-foreground">
-              Course Details
-            </h2>
-            <p className="text-xs text-muted-foreground">
-              Fill in the basic information about your course
-            </p>
-          </div>
-        </div>
-
-        {/* Title Field */}
-        <div className="space-y-2">
-          <Label
-            htmlFor="title"
-            className="text-foreground flex items-center gap-1"
-          >
-            Course Title <span className="text-primary font-bold">*</span>
-          </Label>
-          <div className="relative">
-            <Input
-              id="title"
-              placeholder="e.g. Complete React Bootcamp"
-              value={formData.title}
-              onChange={(e) => updateField("title", e.target.value)}
-              className="bg-background border-border focus-visible:ring-2 focus-visible:ring-primary pl-10 transition-all duration-300 group-hover:border-primary/50 h-11"
-              maxLength={100}
-            />
-            <span className="material-symbols-outlined text-primary absolute left-3 top-1/2 -translate-y-1/2 text-base">
-              title
-            </span>
-          </div>
-          <div className="flex justify-between text-xs">
-            <span
-              className={
-                formData.title.length < 5 ?
-                  "text-destructive"
-                : "text-primary/70"
-              }
+            <div className="flex-1">
+              <p className="text-sm font-medium text-destructive">{error}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setError(null)}
+              className="text-destructive/60 hover:text-destructive transition-colors"
             >
-              Min 5 characters
-            </span>
-            <span
-              className={`font-mono ${formData.title.length >= 90 ? "text-destructive" : "text-primary/70"}`}
-            >
-              {formData.title.length}
-              <span className="text-muted-foreground">/100</span>
-            </span>
+              <span className="material-symbols-outlined text-base">close</span>
+            </button>
           </div>
-        </div>
+        )}
 
-        {/* Full Description Field */}
-        <div className="space-y-2">
-          <Label
-            htmlFor="fullDesc"
-            className="text-foreground flex items-center gap-1"
-          >
-            Full Description <span className="text-primary font-bold">*</span>
-          </Label>
-          <div className="relative">
-            <Textarea
-              id="fullDesc"
-              placeholder="Detailed course description for the course page"
-              value={formData.fullDescription}
-              onChange={(e) => updateField("fullDescription", e.target.value)}
-              className="bg-background border-border focus-visible:ring-2 focus-visible:ring-primary pl-10 transition-all duration-300 group-hover:border-primary/50 min-h-[150px]"
-            />
-            <span className="material-symbols-outlined text-primary absolute left-3 top-4 text-base">
-              notes
-            </span>
-          </div>
-          <div className="flex justify-between text-xs">
-            <span
-              className={
-                formData.fullDescription.length < 20 ?
-                  "text-destructive"
-                : "text-primary/70"
-              }
-            >
-              Min 20 characters
-            </span>
-            <span className="font-mono text-primary/70">
-              {formData.fullDescription.length}
-              <span className="text-muted-foreground"> chars</span>
-            </span>
-          </div>
-        </div>
-
-        {/* Thumbnail Upload - Horizontal Layout */}
-        <div className="space-y-3">
-          <Label className="text-foreground flex items-center gap-1">
-            Course Thumbnail <span className="text-primary font-bold">*</span>
-          </Label>
-          <div className="grid grid-cols-2 gap-4 w-full">
-            {/* Preview Box */}
+        {/* 🔹 COURSE THUMBNAIL CARD */}
+        <Card className="border-border/50 bg-card/50">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Image className="w-5 h-5 text-[#f97316]" />
+              Course Thumbnail
+            </CardTitle>
+            <CardDescription>
+              Upload a 16:9 ratio image (recommended: 1280 x 720 px, max 5MB)
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
             <div
-              className={`aspect-video rounded-lg border-2 transition-all duration-300 overflow-hidden flex items-center justify-center ${
-                thumbnailPreview ?
-                  "border-primary amber-glow"
-                : "border-border bg-muted/30"
+              onClick={() => fileInputRef.current?.click()}
+              className={`relative border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all duration-300 ${
+                thumbnailPreview
+                  ? "border-[#f97316]/50 bg-[#f97316]/5"
+                  : "border-border/50 hover:border-[#f97316]/50 hover:bg-muted/50"
               }`}
             >
-              {thumbnailPreview ?
-                <div className="relative w-full h-full group">
-                  <img
-                    src={thumbnailPreview}
-                    alt="Preview"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <button
-                    type="button"
-                    onClick={handleRemoveFile}
-                    className="absolute top-2 right-2 w-8 h-8 rounded-full bg-destructive/90 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:scale-110 hover:bg-destructive"
-                  >
-                    <span className="material-symbols-outlined text-base">
-                      close
-                    </span>
-                  </button>
-                </div>
-              : <div className="text-center p-3 flex flex-col items-center justify-center">
-                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mb-2">
-                    <span className="material-symbols-outlined text-xl text-primary">
-                      image
-                    </span>
-                  </div>
-                  <p className="text-[10px] text-primary font-medium">
-                    16:9 ratio
-                  </p>
-                  <p className="text-[10px] text-muted-foreground">Max 5MB</p>
-                </div>
-              }
-            </div>
-
-            {/* Upload Button Box */}
-            <div className="flex flex-col justify-center items-center space-y-3">
               <input
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
-                onChange={handleFileChange}
+                onChange={handleThumbnailChange}
                 className="hidden"
-                id="thumbnail-upload"
               />
-              <Label
-                htmlFor="thumbnail-upload"
-                className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 cursor-pointer transition-all duration-300 font-medium ${
-                  thumbnailPreview ?
-                    "bg-muted/30 border-border text-muted-foreground hover:border-primary/50 hover:text-primary"
-                  : "bg-primary/10 border-primary/50 text-primary hover:bg-primary/20 amber-glow hover:scale-[1.02]"
-                }`}
-              >
-                <span className="material-symbols-outlined text-xl">
-                  {thumbnailPreview ? "refresh" : "cloud_upload"}
-                </span>
-                <span className="text-sm">
-                  {thumbnailPreview ? "Change" : "Upload"}
-                </span>
-              </Label>
-              <div className="w-full space-y-1 px-2">
-                <p className="text-[10px] text-muted-foreground text-center">
-                  <span className="text-primary">JPG</span> •{" "}
-                  <span className="text-primary">PNG</span> •{" "}
-                  <span className="text-primary">WebP</span>
-                </p>
-                {thumbnailFile && (
-                  <p className="text-[10px] text-primary flex items-center justify-center gap-1 bg-primary/10 px-2 py-1 rounded">
-                    <span className="material-symbols-outlined text-xs">
-                      check_circle
+              
+              {thumbnailPreview ? (
+                <div className="relative">
+                  <img
+                    src={thumbnailPreview}
+                    alt="Thumbnail preview"
+                    className="max-h-48 mx-auto rounded-lg shadow-lg object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                    <span className="text-white text-sm font-medium">
+                      Click to change
                     </span>
-                    <span className="truncate">{thumbnailFile.name}</span>
-                  </p>
-                )}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-16 h-16 rounded-full bg-[#f97316]/10 flex items-center justify-center">
+                    <Upload className="w-8 h-8 text-[#f97316]" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">
+                      Click to upload thumbnail
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      JPG, PNG, WebP • Max 5MB
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 🔹 COURSE DETAILS CARD */}
+        <Card className="border-border/50 bg-card/50">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-[#f97316]" />
+              Course Details
+            </CardTitle>
+            <CardDescription>
+              Basic information about your course
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <div className="grid gap-2">
+              <Label htmlFor="title" className="text-sm">
+                Course Title <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="title"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                placeholder="e.g., Complete Web Development Bootcamp 2025"
+                className="h-11 transition-all duration-300 focus:ring-2 focus:ring-[#f97316]/50 focus:ring-offset-0"
+              />
+              <p className="text-xs text-muted-foreground">
+                {formData.title.length}/100 characters (min 10)
+              </p>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="description" className="text-sm">
+                Description <span className="text-destructive">*</span>
+              </Label>
+              <Textarea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                placeholder="Describe what students will learn in this course..."
+                className="min-h-[140px] transition-all duration-300 focus:ring-2 focus:ring-[#f97316]/50 focus:ring-offset-0 resize-y"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 🔹 COURSE SETTINGS CARD */}
+        <Card className="border-border/50 bg-card/50">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Trophy className="w-5 h-5 text-[#f97316]" />
+              Course Settings
+            </CardTitle>
+            <CardDescription>
+              Configure category, level, and pricing
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {/* 🔹 CATEGORY with Orange Icon */}
+              <div className="grid gap-2">
+                <Label htmlFor="category" className="text-sm flex items-center gap-1.5">
+                  <Tags className="w-3.5 h-3.5 text-[#f97316]" />
+                  Category <span className="text-destructive">*</span>
+                </Label>
+                <Select
+                  value={formData.category}
+                  onValueChange={handleCategoryChange}
+                >
+                  <SelectTrigger className="h-11 transition-all duration-300 focus:ring-2 focus:ring-[#f97316]/50">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Development">Development</SelectItem>
+                    <SelectItem value="Design">Design</SelectItem>
+                    <SelectItem value="Business">Business</SelectItem>
+                    <SelectItem value="Marketing">Marketing</SelectItem>
+                    <SelectItem value="Photography">Photography</SelectItem>
+                    <SelectItem value="Music">Music</SelectItem>
+                    <SelectItem value="Data Science">Data Science</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* 🔹 LEVEL with Orange Icon */}
+              <div className="grid gap-2">
+                <Label htmlFor="level" className="text-sm flex items-center gap-1.5">
+                  <TrendingUp className="w-3.5 h-3.5 text-[#f97316]" />
+                  Level <span className="text-destructive">*</span>
+                </Label>
+                <Select
+                  value={formData.level}
+                  onValueChange={handleLevelChange}
+                >
+                  <SelectTrigger className="h-11 transition-all duration-300 focus:ring-2 focus:ring-[#f97316]/50">
+                    <SelectValue placeholder="Select level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="BEGINNER">Beginner</SelectItem>
+                    <SelectItem value="INTERMEDIATE">Intermediate</SelectItem>
+                    <SelectItem value="ADVANCED">Advanced</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* 🔹 PRICE with Orange Icon */}
+              <div className="grid gap-2">
+                <Label htmlFor="price" className="text-sm flex items-center gap-1.5">
+                  <DollarSign className="w-3.5 h-3.5 text-[#f97316]" />
+                  Price (USD)
+                </Label>
+                <div className="relative">
+                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#f97316]" />
+                  <Input
+                    id="price"
+                    name="price"
+                    type="number"
+                    value={formData.price}
+                    onChange={handleChange}
+                    placeholder="0.00"
+                    min="0"
+                    step="0.01"
+                    className="h-11 pl-9 transition-all duration-300 focus:ring-2 focus:ring-[#f97316]/50 focus:ring-offset-0"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Enter 0 for free courses
+                </p>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Settings Card */}
-      <div className="glass-card-no-glow rounded-xl border border-border p-6 space-y-6 relative overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-orange-500 to-primary opacity-80" />
-
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center amber-glow">
-            <span className="material-symbols-outlined text-primary text-xl">
-              settings
-            </span>
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-foreground">
-              Course Settings
-            </h2>
-            <p className="text-xs text-muted-foreground">
-              Configure category, level, and pricing
-            </p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Category */}
-          <div className="space-y-2">
-            <Label
-              htmlFor="category"
-              className="text-foreground flex items-center gap-1"
-            >
-              Category <span className="text-primary font-bold">*</span>
-            </Label>
-            <Select
-              value={formData.category}
-              onValueChange={(v) => updateField("category", v)}
-            >
-              <SelectTrigger className="bg-background border-border focus:ring-2 focus:ring-primary transition-all duration-300 hover:border-primary/50 h-11">
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary text-base">
-                    category
-                  </span>
-                  <SelectValue placeholder="Select category" />
-                </div>
-              </SelectTrigger>
-              <SelectContent className="bg-background border-border">
-                {CATEGORIES.map((cat) => (
-                  <SelectItem
-                    key={cat}
-                    value={cat}
-                    className="text-foreground focus:bg-primary/10 focus:text-primary cursor-pointer hover:bg-primary/5"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-primary" />
-                      {cat}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Level */}
-          <div className="space-y-2">
-            <Label
-              htmlFor="level"
-              className="text-foreground flex items-center gap-1"
-            >
-              Level <span className="text-primary font-bold">*</span>
-            </Label>
-            <Select
-              value={formData.level}
-              onValueChange={(v) => updateField("level", v)}
-            >
-              <SelectTrigger className="bg-background border-border focus:ring-2 focus:ring-primary transition-all duration-300 hover:border-primary/50 h-11">
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary text-base">
-                    school
-                  </span>
-                  <SelectValue placeholder="Select level" />
-                </div>
-              </SelectTrigger>
-              <SelectContent className="bg-background border-border">
-                {LEVELS.map((level) => (
-                  <SelectItem
-                    key={level}
-                    value={level}
-                    className="text-foreground focus:bg-primary/10 focus:text-primary cursor-pointer hover:bg-primary/5"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`w-2 h-2 rounded-full ${
-                          level === "Beginner" ? "bg-green-500"
-                          : level === "Intermediate" ? "bg-primary"
-                          : "bg-red-500"
-                        }`}
-                      />
-                      {level}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Price */}
-          <div className="space-y-2">
-            <Label
-              htmlFor="price"
-              className="text-foreground flex items-center gap-1"
-            >
-              Price (Rs.)
-            </Label>
-            <div className="relative">
-              <Input
-                id="price"
-                type="number"
-                min="0"
-                value={formData.price}
-                onChange={(e) => updateField("price", e.target.value)}
-                className="bg-background border-border focus-visible:ring-2 focus-visible:ring-primary pl-10 transition-all duration-300 group-hover:border-primary/50 h-11"
+            <div className="flex items-center justify-between pt-4 mt-4 border-t border-border/50">
+              <div className="space-y-0.5">
+                <Label htmlFor="isPublished" className="text-sm font-medium">
+                  Publish Course
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Make this course visible to students immediately
+                </p>
+              </div>
+              <Switch
+                id="isPublished"
+                checked={formData.isPublished}
+                onCheckedChange={(checked) =>
+                  setFormData((prev) => ({ ...prev, isPublished: checked }))
+                }
+                className="data-[state=checked]:bg-[#f97316]"
               />
-              <span className="material-symbols-outlined text-primary absolute left-3 top-1/2 -translate-y-1/2 text-base">
-                attach_money
-              </span>
             </div>
-            <p className="text-xs flex items-center gap-1">
-              <span className="material-symbols-outlined text-base text-primary">
-                info
-              </span>
-              <span className="text-muted-foreground">
-                Enter <span className="text-primary font-medium">0</span> for
-                free courses
-              </span>
-            </p>
-          </div>
-        </div>
-      </div>
+          </CardContent>
+        </Card>
 
-      {/* Submit Button */}
-      <div className="flex flex-col md:flex-row items-start md:items-center gap-4 pt-4 pb-8">
+        {/* 🔹 SUBMIT BUTTON */}
         <Button
           type="submit"
-          disabled={!isValid || isSubmitting}
-          className={`h-14 px-10 font-bold text-base transition-all duration-300 rounded-xl ${
-            isValid && !isSubmitting ?
-              "bg-primary text-primary-foreground hover:opacity-90 amber-glow hover:scale-[1.02]"
-            : "bg-muted text-muted-foreground cursor-not-allowed opacity-50"
-          }`}
+          disabled={loading}
+          className="w-full h-12 text-base font-medium transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100 gap-2 shadow-lg shadow-[#f97316]/20"
+          style={{ backgroundColor: "#f97316", color: "white" }}
         >
-          {isSubmitting ?
-            <span className="flex items-center gap-2">
-              <span className="material-symbols-outlined animate-spin text-primary">
-                progress_activity
-              </span>
-              Creating...
-            </span>
-          : <span className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-lg">
-                add_circle
-              </span>
-              Create Course
-            </span>
-          }
+          {loading ? (
+            <>
+              <span className="h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              <span>Creating Course...</span>
+            </>
+          ) : (
+            <>
+              <Upload className="w-5 h-5" />
+              <span>Create Course</span>
+            </>
+          )}
         </Button>
-
-        <div className="flex items-center gap-2 text-xs">
-          <span className="w-3 h-3 rounded-full bg-primary amber-glow" />
-          <p className="text-muted-foreground">
-            <span className="text-primary font-bold">*</span> Required fields
-          </p>
-        </div>
-
-        {isValid && (
-          <div className="ml-auto flex items-center gap-2 text-xs text-primary bg-primary/10 px-3 py-1.5 rounded-full border border-primary/20">
-            <span className="material-symbols-outlined text-base">
-              check_circle
-            </span>
-            Form ready to submit
-          </div>
-        )}
-      </div>
-    </form>
+      </form>
+    </div>
   );
 }

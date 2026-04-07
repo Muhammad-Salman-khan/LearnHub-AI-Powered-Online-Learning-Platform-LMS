@@ -1,5 +1,4 @@
 "use server";
-import { authOptions } from "@/app/api/auth/[...nextauth]/option";
 import { prisma } from "@/lib/prisma";
 import {
   ChapterInput,
@@ -7,27 +6,25 @@ import {
   CourseInput,
   courseSchema,
 } from "@/lib/validations";
+import { roleChecker } from "@/services/authCheckers";
 import { UploadCourseThumbnail } from "@/services/UploadFile";
-import { getServerSession } from "next-auth";
+import { getSearchedCoursesParams } from "@/types/types";
 import { revalidatePath } from "next/cache";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 type ActionResponse =
   | { success: true; message: string }
-  | { success: false; error: any };
+  | { success: false; error: string };
 // create Course For students (Start!)
 export const CreateCourse = async (
   data: CourseInput,
 ): Promise<ActionResponse> => {
+  const user = await roleChecker("INSTRUCTOR");
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session) redirect("/login");
-    if (session.user.role !== "INSTRUCTOR") redirect("/dashboard/student/");
     const valid = courseSchema.safeParse(data);
     if (!valid.success) {
       return {
         success: false,
-        error: valid.error?.cause || `something not working`,
+        error: `something went wrong`,
       };
     }
     const {
@@ -41,6 +38,7 @@ export const CreateCourse = async (
     } = valid.data;
 
     const Thumb = thumbnail ? await UploadCourseThumbnail(thumbnail) : null;
+
     await prisma.course.create({
       data: {
         title,
@@ -50,13 +48,13 @@ export const CreateCourse = async (
         category,
         level,
         isPublished,
-        instructorId: session.user.id,
+        instructorId: user.id,
       },
     });
     revalidatePath("/courses");
     return {
       success: true,
-      message: "Course Created Succssfully",
+      message: "Course Created Successfully",
     };
   } catch (error) {
     console.error(`got error`, error);
@@ -67,14 +65,17 @@ export const CreateCourse = async (
 
 // Get Course By id (Start!)
 export const getCourseById = async (id: string) => {
+  if (!id) return notFound();
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session) redirect("/login");
-
-    if (!id) return notFound();
     const FindPost = await prisma.course.findUnique({
       where: { id: id },
+      include: {
+        instructor: { select: { name: true, image: true, bio: true } },
+        chapters: {
+          where: { isPublished: true },
+          orderBy: { position: "asc" },
+        },
+      },
     });
     if (!FindPost) return { success: false, error: "404 Course not found" };
     return { success: true, data: FindPost };
@@ -87,14 +88,11 @@ export const getCourseById = async (id: string) => {
 
 // delete course by id
 export const deleteCourseById = async (id: string) => {
+  const user = await roleChecker("INSTRUCTOR");
+  if (!id) return notFound();
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!id) return notFound();
-    if (!session) redirect("/login");
-    if (session.user.role !== "INSTRUCTOR") redirect("/dashboard/student/");
     const FindPost = await prisma.course.deleteMany({
-      where: { id: id, instructorId: session?.user.id },
+      where: { id: id, instructorId: user.id },
     });
     if (FindPost.count === 0) {
       return { success: false, error: "404 Course not found" };
@@ -102,7 +100,7 @@ export const deleteCourseById = async (id: string) => {
     revalidatePath("/courses/");
     return {
       success: true,
-      message: `Course Deleted Succssfully`,
+      message: `Course Deleted Successfully`,
     };
   } catch (error: any) {
     console.error(error);
@@ -112,26 +110,21 @@ export const deleteCourseById = async (id: string) => {
 
 // update Course By id' (start!)
 export const courseUpdateFields = async (id: string, data: CourseInput) => {
+  const user = await roleChecker("INSTRUCTOR");
+
+  if (!id) return notFound();
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) redirect("/login");
-    if (session.user.role !== "INSTRUCTOR") {
-      redirect("/dashboard/student/");
-    }
-    if (!id) return notFound();
-
     const valid = courseSchema.safeParse(data);
     if (!valid.success) {
       return {
         success: false,
-        error: valid.error?.cause || `something not working`,
+        error: `something went wrong`,
       };
     }
     const { title, description, price, isPublished, category, level } =
       valid.data;
     const FindPost = await prisma.course.updateMany({
-      where: { id: id, instructorId: session?.user.id },
+      where: { id: id, instructorId: user.id },
       data: {
         title,
         description,
@@ -146,7 +139,7 @@ export const courseUpdateFields = async (id: string, data: CourseInput) => {
     revalidatePath("/courses/");
     return {
       success: true,
-      message: "course updated Succssfully!",
+      message: "course updated Successfully!",
     };
   } catch (error: any) {
     console.error(error);
@@ -161,7 +154,7 @@ export const getInstructorId = async (Id: string) => {
     if (!Id) {
       return {
         success: false,
-        error: `No Id found `,
+        error: `No Id found`,
       };
     }
     const InstructorId = await prisma.user.findUnique({
@@ -187,7 +180,9 @@ export const getInstructorId = async (Id: string) => {
 // GetAllUsers (start!)
 export const getAllUsers = async () => {
   try {
-    const allTheUsers = await prisma.user.findMany();
+    const allTheUsers = await prisma.user.findMany({
+      orderBy: { createdAt: "desc" },
+    });
     if (allTheUsers.length === 0) {
       return {
         success: false,
@@ -211,7 +206,27 @@ export const getAllCourses = async () => {
     const allCourse = await prisma.course.findMany({
       where: { isPublished: true },
       orderBy: { createdAt: "desc" },
-      take: 20,
+    });
+    if (allCourse.length === 0) {
+      return {
+        success: false,
+        error: `No Course's found`,
+      };
+    }
+    return {
+      success: true,
+      data: allCourse,
+    };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "Something went wrong" };
+  }
+};
+export const getAllCoursesForAdminDashboard = async () => {
+  const admin = await roleChecker("ADMIN");
+  try {
+    const allCourse = await prisma.course.findMany({
+      orderBy: { createdAt: "desc" },
     });
     if (allCourse.length === 0) {
       return {
@@ -232,14 +247,10 @@ export const getAllCourses = async () => {
 
 //  get Course By Instructor
 export const getCourseByInstructor = async () => {
+  const user = await roleChecker("INSTRUCTOR");
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session) redirect("/login");
-    if (session.user.role !== "INSTRUCTOR") redirect("/dashboard/student/");
-
     const InstructorCourses = await prisma.course.findMany({
-      where: { instructorId: session.user.id },
+      where: { instructorId: user.id },
     });
 
     if (InstructorCourses.length === 0)
@@ -258,10 +269,8 @@ export const getCourseByInstructor = async () => {
 
 // Find userByName (start!)
 export const findUserByName = async (name: string) => {
+  const user = await roleChecker("STUDENT");
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session) redirect("/login");
     const searchedUser = await prisma.user.findMany({
       where: { name: name },
     });
@@ -282,11 +291,8 @@ export const findUserByName = async (name: string) => {
 };
 // all Instructor's
 export const getAllInstructors = async () => {
+  const admin = await roleChecker("ADMIN");
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session) redirect("/login");
-    if (session.user.role !== "ADMIN") redirect(`/dashboard/student`);
     const AllInstructors = await prisma.user.findMany({
       where: { role: "INSTRUCTOR" },
     });
@@ -309,13 +315,10 @@ export const getAllInstructors = async () => {
 
 // create Chapter  inside Course (Start!)
 export const CreateChapters = async (CourseId: string, data: ChapterInput) => {
+  const user = await roleChecker("INSTRUCTOR");
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session) redirect("/login");
-    if (session.user.role !== "INSTRUCTOR") redirect(`/dashboard/student`);
     const valid = chapterSchema.safeParse(data);
-    if (valid.error) {
+    if (!valid?.success) {
       return {
         success: false,
         error: "validation error",
@@ -331,7 +334,7 @@ export const CreateChapters = async (CourseId: string, data: ChapterInput) => {
       content,
     } = valid.data;
     const checkInstructorId = await prisma.course.findFirst({
-      where: { id: CourseId, instructorId: session.user.id },
+      where: { id: CourseId, instructorId: user.id },
       select: { id: true },
     });
     if (!checkInstructorId) return { success: false, message: "access denied" };
@@ -353,6 +356,7 @@ export const CreateChapters = async (CourseId: string, data: ChapterInput) => {
         error: `Failed to create chapter`,
       };
     }
+    revalidatePath("/courses/");
     return {
       success: true,
       data: createdData,
@@ -363,3 +367,69 @@ export const CreateChapters = async (CourseId: string, data: ChapterInput) => {
   }
 };
 // create Chapter  inside Course (end!)
+
+// update from student to Instructor (admin function!!) (start!)
+export const roleChangerAdminLevel = async (
+  userId: string,
+  role: "INSTRUCTOR" | "STUDENT" | "ADMIN",
+) => {
+  const admin = await roleChecker("ADMIN");
+  try {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      return { success: false, error: "User doesn't exists" };
+    }
+    if (user.role === role) {
+      return { success: false, error: `User already has ${role}` };
+    }
+    const changedRole = await prisma.user.update({
+      where: { id: userId },
+      data: { role },
+    });
+    revalidatePath("/dashboard/admin/users");
+    return {
+      success: true,
+      message: `user role updated Succssfully`,
+      data: changedRole,
+    };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "Something went wrong" };
+  }
+};
+// update from student to Instructor (admin function!!) (start!)
+
+// find course by title or description (start!)
+export const getSearchedCourses = async (
+  search: string,
+  category: string,
+  level: string,
+  price: string,
+) => {
+  try {
+    const where: any = {
+      isPublished: true,
+    };
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
+      ];
+    }
+    if (category) where.category = category;
+    if (level) where.level = level;
+
+    if (price === "free") where.price = 0;
+    if (price === "paid") where.price = { gt: 0 };
+
+    return await prisma.course.findMany({
+      where,
+      include: { instructor: { select: { name: true } } },
+      orderBy: { createdAt: "desc" },
+    });
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "Something went wrong" };
+  }
+};
+// find course by title or description (end!)
