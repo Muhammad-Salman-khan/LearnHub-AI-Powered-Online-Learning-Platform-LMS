@@ -186,7 +186,9 @@ export const getInstructorId = async (Id: string) => {
 // GetAllUsers (start!)
 export const getAllUsers = async () => {
   try {
-    const allTheUsers = await prisma.user.findMany();
+    const allTheUsers = await prisma.user.findMany({
+      orderBy: { createdAt: "desc" },
+    });
     if (allTheUsers.length === 0) {
       return {
         success: false,
@@ -210,7 +212,26 @@ export const getAllCourses = async () => {
     const allCourse = await prisma.course.findMany({
       where: { isPublished: true },
       orderBy: { createdAt: "desc" },
-      take: 20,
+    });
+    if (allCourse.length === 0) {
+      return {
+        success: false,
+        error: `No Course's found`,
+      };
+    }
+    return {
+      success: true,
+      data: allCourse,
+    };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "Something went wrong" };
+  }
+};
+export const getAllCoursesForAdminDashboard = async () => {
+  try {
+    const allCourse = await prisma.course.findMany({
+      orderBy: { createdAt: "desc" },
     });
     if (allCourse.length === 0) {
       return {
