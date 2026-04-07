@@ -15,10 +15,10 @@ import { getAllCourses, getAllUsers } from "@/server/action";
 export default async function AdminOverviewPage() {
   // 1. Auth & Role Check
 
-  const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== "ADMIN") {
-    redirect("/login");
-  }
+  // const session = await getServerSession(authOptions);
+  // if (!session || session.user.role !== "ADMIN") {
+  //   redirect("/login");
+  // }
 
   // 2. Data Fetching
   const [coursesRes, usersRes] = await Promise.all([

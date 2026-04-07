@@ -8,6 +8,7 @@ import {
 } from "@/lib/validations";
 import { roleChecker } from "@/services/authCheckers";
 import { UploadCourseThumbnail } from "@/services/UploadFile";
+import { getSearchedCoursesParams } from "@/types/types";
 import { revalidatePath } from "next/cache";
 import { notFound } from "next/navigation";
 type ActionResponse =
@@ -68,6 +69,13 @@ export const getCourseById = async (id: string) => {
   try {
     const FindPost = await prisma.course.findUnique({
       where: { id: id },
+      include: {
+        instructor: { select: { name: true, image: true, bio: true } },
+        chapters: {
+          where: { isPublished: true },
+          orderBy: { position: "asc" },
+        },
+      },
     });
     if (!FindPost) return { success: false, error: "404 Course not found" };
     return { success: true, data: FindPost };
@@ -392,22 +400,33 @@ export const roleChangerAdminLevel = async (
 // update from student to Instructor (admin function!!) (start!)
 
 // find course by title or description (start!)
-export const getSearchedCourses = async (query: string) => {
+export const getSearchedCourses = async (
+  search: string,
+  category: string,
+  level: string,
+  price: string,
+) => {
   try {
-    if (!query) return { success: false, error: "No search query provided" };
-    const courses = await prisma.course.findMany({
-      where: {
-        isPublished: true,
-        OR: [
-          { title: { contains: query, mode: "insensitive" } },
-          { description: { contains: query, mode: "insensitive" } },
-        ],
-      },
-    });
-    if (courses.length === 0) {
-      return { success: false, error: "course not found" };
+    const where: any = {
+      isPublished: true,
+    };
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
+      ];
     }
-    return { success: true, data: courses };
+    if (category) where.category = category;
+    if (level) where.level = level;
+
+    if (price === "free") where.price = 0;
+    if (price === "paid") where.price = { gt: 0 };
+
+    return await prisma.course.findMany({
+      where,
+      include: { instructor: { select: { name: true } } },
+      orderBy: { createdAt: "desc" },
+    });
   } catch (error) {
     console.error(error);
     return { success: false, error: "Something went wrong" };
