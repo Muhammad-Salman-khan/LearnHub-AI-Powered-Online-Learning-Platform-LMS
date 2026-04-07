@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
  * - Animated loading ring with gradient
  * - Pulsing status indicators
  * - Encrypted core status badge
+ * - ✅ Fully responsive design
  */
 
 export default function LoadingScreen() {
@@ -26,7 +27,6 @@ export default function LoadingScreen() {
   ];
 
   useEffect(() => {
-    // Simulate loading progress
     const progressInterval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) return 0;
@@ -34,12 +34,10 @@ export default function LoadingScreen() {
       });
     }, 50);
 
-    // Rotate loading texts
     const textInterval = setInterval(() => {
       setLoadingText((prev) => (prev + 1) % loadingTexts.length);
     }, 2500);
 
-    // Animate dots
     const dotsInterval = setInterval(() => {
       setDots((prev) => {
         if (prev.length >= 3) return "";
@@ -58,35 +56,35 @@ export default function LoadingScreen() {
     <>
       {/* Background - Obsidian Base */}
       <div className="fixed inset-0 bg-[#131313] overflow-hidden">
-        {/* Subtle Ambient Glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#F97316]/5 rounded-full blur-[120px] pointer-events-none" />
+        {/* Subtle Ambient Glow - Responsive Size */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] sm:w-[600px] sm:h-[600px] bg-[#F97316]/5 rounded-full blur-[80px] sm:blur-[120px] pointer-events-none" />
 
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#131313] via-[#131313] to-[#0e0e0e]" />
       </div>
 
       {/* Main Container */}
-      <main className="relative min-h-screen flex flex-col items-center justify-center px-6">
-        {/* LEARNHUB Logo */}
-        <header className="absolute top-12 sm:top-16 transition-all duration-700">
-          <div className="flex flex-col items-center gap-3">
+      <main className="relative min-h-screen flex flex-col items-center justify-center px-4 sm:px-6">
+        {/* LEARNHUB Logo - Responsive */}
+        <header className="absolute top-8 sm:top-12 left-0 right-0 transition-all duration-700">
+          <div className="flex flex-col items-center gap-2 sm:gap-3">
             <h1
-              className="text-3xl sm:text-4xl font-bold text-[#e2e2e2] tracking-tight"
+              className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#e2e2e2] tracking-tight text-center px-4"
               style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
             >
               LEARNHUB
             </h1>
-            {/* Animated Underline */}
-            <div className="w-12 h-0.5 bg-gradient-to-r from-transparent via-[#F97316] to-transparent animate-pulse" />
+            {/* Animated Underline - Responsive Width */}
+            <div className="w-8 h-0.5 sm:w-12 sm:h-0.5 bg-gradient-to-r from-transparent via-[#F97316] to-transparent animate-pulse" />
           </div>
         </header>
 
         {/* Loading Content */}
-        <div className="flex flex-col items-center gap-8 sm:gap-12 max-w-md mx-auto">
-          {/* Animated Loading Ring */}
-          <div className="relative w-32 h-32 sm:w-40 sm:h-40">
+        <div className="flex flex-col items-center gap-6 sm:gap-8 md:gap-12 max-w-xs sm:max-w-md mx-auto w-full px-2">
+          {/* Animated Loading Ring - Responsive Size */}
+          <div className="relative w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40">
             {/* Outer Glow Ring */}
-            <div className="absolute inset-0 rounded-full border-2 border-[#F97316]/10 blur-sm" />
+            <div className="absolute inset-0 rounded-full border border-[#F97316]/10 sm:border-2 blur-[2px] sm:blur-sm" />
 
             {/* Main Ring Container */}
             <div className="relative w-full h-full">
@@ -98,7 +96,7 @@ export default function LoadingScreen() {
                   r="45%"
                   fill="none"
                   stroke="#1a1a1a"
-                  strokeWidth="3"
+                  strokeWidth="2.5"
                 />
                 {/* Progress Ring with Gradient */}
                 <circle
@@ -107,12 +105,12 @@ export default function LoadingScreen() {
                   r="45%"
                   fill="none"
                   stroke="url(#gradient)"
-                  strokeWidth="3"
+                  strokeWidth="2.5"
                   strokeLinecap="round"
                   strokeDasharray={`${283 * (progress / 100)} 283`}
                   className="transition-all duration-100 ease-linear"
                   style={{
-                    filter: "drop-shadow(0 0 8px rgba(249, 115, 22, 0.5))",
+                    filter: "drop-shadow(0 0 6px rgba(249, 115, 22, 0.5))",
                   }}
                 />
                 <defs>
@@ -129,43 +127,43 @@ export default function LoadingScreen() {
                 </defs>
               </svg>
 
-              {/* Center Glow Effect */}
+              {/* Center Glow Effect - Responsive */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <div
-                  className="w-2 h-2 rounded-full bg-[#F97316]/60 animate-pulse"
-                  style={{ boxShadow: "0 0 20px rgba(249, 115, 22, 0.8)" }}
+                  className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#F97316]/60 animate-pulse"
+                  style={{ boxShadow: "0 0 12px sm:0 0 20px rgba(249, 115, 22, 0.8)" }}
                 />
               </div>
             </div>
           </div>
 
-          {/* Loading Text */}
-          <div className="text-center space-y-3">
-            {/* Primary Status - Animated */}
+          {/* Loading Text - Responsive */}
+          <div className="text-center space-y-2 sm:space-y-3 w-full px-2">
+            {/* Primary Status - Animated - Responsive Font */}
             <h2
-              className="text-base sm:text-lg font-semibold text-[#F97316] uppercase tracking-[0.2em] transition-all duration-500"
+              className="text-xs sm:text-sm md:text-base font-semibold text-[#F97316] uppercase tracking-[0.15em] sm:tracking-[0.2em] transition-all duration-500 break-words"
               style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
             >
               {loadingTexts[loadingText]}
             </h2>
 
-            {/* Animated Dots */}
-            <div className="flex items-center justify-center gap-1.5">
+            {/* Animated Dots - Responsive Size */}
+            <div className="flex items-center justify-center gap-1 sm:gap-1.5">
               {[0, 1, 2].map((i) => (
                 <span
                   key={i}
-                  className="w-1.5 h-1.5 rounded-full bg-[#F97316] animate-pulse"
+                  className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-[#F97316] animate-pulse"
                   style={{
                     animationDelay: `${i * 150}ms`,
-                    boxShadow: "0 0 8px rgba(249, 115, 22, 0.6)",
+                    boxShadow: "0 0 6px sm:0 0 8px rgba(249, 115, 22, 0.6)",
                   }}
                 />
               ))}
             </div>
 
-            {/* Secondary Status */}
+            {/* Secondary Status - Responsive Font */}
             <p
-              className="text-sm text-[#8a8a8a] uppercase tracking-[0.15em] transition-all duration-500"
+              className="text-[10px] sm:text-xs text-[#8a8a8a] uppercase tracking-[0.12em] sm:tracking-[0.15em] transition-all duration-500 break-words"
               style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
             >
               {loadingText === 0 && "OPTIMIZING COGNITION MATRICES"}
@@ -175,22 +173,22 @@ export default function LoadingScreen() {
             </p>
           </div>
 
-          {/* Progress Bar (Optional Visual) */}
-          <div className="w-full max-w-xs">
-            <div className="h-px bg-gradient-to-r from-transparent via-[#584237]/30 to-transparent mb-4" />
-            <div className="flex justify-between text-xs text-[#5a5a5a] uppercase tracking-wider">
-              <span>Initializing</span>
-              <span className="text-[#F97316]">{progress}%</span>
+          {/* Progress Bar - Responsive */}
+          <div className="w-full max-w-[200px] sm:max-w-xs">
+            <div className="h-px bg-gradient-to-r from-transparent via-[#584237]/30 to-transparent mb-3 sm:mb-4" />
+            <div className="flex justify-between text-[10px] sm:text-xs text-[#5a5a5a] uppercase tracking-wider">
+              <span className="truncate">Initializing</span>
+              <span className="text-[#F97316] font-medium">{progress}%</span>
             </div>
           </div>
         </div>
 
-        {/* Footer - Security Status */}
-        <footer className="absolute bottom-8 sm:bottom-12 w-full text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#0e0e0e]/60 backdrop-blur-sm border border-[#584237]/15">
-            {/* Lock Icon */}
+        {/* Footer - Security Status - Responsive */}
+        <footer className="absolute bottom-6 sm:bottom-8 md:bottom-12 w-full text-center px-4">
+          <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-[#0e0e0e]/60 backdrop-blur-sm border border-[#584237]/15">
+            {/* Lock Icon - Responsive */}
             <svg
-              className="w-3.5 h-3.5 text-[#F97316]/60"
+              className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#F97316]/60"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -203,16 +201,16 @@ export default function LoadingScreen() {
               />
             </svg>
             <span
-              className="text-xs uppercase tracking-[0.2em] text-[#8a8a8a]"
+              className="text-[10px] sm:text-xs uppercase tracking-[0.15em] sm:tracking-[0.2em] text-[#8a8a8a] break-words"
               style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
             >
               Encrypted Core Active
             </span>
           </div>
 
-          {/* Copyright */}
+          {/* Copyright - Responsive */}
           <p
-            className="mt-4 text-xs text-[#5a5a5a] uppercase tracking-wider"
+            className="mt-3 sm:mt-4 text-[10px] sm:text-xs text-[#5a5a5a] uppercase tracking-wider"
             style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
           >
             © 2024 LEARNHUB ARCHIVE
@@ -220,12 +218,12 @@ export default function LoadingScreen() {
         </footer>
       </main>
 
-      {/* Ambient Particles */}
+      {/* Ambient Particles - Responsive */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         {[...Array(5)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-[300px] h-[300px] bg-[#F97316]/[0.02] rounded-full blur-[60px]"
+            className="absolute w-[200px] h-[200px] sm:w-[300px] sm:h-[300px] bg-[#F97316]/[0.02] rounded-full blur-[40px] sm:blur-[60px]"
             style={{
               top: `${10 + i * 20}%`,
               left: `${5 + i * 15}%`,
@@ -235,6 +233,18 @@ export default function LoadingScreen() {
           />
         ))}
       </div>
+
+      {/* ✅ Add float animation keyframes */}
+      <style jsx global>{`
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(0) translateX(0);
+          }
+          50% {
+            transform: translateY(-20px) translateX(10px);
+          }
+        }
+      `}</style>
     </>
   );
 }
