@@ -24,20 +24,6 @@ import GoogleIcon from "@/components/ui/GoogleIcon";
 
 /**
  * LoginPage - User Authentication
- *
- * Features:
- * - NextAuth.js credentials + Google OAuth sign-in
- * - Loading states with disabled buttons
- * - Inline error popup (no browser alerts)
- * - Blurred animated background
- * - Responsive design with shadcn/ui components
- * - Password visibility toggle
- * - Hydration-safe animations
- *
- * Error Handling:
- * - Errors display in a dismissible banner at top of form
- * - Auto-dismiss after 5 seconds (optional)
- * - Clear error when user starts typing
  */
 export default function LoginPage() {
   // 🔹 Auth state
@@ -52,12 +38,12 @@ export default function LoginPage() {
 
   const router = useRouter();
 
-  // ✅ Prevent hydration mismatch: only animate after client mount
+  // ✅ Prevent hydration mismatch
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // 🔹 Auto-dismiss error after 5 seconds (optional UX improvement)
+  // 🔹 Auto-dismiss error after 5 seconds
   useEffect(() => {
     if (error) {
       const timer = setTimeout(() => setError(null), 5000);
@@ -68,7 +54,7 @@ export default function LoginPage() {
   // 🔹 Handle credentials login
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setError(null); // Clear previous errors
+    setError(null);
     setLoading(true);
 
     try {
@@ -82,12 +68,10 @@ export default function LoginPage() {
         router.push("/dashboard/student/");
         router.refresh();
       } else {
-        // ✅ Show inline error instead of alert
         setError(res?.error || "Invalid Credentials");
       }
     } catch (error) {
       console.error("Login error:", error);
-      // ✅ Show inline error instead of alert
       setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
@@ -100,48 +84,38 @@ export default function LoginPage() {
       await signIn("google", { callbackUrl: "/dashboard/student" });
     } catch (error) {
       console.error("Google sign-in error:", error);
-      // ✅ Show inline error instead of alert
       setError("Google sign-in failed. Please try again.");
     }
   };
 
   return (
     <>
-      {/* 🔹 BLURRED BACKGROUND OVERLAY - Fades in on mount */}
+      {/* 🔹 BLURRED BACKGROUND OVERLAY */}
       <div
         className={`fixed inset-0 -z-10 bg-background/80 backdrop-blur-sm transition-opacity duration-500 ${
           isMounted ? "opacity-100" : "opacity-0"
         }`}
       />
 
-      {/* 🔹 MAIN CONTAINER - Centers the card */}
+      {/* 🔹 MAIN CONTAINER */}
       <div className="flex min-h-screen items-center justify-center p-4">
-        {/* 🔹 LOGIN CARD - Slides up on mount */}
+        {/* 🔹 LOGIN CARD */}
         <Card
           className={`w-full max-w-sm sm:max-w-md shadow-lg border-0 sm:border transition-all duration-500 ${
             isMounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
-          <CardHeader className="space-y-1 pb-4">
+          <CardHeader className="space-y-1 pb-2">
             <CardTitle className="text-xl sm:text-2xl text-center">
               Welcome Back
             </CardTitle>
             <CardDescription className="text-sm text-center">
               Enter your credentials to login to your account
             </CardDescription>
-            <CardAction>
-              <Button
-                variant="link"
-                className="px-0 text-sm sm:text-base"
-                asChild
-              >
-                <a href="/signup">Don't have an account? Sign Up</a>
-              </Button>
-            </CardAction>
           </CardHeader>
 
           <CardContent>
-            {/* ✅ INLINE ERROR POPUP - Dismissible banner */}
+            {/* ✅ INLINE ERROR POPUP */}
             {error && (
               <div className="mb-4 p-3 rounded-lg border border-destructive/30 bg-destructive/10 flex items-start gap-3 animate-fade-in">
                 <span className="material-symbols-outlined text-destructive text-lg shrink-0 mt-0.5">
@@ -169,7 +143,21 @@ export default function LoginPage() {
             )}
 
             <form onSubmit={handleLogin} id="login-form">
-              <div className="flex flex-col gap-4 sm:gap-6">
+              <div className="flex flex-col gap-4 sm:gap-5">
+                
+                {/* 🔹 SIGN UP LINK - ✅ Moved UP (more negative margin) */}
+                <div className="text-center -mt-2 mb-0">
+                  <Button
+                    variant="link"
+                    className="px-0 text-sm sm:text-base h-auto py-0"
+                    asChild
+                  >
+                    <a href="/signup">
+                      Don't have an account? <span className="text-[#f97316] font-medium">Sign Up</span>
+                    </a>
+                  </Button>
+                </div>
+
                 {/* 📧 EMAIL FIELD */}
                 <div className="grid gap-2">
                   <Label htmlFor="email" className="text-sm">
@@ -183,7 +171,7 @@ export default function LoginPage() {
                     value={email}
                     onChange={(e) => {
                       setEmail(e.target.value);
-                      if (error) setError(null); // Clear error on input
+                      if (error) setError(null);
                     }}
                     required
                     disabled={loading}
@@ -192,7 +180,7 @@ export default function LoginPage() {
                   />
                 </div>
 
-                {/* 🔒 PASSWORD FIELD with visibility toggle */}
+                {/* 🔒 PASSWORD FIELD */}
                 <div className="grid gap-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="password" className="text-sm">
@@ -203,9 +191,7 @@ export default function LoginPage() {
                       onClick={() => setShowPassword(!showPassword)}
                       className="text-xs text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
                       disabled={loading}
-                      aria-label={
-                        showPassword ? "Hide password" : "Show password"
-                      }
+                      aria-label={showPassword ? "Hide password" : "Show password"}
                     >
                       {showPassword ? "Hide" : "Show"}
                     </button>
@@ -217,7 +203,7 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => {
                       setPassword(e.target.value);
-                      if (error) setError(null); // Clear error on input
+                      if (error) setError(null);
                     }}
                     required
                     disabled={loading}
@@ -226,6 +212,7 @@ export default function LoginPage() {
                   />
                 </div>
               </div>
+
               <Button
                 type="submit"
                 disabled={loading}
@@ -238,12 +225,7 @@ export default function LoginPage() {
                   </>
                 ) : (
                   <>
-                    <LogInIcon
-                      size={16}
-                      color="currentColor"
-                      strokeWidth={2.5}
-                      className="flex-shrink-0"
-                    />
+                    <LogInIcon size={16} color="currentColor" strokeWidth={2.5} className="flex-shrink-0" />
                     <span>Login</span>
                   </>
                 )}
@@ -251,14 +233,14 @@ export default function LoginPage() {
             </form>
           </CardContent>
 
-          <CardFooter className="flex flex-col gap-3 pt-2">
-            {/* 🔹 DIVIDER */}
+          <CardFooter className="flex flex-col gap-4 pt-2">
+            {/* 🔹 DIVIDER - No background */}
             <div className="relative w-full py-2">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border" />
+                <span className="w-full border-t border-border/60" />
               </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">
+              <div className="relative flex justify-center">
+                <span className="px-3 text-xs uppercase text-muted-foreground/70">
                   Or continue with
                 </span>
               </div>
@@ -269,7 +251,7 @@ export default function LoginPage() {
               variant="outline"
               type="button"
               disabled={loading}
-              className="w-full h-10 sm:h-11 gap-2 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+              className="w-full h-10 sm:h-11 gap-2 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 px-6"
               onClick={handleGoogleLogin}
             >
               <GoogleIcon size={16} />
