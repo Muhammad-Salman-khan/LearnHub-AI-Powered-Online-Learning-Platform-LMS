@@ -67,10 +67,12 @@ export default function LessonPlayerPage({
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex flex-col h-screen bg-background text-foreground">
-      {/* Mobile Header */}
-      <div className="md:hidden p-4 border-b border-border flex items-center justify-between bg-background/95 backdrop-blur-md sticky top-0 z-50">
-        <h1 className="font-bold truncate flex-1">{course.title}</h1>
+    <div className="flex flex-col h-screen bg-[#131313] text-[#e2e2e2]">
+      {/* Mobile Header - Uses tonal shift, NOT border */}
+      <div className="md:hidden p-4 flex items-center justify-between bg-[#131313]/95 backdrop-blur-[16px] sticky top-0 z-50">
+        <h1 className="font-bold truncate flex-1 text-[#e2e2e2]">
+          {course.title}
+        </h1>
 
         {/* Mobile Chapter List Drawer */}
         <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
@@ -78,14 +80,14 @@ export default function LessonPlayerPage({
             <Button
               variant="ghost"
               size="icon"
-              className="text-foreground hover:bg-muted/50"
+              className="text-[#e2e2e2] hover:bg-[#584237]/10 hover:text-[#f97316] transition-colors"
             >
               <span className="material-symbols-outlined">menu</span>
             </Button>
           </SheetTrigger>
           <SheetContent
             side="right"
-            className="w-[280px] p-0 bg-background border-l border-border"
+            className="w-[280px] p-0 bg-[#131313] border-l border-[#584237]/15"
           >
             <ChapterSidebar
               courseTitle={course.title}
@@ -100,47 +102,47 @@ export default function LessonPlayerPage({
       <div className="flex flex-1 overflow-hidden">
         {/* --- LEFT: Main Content (Scrollable) --- */}
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-5xl mx-auto p-6 md:p-10 space-y-8">
-            {/* Breadcrumb Navigation */}
-            <nav className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
-              <span className="hover:text-primary cursor-pointer transition-colors">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-12 sm:space-y-24">
+            {/* Breadcrumb Navigation - Uses spacing, not border */}
+            <nav className="hidden md:flex items-center gap-2 text-sm text-[#8a8a8a]">
+              <span className="hover:text-[#f97316] cursor-pointer transition-colors">
                 My Courses
               </span>
               <span className="material-symbols-outlined text-xs">
                 chevron_right
               </span>
-              <span className="hover:text-primary cursor-pointer transition-colors truncate max-w-[200px]">
+              <span className="hover:text-[#f97316] cursor-pointer transition-colors truncate max-w-[200px]">
                 {course.title}
               </span>
               <span className="material-symbols-outlined text-xs">
                 chevron_right
               </span>
-              <span className="text-primary font-medium truncate max-w-[200px]">
+              <span className="text-[#f97316] font-medium truncate max-w-[200px]">
                 {chapter.title}
               </span>
             </nav>
 
-            {/* Spec: Video Embed 16:9 */}
-            <div className="w-full aspect-video rounded-xl overflow-hidden glass-card-no-glow amber-glow transition-all duration-500">
+            {/* Spec: Video Embed 16:9 - Professional roundedness + Amber Radiance */}
+            <div className="w-full aspect-video rounded-[min(var(--radius-md),4px)] overflow-hidden bg-[#0e0e0e] shadow-[0_0_40px_rgba(249,115,22,0.08)] transition-all duration-500">
               <VideoPlayer url={chapter.videoUrl} />
             </div>
 
             {/* Chapter Header */}
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
-                  <h1 className="text-3xl md:text-4xl font-bold text-foreground tracking-tight mb-2">
+                  <h1 className="text-3xl md:text-4xl font-bold text-[#e2e2e2] tracking-tight mb-3 leading-tight">
                     {chapter.title}
                   </h1>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-4 text-sm text-[#8a8a8a]">
                     <span className="flex items-center gap-1">
-                      <span className="material-symbols-outlined text-base">
+                      <span className="material-symbols-outlined text-base text-[#f97316]">
                         schedule
                       </span>
                       {chapter.duration}
                     </span>
                     <span className="flex items-center gap-1">
-                      <span className="material-symbols-outlined text-base">
+                      <span className="material-symbols-outlined text-base text-[#f97316]">
                         folder
                       </span>
                       {course.category}
@@ -148,14 +150,14 @@ export default function LessonPlayerPage({
                   </div>
                 </div>
 
-                {/* Spec: Mark Complete Button */}
+                {/* Spec: Mark Complete Button - Gradient Primary */}
                 <div className="hidden md:block">
                   <MarkCompleteButton isCompleted={chapter.isCompleted} />
                 </div>
               </div>
 
-              {/* Spec: Description */}
-              <p className="text-muted-foreground text-lg leading-relaxed">
+              {/* Spec: Description - Editorial body text */}
+              <p className="text-[#e0c0b1] text-lg leading-relaxed max-w-3xl">
                 {chapter.description}
               </p>
 
@@ -165,22 +167,25 @@ export default function LessonPlayerPage({
               </div>
             </div>
 
-            {/* Instructor Card */}
+            {/* Instructor Card - Uses surface hierarchy */}
             <InstructorCard instructor={course.instructor} />
 
-            {/* Resources Section */}
+            {/* Resources Section - No dividers, uses spacing */}
             <ResourcesSection resources={chapter.resources} />
 
             {/* Discussion Preview */}
             <DiscussionPreview />
 
-            {/* Spec: Prev/Next Navigation */}
-            <CourseNavigation hasPrev={true} hasNext={true} />
+            {/* Spec: Prev/Next Navigation - Editorial spacing */}
+            <div className="pt-12 sm:pt-24">
+              <CourseNavigation hasPrev={true} hasNext={true} />
+            </div>
           </div>
         </div>
 
-        {/* --- RIGHT: Chapter Sidebar (Fixed 280px - Desktop Only) --- */}
-        <div className="w-[280px] border-l border-border hidden md:flex flex-col bg-background">
+        {/* --- RIGHT: Chapter Sidebar (Fixed 280px - Desktop Only) */}
+        {/* Uses tonal shift instead of border-l */}
+        <div className="w-[280px] hidden md:flex flex-col bg-[#1b1b1b]">
           <ChapterSidebar
             courseTitle={course.title}
             progress={course.progress}
