@@ -1,6 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+// 1. Link import karein
+import Link from "next/link";
 
 interface Course {
   id: string;
@@ -87,15 +89,23 @@ export function CoursesTable({ courses }: CoursesTableProps) {
                   </td>
                   <td className="p-4 text-right">
                     <div className="flex items-center justify-end gap-2">
+                      {/* ✅ Solution: Button ko hi Link bana dein 'asChild' use karke, 
+        lekin andar <a> tag mat rakhein */}
                       <Button
+                        asChild
                         variant="ghost"
                         size="sm"
-                        className="text-primary hover:text-primary hover:bg-primary/10"
+                        className="text-primary hover:text-primary hover:bg-primary/10 cursor-pointer"
                       >
-                        <span className="material-symbols-outlined text-base">
-                          edit
-                        </span>
+                        <Link
+                          href={`/dashboard/instructor/courses/${course.id}/edit`}
+                        >
+                          <span className="material-symbols-outlined text-base">
+                            edit
+                          </span>
+                        </Link>
                       </Button>
+
                       <Button
                         variant="ghost"
                         size="sm"
