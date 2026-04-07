@@ -1,18 +1,7 @@
-/**
- * Course Listing Page - LearnHub
- *
- * Design: Obsidian & Amber Editorial ("The Kinetic Monolith")
- * Features:
- * - Server-side course fetching with Prisma
- * - Client-side filters & search
- * - Responsive grid layout
- * - DESIGN.md compliant: No-Line Rule, Amber Radiance, Editorial spacing
- */
-
-import { prisma } from "@/lib/prisma";
 import { CourseFilters } from "../../components/courses/course-filters";
 import { CourseCard } from "../../components/courses/course-card";
 import Link from "next/link";
+import { getSearchedCourses } from "@/server/action";
 
 // Metadata for SEO
 export const metadata = {
@@ -21,36 +10,9 @@ export const metadata = {
     "Explore our curated collection of deep-tech courses. Master the future of human capital.",
 };
 
-// Fetch courses from database
-async function getCourses(
-  search?: string,
-  category?: string,
-  level?: string,
-  price?: string,
-) {
-  const where: any = { isPublished: true };
-
-  if (search) {
-    where.OR = [
-      { title: { contains: search, mode: "insensitive" } },
-      { description: { contains: search, mode: "insensitive" } },
-    ];
-  }
-  if (category) where.category = category;
-  if (level) where.level = level;
-  if (price === "free") where.price = 0;
-  if (price === "paid") where.price = { gt: 0 };
-
-  return await prisma.course.findMany({
-    where,
-    include: { instructor: { select: { name: true, image: true } } },
-    orderBy: { createdAt: "desc" },
-  });
-}
-
 // Available filter options
 const CATEGORIES = [
-  "Web Dev",
+  "Development",
   "Data Science",
   "Design",
   "Backend",
@@ -77,7 +39,7 @@ export default async function CoursesPage({
   }>;
 }) {
   const params = await searchParams;
-  const courses = await getCourses(
+  const courses = await getSearchedCourses(
     params.search,
     params.category,
     params.level,
@@ -108,21 +70,23 @@ export default async function CoursesPage({
             {/* Search Bar */}
             <div className="w-full sm:w-auto">
               <div className="relative">
-                <input
-                  type="search"
-                  placeholder="Search courses..."
-                  defaultValue={params.search}
-                  name="search"
-                  className="w-full sm:w-80 h-11 bg-[#0e0e0e] border-0 border-b-2 border-transparent focus:border-[#f97316] focus:ring-0 text-[#e2e2e2] placeholder:text-[#5a5a5a] transition-all duration-300 rounded-none px-4 pr-10"
-                />
-                <button
-                  type="submit"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8a8a8a] hover:text-[#f97316] transition-colors"
-                >
-                  <span className="material-symbols-outlined text-lg">
-                    search
-                  </span>
-                </button>
+                <form>
+                  <input
+                    type="search"
+                    placeholder="Search courses..."
+                    defaultValue={params.search}
+                    name="search"
+                    className="w-full sm:w-80 h-11 bg-[#0e0e0e] border-0 border-b-2 border-transparent focus:border-[#f97316] focus:ring-0 text-[#e2e2e2] placeholder:text-[#5a5a5a] transition-all duration-300 rounded-none px-4 pr-10"
+                  />
+                  <button
+                    type="submit"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8a8a8a] hover:text-[#f97316] transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-lg">
+                      search
+                    </span>
+                  </button>
+                </form>
               </div>
             </div>
           </div>
@@ -162,14 +126,13 @@ export default async function CoursesPage({
             </div>
 
             {/* Course Cards Grid */}
-            {courses.length > 0 ? (
+            {courses.length > 0 ?
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {courses.map((course) => (
                   <CourseCard key={course.id} course={course} />
                 ))}
               </div>
-            ) : (
-              <div className="text-center py-16">
+            : <div className="text-center py-16">
                 <span className="material-symbols-outlined text-[#5a5a5a] text-4xl mb-4">
                   search_off
                 </span>
@@ -186,7 +149,7 @@ export default async function CoursesPage({
                   Clear all filters
                 </Link>
               </div>
-            )}
+            }
           </section>
         </div>
       </div>

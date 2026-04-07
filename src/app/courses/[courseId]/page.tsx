@@ -1,21 +1,9 @@
-/**
- * Course Detail Page - LearnHub
- *
- * Design: Obsidian & Amber Editorial ("The Kinetic Monolith")
- * Features:
- * - Server-side course fetching with Prisma
- * - Sticky enrollment sidebar
- * - Expandable curriculum
- * - Tabbed content (Overview, Reviews, Q&A)
- * - DESIGN.md compliant: No-Line Rule, Amber Radiance, Editorial spacing
- */
-
-import { prisma } from "@/lib/prisma"
-import { notFound } from "next/navigation"
-import { CourseHeader } from "@/components/courses/course-header"
-import { CourseSidebar } from "@/components/courses/course-sidebar"
-import { CourseCurriculum } from "@/components/courses/course-curriculum"
-import { CourseTabs } from "@/components/courses/course-tabs"
+import { notFound } from "next/navigation";
+import { CourseHeader } from "@/components/courses/course-header";
+import { CourseSidebar } from "@/components/courses/course-sidebar";
+import { CourseCurriculum } from "@/components/courses/course-curriculum";
+import { CourseTabs } from "@/components/courses/course-tabs";
+import { getCourseById } from "@/server/action";
 
 // ✅ REMOVED: import { auth } from "@/lib/auth" — doesn't exist yet
 
@@ -23,41 +11,18 @@ import { CourseTabs } from "@/components/courses/course-tabs"
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ courseId: string }>
+  params: Promise<{ courseId: string }>;
 }) {
-  const { courseId } = await params
-  const course = await prisma.course.findUnique({
-    where: { id: courseId },
-    select: { title: true, description: true },
-  })
-
-  if (!course) return { title: "Course Not Found | LearnHub" }
+  const { courseId } = await params;
+  const couseRawData = await getCourseById(courseId);
+  const course = couseRawData.data;
+  if (!course) return { title: "Course Not Found | LearnHub" };
 
   return {
     title: `${course.title} | LearnHub`,
     description: course.description,
-  }
-}
-
-// Fetch course data - Matches your Prisma schema (chapters, not lessons)
-async function getCourse(courseId: string) {
-  const course = await prisma.course.findUnique({
-    where: { id: courseId },
-    include: {
-      instructor: { select: { name: true, image: true, bio: true } },
-      // ✅ Chapters ARE the lessons in your schema
-      chapters: {
-        where: { isPublished: true },
-        orderBy: { position: "asc" },
-      },
-      // ❌ REMOVED: reviews - doesn't exist in your schema yet
-      // ❌ REMOVED: enrollments - not needed for public view
-    },
-  });
-
-  if (!course || !course.isPublished) notFound();
-
-  return course;
+    CourseCurriculum: course.description,
+  };
 }
 
 // ✅ TEMPORARY: Assume not enrolled (will connect to auth when ready)
@@ -66,21 +31,21 @@ async function getCourse(courseId: string) {
 export default async function CourseDetailPage({
   params,
 }: {
-  params: Promise<{ courseId: string }>
+  params: Promise<{ courseId: string }>;
 }) {
-  const { courseId } = await params
-  const course = await getCourse(courseId)
-
+  const { courseId } = await params;
+  const courseRawData = await getCourseById(courseId);
+  const course = courseRawData.data;
+  if (!course) notFound();
   // ✅ TEMPORARY: Assume not enrolled
-  const enrolled = false
-  const progress = 0
+  const enrolled = false;
+  const progress = 0;
 
-  // ✅ Calculate stats based on CHAPTERS (your schema), not lessons
-  const totalChapters = course.chapters.length
+  const totalChapters = course.chapters.length;
   const totalDuration = course.chapters.reduce(
     (acc, ch) => acc + (ch.videoUrl ? 15 : 5), // Estimate: 15min video, 5min reading
-    0
-  )
+    0,
+  );
 
   return (
     <main className="min-h-screen bg-[#131313] text-[#e2e2e2]">
@@ -94,23 +59,26 @@ export default async function CourseDetailPage({
           <section className="flex-1 min-w-0">
             {/* What You'll Learn */}
             <div className="bg-[#1b1b1b] rounded-[min(var(--radius-md),4px)] p-6 sm:p-8 mb-8">
-              <h2 className="text-xl font-bold text-[#e2e2e2] mb-4">What You'll Learn</h2>
+              <h2 className="text-xl font-bold text-[#e2e2e2] mb-4">
+                What You'll Learn
+              </h2>
               <ul className="grid sm:grid-cols-2 gap-3">
-                {(
-                  course.learningOutcomes || [
-                    "Master core concepts",
-                    "Build real projects",
-                    "Industry best practices",
-                    "Portfolio-ready skills",
-                  ]
-                ).map((item, i) => (
-                  <li key={i} className="flex items-start gap-3">
-                    <span className="material-symbols-outlined text-[#f97316] text-lg shrink-0 mt-0.5">
-                      check_circle
-                    </span>
-                    <span className="text-sm text-[#e0c0b1]">{item}</span>
-                  </li>
-                ))}
+                {course?.learningOutcomes &&
+                  (
+                    course?.learningOutcomes || [
+                      "Master core concepts",
+                      "Build real projects",
+                      "Industry best practices",
+                      "Portfolio-ready skills",
+                    ]
+                  ).map((item, i) => (
+                    <li key={i} className="flex items-start gap-3">
+                      <span className="material-symbols-outlined text-[#f97316] text-lg shrink-0 mt-0.5">
+                        check_circle
+                      </span>
+                      <span className="text-sm text-[#e0c0b1]">{item}</span>
+                    </li>
+                  ))}
               </ul>
             </div>
 
@@ -119,28 +87,31 @@ export default async function CourseDetailPage({
 
             {/* Instructor Section */}
             <div className="bg-[#1b1b1b] rounded-[min(var(--radius-md),4px)] p-6 sm:p-8 mt-8">
-              <h2 className="text-xl font-bold text-[#e2e2e2] mb-6">Your Instructor</h2>
+              <h2 className="text-xl font-bold text-[#e2e2e2] mb-6">
+                Your Instructor
+              </h2>
               <div className="flex flex-col sm:flex-row gap-6">
                 <div className="w-20 h-20 rounded-full bg-[#0e0e0e] overflow-hidden flex-shrink-0">
-                  {course.instructor.image ? (
+                  {course.instructor.image ?
                     <img
                       src={course.instructor.image}
                       alt={course.instructor.name}
                       className="w-full h-full object-cover"
                     />
-                  ) : (
-                    <div className="w-full h-full bg-[#2a2a2a] flex items-center justify-center">
+                  : <div className="w-full h-full bg-[#2a2a2a] flex items-center justify-center">
                       <span className="material-symbols-outlined text-[#8a8a8a] text-3xl">
                         person
                       </span>
                     </div>
-                  )}
+                  }
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-[#e2e2e2] mb-1">
                     {course.instructor.name}
                   </h3>
-                  <p className="text-sm text-[#f97316] mb-3">Senior Engineer & Educator</p>
+                  <p className="text-sm text-[#f97316] mb-3">
+                    Senior Engineer & Educator
+                  </p>
                   <p className="text-sm text-[#e0c0b1]">
                     {course.instructor.bio ||
                       "Industry veteran with 10+ years of experience building scalable systems."}
@@ -166,5 +137,5 @@ export default async function CourseDetailPage({
         </div>
       </div>
     </main>
-  )
+  );
 }

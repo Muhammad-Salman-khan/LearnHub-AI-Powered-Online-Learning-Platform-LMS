@@ -11,7 +11,7 @@ interface CourseHeaderProps {
     students?: number;
     category: string;
     level: string;
-    updatedAt: Date;
+    createdAt: string;
   };
 }
 
@@ -72,7 +72,7 @@ export function CourseHeader({ course }: CourseHeaderProps) {
                   schedule
                 </span>
                 <span className="text-[#8a8a8a]">
-                  Last updated {new Date(course.updatedAt).toLocaleDateString()}
+                  Last updated {new Date(course.createdAt).toLocaleDateString()}
                 </span>
               </div>
             </div>
@@ -81,20 +81,19 @@ export function CourseHeader({ course }: CourseHeaderProps) {
           {/* Right: Thumbnail (Desktop) */}
           <div className="lg:w-80 flex-shrink-0 hidden lg:block">
             <div className="relative aspect-video rounded-[min(var(--radius-md),4px)] overflow-hidden shadow-[0_0_40px_rgba(249,115,22,0.08)]">
-              {course.thumbnail ? (
+              {course.thumbnail ?
                 <Image
                   src={course.thumbnail}
                   alt={course.title}
                   fill
                   className="object-cover"
                 />
-              ) : (
-                <div className="w-full h-full bg-[#0e0e0e] flex items-center justify-center">
+              : <div className="w-full h-full bg-[#0e0e0e] flex items-center justify-center">
                   <span className="material-symbols-outlined text-[#5a5a5a] text-4xl">
                     school
                   </span>
                 </div>
-              )}
+              }
             </div>
           </div>
         </div>
