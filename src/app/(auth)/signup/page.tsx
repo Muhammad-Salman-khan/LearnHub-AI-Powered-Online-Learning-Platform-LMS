@@ -172,15 +172,6 @@ export default function SignUpPage() {
             <CardDescription className="text-sm text-center">
               Enter your details to get started
             </CardDescription>
-            <CardAction>
-              <Button
-                variant="link"
-                className="px-0 text-sm sm:text-base"
-                asChild
-              >
-                <Link href="/login">Already have an account? Login</Link>
-              </Button>
-            </CardAction>
           </CardHeader>
 
           <CardContent>
@@ -213,6 +204,20 @@ export default function SignUpPage() {
 
             <form onSubmit={handleSignup} id="signup-form">
               <div className="flex flex-col gap-4 sm:gap-5">
+                
+                {/* 🔹 LOGIN LINK - Name field ke UPAR */}
+                <div className="text-center -mt-1 mb-1">
+                  <Button
+                    variant="link"
+                    className="px-0 text-sm sm:text-base h-auto py-0"
+                    asChild
+                  >
+                    <Link href="/login">
+                      Already have an account? <span className="text-[#f97316] font-medium">Login</span>
+                    </Link>
+                  </Button>
+                </div>
+
                 {/* 👤 FULL NAME FIELD */}
                 <div className="grid gap-2">
                   <Label htmlFor="name" className="text-sm">
@@ -331,28 +336,36 @@ export default function SignUpPage() {
                     )}
                 </div>
 
-                {/* ✅ TERMS & CONDITIONS CHECKBOX - Extra padding for clarity */}
-                <div className="flex items-start gap-2 pt-2 pb-3">
-                  <input
-                    type="checkbox"
-                    id="terms"
-                    checked={acceptedTerms}
-                    onChange={(e) => {
-                      setAcceptedTerms(e.target.checked);
-                      if (error) setError(null);
-                    }}
-                    disabled={loading}
-                    className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary disabled:opacity-50"
-                    required
-                  />
+                {/* ✅ TERMS & CONDITIONS CHECKBOX - Reduced padding + Upgraded checkbox */}
+                <div className="flex items-start gap-2.5 pt-1 pb-2">
+                  <div className="relative flex items-center justify-center mt-0.5">
+                    <input
+                      type="checkbox"
+                      id="terms"
+                      checked={acceptedTerms}
+                      onChange={(e) => {
+                        setAcceptedTerms(e.target.checked);
+                        if (error) setError(null);
+                      }}
+                      disabled={loading}
+                      className="peer h-4.5 w-4.5 shrink-0 rounded-sm border-2 border-gray-300 appearance-none cursor-pointer transition-all duration-200 checked:border-[#f97316] checked:bg-[#f97316] focus:outline-none focus:ring-2 focus:ring-[#f97316]/50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      required
+                    />
+                    {/* ✅ Custom checkmark icon */}
+                    <span className="absolute pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity duration-150">
+                      <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </span>
+                  </div>
                   <Label
                     htmlFor="terms"
-                    className="text-xs sm:text-sm leading-tight cursor-pointer text-muted-foreground"
+                    className="text-xs sm:text-sm leading-tight cursor-pointer text-muted-foreground select-none"
                   >
                     I agree to the{" "}
                     <Link
                       href="/terms"
-                      className="underline underline-offset-4 hover:text-primary transition-colors"
+                      className="underline underline-offset-4 hover:text-[#f97316] transition-colors font-medium"
                       target="_blank"
                     >
                       Terms of Service
@@ -360,7 +373,7 @@ export default function SignUpPage() {
                     and{" "}
                     <Link
                       href="/privacy"
-                      className="underline underline-offset-4 hover:text-primary transition-colors"
+                      className="underline underline-offset-4 hover:text-[#f97316] transition-colors font-medium"
                       target="_blank"
                     >
                       Privacy Policy
@@ -368,11 +381,12 @@ export default function SignUpPage() {
                   </Label>
                 </div>
 
-                {/* ✅ SUBMIT BUTTON - Extra top padding for separation */}
+                {/* ✅ SUBMIT BUTTON */}
                 <Button
                   type="submit"
                   disabled={loading || !acceptedTerms}
                   className="w-full h-11 sm:h-12 mt-1 mb-2 text-sm sm:text-base transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100 gap-2 px-6"
+                  style={{ backgroundColor: acceptedTerms ? "#f97316" : undefined }}
                 >
                   {loading ? (
                     <>
@@ -395,31 +409,31 @@ export default function SignUpPage() {
             </form>
           </CardContent>
 
-          <CardFooter className="flex flex-col gap-4 pt-4">
-            {/* 🔹 DIVIDER - Extra top padding for separation */}
-            <div className="relative w-full py-3">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-3 text-muted-foreground">
-                  Or sign up with
-                </span>
-              </div>
-            </div>
+         <CardFooter className="flex flex-col gap-4 pt-2">
+  {/* 🔹 DIVIDER - ✅ NO BACKGROUND - Fully merged with card */}
+  <div className="relative w-full py-2">
+    <div className="absolute inset-0 flex items-center">
+      <span className="w-full border-t border-border/60" />
+    </div>
+    <div className="relative flex justify-center">
+      <span className="px-3 text-xs uppercase text-muted-foreground/70">
+        Or sign up with
+      </span>
+    </div>
+  </div>
 
-            {/* 🔹 GOOGLE SIGNUP BUTTON */}
-            <Button
-              variant="outline"
-              type="button"
-              disabled={loading}
-              className="w-full h-11 sm:h-12 gap-2 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 px-6"
-              onClick={handleGoogleSignup}
-            >
-              <GoogleIcon size={16} />
-              <span>Sign up with Google</span>
-            </Button>
-          </CardFooter>
+  {/* 🔹 GOOGLE SIGNUP BUTTON */}
+  <Button
+    variant="outline"
+    type="button"
+    disabled={loading}
+    className="w-full h-11 sm:h-12 gap-2 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 px-6"
+    onClick={handleGoogleSignup}
+  >
+    <GoogleIcon size={16} />
+    <span>Sign up with Google</span>
+  </Button>
+</CardFooter>
         </Card>
       </div>
     </>

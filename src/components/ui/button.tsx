@@ -4,32 +4,32 @@ import { Slot } from "@radix-ui/react-slot";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group/button inline-flex shrink-0 items-center justify-center rounded-[min(var(--radius-md),4px)] border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
-        // ✅ Obsidian Amber Theme - Primary Button
+        // ✅ Primary: Kinetic Gradient + Ultra-Subtle Amber Radiance (DESIGN.md compliant)
         default:
-          "kinetic-gradient text-white border-0 shadow-lg shadow-[#F97316]/20 hover:shadow-[#F97316]/40 hover:opacity-90",
+          "bg-gradient-to-br from-[#ffb690] to-[#f97316] text-[#131313] border-0 shadow-[0_0_15px_rgba(249,115,22,0.05)] hover:shadow-[0_0_25px_rgba(249,115,22,0.08)] hover:opacity-95",
 
-        // ✅ Outline - Glass effect with amber border
+        // ✅ Outline: Ghost Border (15% opacity, "felt not seen")
         outline:
-          "border-[#F97316]/30 bg-[#0e0e0e]/50 text-[#e2e2e2] hover:bg-[#F97316]/10 hover:border-[#F97316]/50 hover:text-[#F97316]",
+          "border border-[#584237]/15 bg-transparent text-[#f97316] hover:bg-[#584237]/5 hover:border-[#f97316]/20 hover:text-[#ffb690]",
 
-        // ✅ Secondary - Subtle amber background
+        // ✅ Secondary: Subtle amber background, no glow
         secondary:
-          "bg-[#F97316]/10 text-[#F97316] border border-[#F97316]/20 hover:bg-[#F97316]/20 hover:border-[#F97316]/30",
+          "bg-[#f97316]/10 text-[#f97316] border border-[#584237]/15 hover:bg-[#f97316]/15 hover:border-[#f97316]/20",
 
-        // ✅ Ghost - Minimal, for sidebar nav
+        // ✅ Ghost: Minimal, for sidebar nav
         ghost:
-          "text-gray-400 hover:text-[#F97316] hover:bg-[#F97316]/5 border-transparent",
+          "text-[#8a8a8a] hover:text-[#f97316] hover:bg-[#584237]/5 border-transparent",
 
-        // ✅ Destructive - Red for delete/sign out
+        // ✅ Destructive: Red for delete/sign out (subtle)
         destructive:
-          "bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 hover:border-red-500/30 hover:text-red-300",
+          "bg-[#ef4444]/10 text-[#ef4444] border border-[#ef4444]/20 hover:bg-[#ef4444]/15 hover:border-[#ef4444]/30",
 
-        // ✅ Link - Amber text link
-        link: "text-[#F97316] underline-offset-4 hover:underline hover:text-[#ffb690]",
+        // ✅ Link: Amber text link
+        link: "text-[#f97316] underline-offset-4 hover:underline hover:text-[#ffb690]",
       },
       size: {
         default:
