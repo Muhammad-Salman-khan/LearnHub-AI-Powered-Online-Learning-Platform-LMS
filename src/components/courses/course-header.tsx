@@ -11,7 +11,7 @@ interface CourseHeaderProps {
     students?: number;
     category: string;
     level: string;
-    createdAt: string;
+    createdAt: Date | string;
   };
 }
 

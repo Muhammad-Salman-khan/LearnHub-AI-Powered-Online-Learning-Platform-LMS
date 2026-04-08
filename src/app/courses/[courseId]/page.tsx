@@ -46,6 +46,12 @@ export default async function CourseDetailPage({
     (acc, ch) => acc + (ch.videoUrl ? 15 : 5), // Estimate: 15min video, 5min reading
     0,
   );
+  const learningOutcomes = [
+    "Master core concepts",
+    "Build real projects",
+    "Industry best practices",
+    "Portfolio-ready skills",
+  ];
 
   return (
     <main className="min-h-screen bg-[#131313] text-[#e2e2e2]">
@@ -63,22 +69,14 @@ export default async function CourseDetailPage({
                 What You'll Learn
               </h2>
               <ul className="grid sm:grid-cols-2 gap-3">
-                {course?.learningOutcomes &&
-                  (
-                    course?.learningOutcomes || [
-                      "Master core concepts",
-                      "Build real projects",
-                      "Industry best practices",
-                      "Portfolio-ready skills",
-                    ]
-                  ).map((item, i) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#f97316] text-lg shrink-0 mt-0.5">
-                        check_circle
-                      </span>
-                      <span className="text-sm text-[#e0c0b1]">{item}</span>
-                    </li>
-                  ))}
+                {learningOutcomes.map((item, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <span className="material-symbols-outlined text-[#f97316] text-lg shrink-0 mt-0.5">
+                      check_circle
+                    </span>
+                    <span className="text-sm text-[#e0c0b1]">{item}</span>
+                  </li>
+                ))}
               </ul>
             </div>
 

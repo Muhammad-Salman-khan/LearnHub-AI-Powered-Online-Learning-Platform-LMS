@@ -1,55 +1,81 @@
 import { prisma } from "@/lib/prisma";
+import { registerSchema } from "@/lib/validations";
 import { Hashpassword } from "@/services/hashService";
 import { NextRequest, NextResponse } from "next/server";
 
-export const POST = async (req: NextRequest) => {
+type RegisterRequestBody = {
+  name?: unknown;
+  email?: unknown;
+  password?: unknown;
+  confirmPassword?: unknown;
+};
+
+const INVALID_PAYLOAD_MESSAGE = "Invalid request payload.";
+
+export const POST = async (req: NextRequest): Promise<NextResponse> => {
   try {
-    const { name, email, password } = await req.json();
-    if (!name || !email || !password) {
+    const payload = (await req.json()) as RegisterRequestBody;
+    const parsedBody = registerSchema.safeParse({
+      name: payload?.name,
+      email:
+        typeof payload?.email === "string"
+          ? payload.email.trim().toLowerCase()
+          : payload?.email,
+      password: payload?.password,
+      confirmPassword:
+        typeof payload?.confirmPassword === "string"
+          ? payload.confirmPassword
+          : payload?.password,
+    });
+
+    if (!parsedBody.success) {
       return NextResponse.json(
-        { error: "All fields are required" },
+        {
+          message:
+            parsedBody.error.issues[0]?.message ?? INVALID_PAYLOAD_MESSAGE,
+        },
         { status: 400 },
       );
     }
+
+    const { name, password } = parsedBody.data;
+    const email = parsedBody.data.email.trim().toLowerCase();
+
     const user = await prisma.user.findUnique({
       where: { email },
     });
+
     if (user) {
       return NextResponse.json(
         {
-          message: "User with a email already exists",
+          message: "An account with this email already exists.",
         },
-        { status: 401 },
+        { status: 409 },
       );
     }
+
     const encryptedPassword = await Hashpassword(password, 12);
-    const newUser = await prisma.user.create({
+    await prisma.user.create({
       data: {
-        name,
+        name: name.trim(),
         email,
-        password : encryptedPassword
+        password: encryptedPassword,
       },
     });
-    if (!newUser) {
-      return NextResponse.json(
-        {
-          message: "something went wrong",
-        },
-        { status: 500 },
-      );
-    }
+
     return NextResponse.json(
       {
         success: true,
-        data: newUser,
+        message: "Account created successfully.",
       },
       { status: 201 },
     );
   } catch (error) {
-  console.error(error);
-  return NextResponse.json(
-    { message: "Internal Server Error" },
-    { status: 500 }
-  );
-}
+    console.error("Registration error:", error);
+
+    return NextResponse.json(
+      { message: "Internal Server Error" },
+      { status: 500 },
+    );
+  }
 };

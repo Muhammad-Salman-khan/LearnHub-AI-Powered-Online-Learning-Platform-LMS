@@ -61,8 +61,9 @@ const mockData = {
 export default function LessonPlayerPage({
   params,
 }: {
-  params: { courseId: string; chapterId: string };
+  params: Promise<{ courseId: string; chapterId: string }>;
 }) {
+  void params;
   const { course, chapter, chapters } = mockData;
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
