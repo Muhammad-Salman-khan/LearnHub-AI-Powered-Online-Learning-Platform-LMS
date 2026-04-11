@@ -19,17 +19,17 @@ export default async function AdminUsersPage() {
   }
 
   // 2. Sirf Admin hone par hi data fetch hoga
-  const response = await getAllUsers();
-  const dbUsers = (response.success ? response.data : []) ?? [];
+  const response = await getAllUsers(1, 100);
+  const dbUsers = (response.success && response.data ? response.data.items : []) ?? [];
 
-  const formattedUsers = dbUsers.map((user: any) => ({
+  const formattedUsers = dbUsers.map((user: { id: string; name: string; email: string; role: string; createdAt: Date }) => ({
     id: user.id,
     name: user.name || "Unknown User",
     email: user.email,
     role: user.role,
     joinDate: new Date(user.createdAt).toLocaleDateString(),
-    status: user.isBanned ? "Banned" : "Active",
-    avatar: user.image || null,
+    status: "Active", // TODO: add isBanned field to User model
+    avatar: null, // TODO: add image field to User model
   }));
 
   return (

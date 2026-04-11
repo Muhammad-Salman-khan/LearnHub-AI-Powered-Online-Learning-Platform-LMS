@@ -27,7 +27,7 @@ const isProtectedRoute = (pathname: string): boolean =>
 const isInstructorRoute = (pathname: string): boolean =>
   INSTRUCTOR_PREFIXES.some((route) => pathname.startsWith(route));
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const token = await getToken({ req: request });
   const { pathname } = request.nextUrl;
   const role = token?.role as AppRole | undefined;

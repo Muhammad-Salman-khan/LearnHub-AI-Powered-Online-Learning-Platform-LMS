@@ -1,5 +1,3 @@
-"use client";
-
 interface CourseNavigationProps {
   hasPrev: boolean;
   hasNext: boolean;

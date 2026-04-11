@@ -3,6 +3,7 @@
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { useRouter } from "next/navigation";
 
@@ -46,10 +47,15 @@ export default function CourseCard({
       {/* Thumbnail - 16:9 Aspect Ratio */}
       <div className="aspect-video w-full bg-[#1a1a1a] relative group overflow-hidden">
         {course.thumbnail ? (
-          <img
+          <Image
             src={course.thumbnail}
             alt={course.title}
+            fill
+            sizes="(max-width: 640px) 100vw, 280px"
             className="w-full h-full object-cover transition-transform group-hover:scale-105"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = "none";
+            }}
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center kinetic-gradient">

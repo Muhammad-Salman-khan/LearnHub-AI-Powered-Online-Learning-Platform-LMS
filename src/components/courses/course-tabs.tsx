@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 
 interface CourseTabsProps {
   course: {
@@ -112,9 +113,11 @@ export function CourseTabs({ course, enrolled }: CourseTabsProps) {
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-10 h-10 rounded-full bg-[#0e0e0e] overflow-hidden">
                       {review.user.image ? (
-                        <img
+                        <Image
                           src={review.user.image}
                           alt={review.user.name}
+                          width={40}
+                          height={40}
                           className="w-full h-full object-cover"
                         />
                       ) : (

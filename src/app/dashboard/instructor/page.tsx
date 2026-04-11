@@ -22,24 +22,24 @@ export default async function InstructorDashboardPage() {
   }
 
   // 2. Fetch Data (Direct response check)
-  const response = await getCourseByInstructor();
-  
+  const response = await getCourseByInstructor(1, 100);
+
   // ✅ Improved Data Extraction
-  const rawCourses = response && response.success && Array.isArray(response.data) 
-    ? response.data 
+  const rawCourses = response && response.success && response.data && Array.isArray(response.data.items)
+    ? response.data.items
     : [];
 
   // 3. Mapping
-  const formattedCourses = rawCourses.map((course: any) => ({
+  const formattedCourses = rawCourses.map((course: { title: string; id: string; isPublished: boolean; createdAt: Date; thumbnail: string | null; description: string; price: number; category: string; level: string; instructorId: string; rating: number }) => ({
     ...course,
     status: course.isPublished ? "published" : "draft",
-    students: course.enrolledStudents || 0,
+    students: 0,
   }));
 
   const stats = {
     totalCourses: formattedCourses.length,
-    publishedCourses: formattedCourses.filter((c: any) => c.status === "published").length,
-    totalStudents: formattedCourses.reduce((acc: number, curr: any) => acc + (curr.students || 0), 0),
+    publishedCourses: formattedCourses.filter((c) => c.status === "published").length,
+    totalStudents: formattedCourses.reduce((acc: number, curr) => acc + (curr.students || 0), 0),
   };
 
   return (

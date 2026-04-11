@@ -1,14 +1,16 @@
 "use server";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import {
   ChapterInput,
   chapterSchema,
   CourseInput,
   courseSchema,
+  SearchInput,
+  searchSchema,
 } from "@/lib/validations";
 import { roleChecker } from "@/services/authCheckers";
 import { UploadCourseThumbnail } from "@/services/UploadFile";
-import { getSearchedCoursesParams } from "@/types/types";
 import { revalidatePath } from "next/cache";
 import { notFound } from "next/navigation";
 type ActionResponse =
@@ -79,7 +81,7 @@ export const getCourseById = async (id: string) => {
     });
     if (!FindPost) return { success: false, error: "404 Course not found" };
     return { success: true, data: FindPost };
-  } catch (error: any) {
+  } catch (error) {
     console.error(error);
     return { success: false, error: "something went wrong" };
   }
@@ -102,7 +104,7 @@ export const deleteCourseById = async (id: string) => {
       success: true,
       message: `Course Deleted Successfully`,
     };
-  } catch (error: any) {
+  } catch (error) {
     console.error(error);
     return { success: false, error: "something went wrong" };
   }
@@ -141,7 +143,7 @@ export const courseUpdateFields = async (id: string, data: CourseInput) => {
       success: true,
       message: "course updated Successfully!",
     };
-  } catch (error: any) {
+  } catch (error) {
     console.error(error);
     return { success: false, error: "something went wrong" };
   }
@@ -178,20 +180,30 @@ export const getInstructorId = async (Id: string) => {
 // Get Instructor Id End
 
 // GetAllUsers (start!)
-export const getAllUsers = async () => {
+export const getAllUsers = async (page = 1, pageSize = 20) => {
   try {
-    const allTheUsers = await prisma.user.findMany({
-      orderBy: { createdAt: "desc" },
-    });
-    if (allTheUsers.length === 0) {
-      return {
-        success: false,
-        error: `No user's found`,
-      };
+    const skip = (page - 1) * pageSize;
+    const [data, total] = await Promise.all([
+      prisma.user.findMany({
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: pageSize,
+      }),
+      prisma.user.count(),
+    ]);
+
+    if (data.length === 0) {
+      return { success: false, error: `No users found` };
     }
     return {
       success: true,
-      data: allTheUsers,
+      data: {
+        items: data,
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+      },
     };
   } catch (error) {
     console.error(error);
@@ -201,42 +213,60 @@ export const getAllUsers = async () => {
 // GetAllUsers (end!)
 
 // GetAllCourses (Start!)
-export const getAllCourses = async () => {
+export const getAllCourses = async (page = 1, pageSize = 20) => {
   try {
-    const allCourse = await prisma.course.findMany({
-      where: { isPublished: true },
-      orderBy: { createdAt: "desc" },
-    });
-    if (allCourse.length === 0) {
-      return {
-        success: false,
-        error: `No Course's found`,
-      };
+    const skip = (page - 1) * pageSize;
+    const [data, total] = await Promise.all([
+      prisma.course.findMany({
+        where: { isPublished: true },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: pageSize,
+      }),
+      prisma.course.count({ where: { isPublished: true } }),
+    ]);
+    if (data.length === 0) {
+      return { success: false, error: `No courses found` };
     }
     return {
       success: true,
-      data: allCourse,
+      data: {
+        items: data,
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+      },
     };
   } catch (error) {
     console.error(error);
     return { success: false, error: "Something went wrong" };
   }
 };
-export const getAllCoursesForAdminDashboard = async () => {
+export const getAllCoursesForAdminDashboard = async (page = 1, pageSize = 20) => {
   const admin = await roleChecker("ADMIN");
   try {
-    const allCourse = await prisma.course.findMany({
-      orderBy: { createdAt: "desc" },
-    });
-    if (allCourse.length === 0) {
-      return {
-        success: false,
-        error: `No Course's found`,
-      };
+    const skip = (page - 1) * pageSize;
+    const [data, total] = await Promise.all([
+      prisma.course.findMany({
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: pageSize,
+      }),
+      prisma.course.count(),
+    ]);
+    if (data.length === 0) {
+      return { success: false, error: `No courses found` };
     }
     return {
       success: true,
-      data: allCourse,
+      data: {
+        items: data,
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+      },
     };
   } catch (error) {
     console.error(error);
@@ -246,19 +276,31 @@ export const getAllCoursesForAdminDashboard = async () => {
 // GetAllCourses (end!)
 
 //  get Course By Instructor
-export const getCourseByInstructor = async () => {
+export const getCourseByInstructor = async (page = 1, pageSize = 20) => {
   const user = await roleChecker("INSTRUCTOR");
   try {
-    const InstructorCourses = await prisma.course.findMany({
-      where: { instructorId: user.id },
-    });
+    const skip = (page - 1) * pageSize;
+    const [data, total] = await Promise.all([
+      prisma.course.findMany({
+        where: { instructorId: user.id },
+        skip,
+        take: pageSize,
+      }),
+      prisma.course.count({ where: { instructorId: user.id } }),
+    ]);
 
-    if (InstructorCourses.length === 0)
-      return { success: false, error: `No Course's found` };
+    if (data.length === 0)
+      return { success: false, error: `No courses found` };
 
     return {
       success: true,
-      data: InstructorCourses,
+      data: {
+        items: data,
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+      },
     };
   } catch (error) {
     console.error(error);
@@ -290,21 +332,30 @@ export const findUserByName = async (name: string) => {
   }
 };
 // all Instructor's
-export const getAllInstructors = async () => {
+export const getAllInstructors = async (page = 1, pageSize = 20) => {
   const admin = await roleChecker("ADMIN");
   try {
-    const AllInstructors = await prisma.user.findMany({
-      where: { role: "INSTRUCTOR" },
-    });
-    if (AllInstructors.length === 0) {
-      return {
-        success: false,
-        error: `No Instructor found`,
-      };
+    const skip = (page - 1) * pageSize;
+    const [data, total] = await Promise.all([
+      prisma.user.findMany({
+        where: { role: "INSTRUCTOR" },
+        skip,
+        take: pageSize,
+      }),
+      prisma.user.count({ where: { role: "INSTRUCTOR" } }),
+    ]);
+    if (data.length === 0) {
+      return { success: false, error: `No instructors found` };
     }
     return {
       success: true,
-      data: AllInstructors,
+      data: {
+        items: data,
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+      },
     };
   } catch (error) {
     console.error(error);
@@ -400,36 +451,192 @@ export const roleChangerAdminLevel = async (
 // update from student to Instructor (admin function!!) (start!)
 
 // find course by title or description (start!)
-export const getSearchedCourses = async (
-  search: string,
-  category: string,
-  level: string,
-  price: string,
-) => {
+export const getSearchedCourses = async (params: { query?: string; category?: string; level?: "BEGINNER" | "INTERMEDIATE" | "ADVANCED"; minPrice?: number; maxPrice?: number; page?: number; pageSize?: number }) => {
+  const { query, category, level, minPrice, maxPrice, page = 1, pageSize = 10 } = params;
+
   try {
-    const where: any = {
+    const validated = searchSchema.safeParse({ query, category, level, minPrice, maxPrice });
+    if (!validated.success) {
+      return { success: false, error: "Invalid search parameters" };
+    }
+
+    const where: Prisma.CourseWhereInput = {
       isPublished: true,
     };
-    if (search) {
+
+    if (query) {
       where.OR = [
-        { title: { contains: search, mode: "insensitive" } },
-        { description: { contains: search, mode: "insensitive" } },
+        { title: { contains: query, mode: "insensitive" } },
+        { description: { contains: query, mode: "insensitive" } },
       ];
     }
     if (category) where.category = category;
     if (level) where.level = level;
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      where.price = {};
+      if (minPrice !== undefined) where.price.gte = minPrice;
+      if (maxPrice !== undefined) where.price.lte = maxPrice;
+    }
 
-    if (price === "free") where.price = 0;
-    if (price === "paid") where.price = { gt: 0 };
+    const skip = (page - 1) * pageSize;
 
-    return await prisma.course.findMany({
-      where,
-      include: { instructor: { select: { name: true } } },
-      orderBy: { createdAt: "desc" },
-    });
+    const [items, total] = await Promise.all([
+      prisma.course.findMany({
+        where,
+        include: { instructor: { select: { name: true } } },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: pageSize,
+      }),
+      prisma.course.count({ where }),
+    ]);
+
+    return {
+      success: true,
+      data: {
+        items,
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+      },
+    };
   } catch (error) {
     console.error(error);
     return { success: false, error: "Something went wrong" };
   }
 };
 // find course by title or description (end!)
+
+// ─────────────────────────────────────────────────────────────
+// ENROLLMENT & PROGRESS ACTIONS
+// ─────────────────────────────────────────────────────────────
+
+// Enroll user in a course (start!)
+export const enrollInCourse = async (courseId: string) => {
+  const user = await roleChecker("STUDENT");
+  try {
+    const course = await prisma.course.findUnique({
+      where: { id: courseId, isPublished: true },
+    });
+    if (!course) return { success: false, error: "Course not found" };
+
+    const existing = await prisma.enrollment.findUnique({
+      where: { userId_courseId: { userId: user.id, courseId } },
+    });
+    if (existing) return { success: false, error: "Already enrolled" };
+
+    await prisma.enrollment.create({
+      data: { userId: user.id, courseId },
+    });
+    revalidatePath("/dashboard/student");
+    return { success: true, message: "Enrolled successfully" };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "Something went wrong" };
+  }
+};
+// Enroll user in a course (end!)
+
+// Get enrolled courses for a user (start!)
+export const getEnrolledCourses = async (userId: string, page = 1, pageSize = 20) => {
+  try {
+    const skip = (page - 1) * pageSize;
+    const [items, total] = await Promise.all([
+      prisma.enrollment.findMany({
+        where: { userId },
+        include: {
+          course: {
+            include: {
+              instructor: { select: { name: true } },
+              _count: { select: { chapters: true } },
+            },
+          },
+          user: {
+            select: { id: true },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: pageSize,
+      }),
+      prisma.enrollment.count({ where: { userId } }),
+    ]);
+
+    return {
+      success: true,
+      data: {
+        items: items.map((e) => ({
+          ...e.course,
+          enrolledAt: e.createdAt,
+        })),
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+      },
+    };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "Something went wrong" };
+  }
+};
+// Get enrolled courses for a user (end!)
+
+// Mark chapter as complete (start!)
+export const markChapterComplete = async (chapterId: string) => {
+  const user = await roleChecker("STUDENT");
+  try {
+    await prisma.progress.upsert({
+      where: { userId_chapterId: { userId: user.id, chapterId } },
+      update: { isCompleted: true },
+      create: { userId: user.id, chapterId, isCompleted: true },
+    });
+    revalidatePath("/courses");
+    return { success: true, message: "Chapter marked as complete" };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "Something went wrong" };
+  }
+};
+// Mark chapter as complete (end!)
+
+// Get chapter progress (start!)
+export const getChapterProgress = async (userId: string, chapterIds: string[]) => {
+  try {
+    const progress = await prisma.progress.findMany({
+      where: { userId, chapterId: { in: chapterIds } },
+      select: { chapterId: true, isCompleted: true },
+    });
+    const progressMap = new Map(progress.map((p) => [p.chapterId, p.isCompleted]));
+    return { success: true, data: progressMap };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "Something went wrong" };
+  }
+};
+// Get chapter progress (end!)
+
+// Get course progress summary (start!)
+export const getCourseProgress = async (userId: string, courseId: string) => {
+  try {
+    const chapters = await prisma.chapter.findMany({
+      where: { courseId, isPublished: true },
+      select: { id: true },
+    });
+    const chapterIds = chapters.map((c) => c.id);
+    const completed = await prisma.progress.count({
+      where: { userId, chapterId: { in: chapterIds }, isCompleted: true },
+    });
+    const total = chapters.length;
+    const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+    return {
+      success: true,
+      data: { completed, total, percentage, chapterIds },
+    };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "Something went wrong" };
+  }
+};
+// Get course progress summary (end!)

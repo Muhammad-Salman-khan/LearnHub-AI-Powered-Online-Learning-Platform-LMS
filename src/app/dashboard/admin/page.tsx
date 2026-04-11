@@ -14,20 +14,19 @@ import { getAllCourses, getAllUsers } from "@/server/action";
 
 export default async function AdminOverviewPage() {
   // 1. Auth & Role Check
+  const session = await getServerSession(authOptions);
+  if (!session || session.user.role !== "ADMIN") {
+    redirect("/login");
+  }
 
-  // const session = await getServerSession(authOptions);
-  // if (!session || session.user.role !== "ADMIN") {
-  //   redirect("/login");
-  // }
-
-  // 2. Data Fetching
+  // 2. Data Fetching (stats only, fetch small page)
   const [coursesRes, usersRes] = await Promise.all([
-    getAllCourses(),
-    getAllUsers(),
+    getAllCourses(1, 100),
+    getAllUsers(1, 100),
   ]);
 
-  const dbCourses = (coursesRes.success ? coursesRes.data : []) ?? [];
-  const dbUsers = (usersRes.success ? usersRes.data : []) ?? [];
+  const dbCourses = (coursesRes.success && coursesRes.data ? coursesRes.data.items : []) ?? [];
+  const dbUsers = (usersRes.success && usersRes.data ? usersRes.data.items : []) ?? [];
 
   // 3. Stats Calculation (Bina alag action ke)
   const stats = {
@@ -35,7 +34,7 @@ export default async function AdminOverviewPage() {
     totalCourses: dbCourses.length,
     totalEnrollments: 0, // Iske liye enrollment table ka action chahiye hoga baad mein
     totalRevenue: dbCourses.reduce(
-      (acc: number, curr: any) => acc + (curr.price || 0),
+      (acc: number, curr: { price?: number }) => acc + (curr.price || 0),
       0,
     ), // Base calculation
   };
@@ -97,10 +96,10 @@ export default async function AdminOverviewPage() {
             {/* Tables Area */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Users Table */}
-              <RecentUsersTable users={recentUsers as any} />
+              <RecentUsersTable users={recentUsers} />
 
               {/* Courses Table */}
-              <RecentCoursesTable courses={recentCourses as any} />
+              <RecentCoursesTable courses={recentCourses} />
             </div>
           </div>
         </div>

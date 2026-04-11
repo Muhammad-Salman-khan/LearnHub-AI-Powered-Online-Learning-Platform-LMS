@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import Image from "next/image";
 
 interface CourseSidebarProps {
   course: {
@@ -60,9 +61,11 @@ export function CourseSidebar({
         {/* Thumbnail (Mobile) */}
         <div className="relative aspect-video lg:hidden">
           {course.thumbnail ? (
-            <img
+            <Image
               src={course.thumbnail}
               alt={course.title}
+              fill
+              sizes="(max-width: 1024px) 100vw"
               className="w-full h-full object-cover"
             />
           ) : (

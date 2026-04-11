@@ -1,5 +1,3 @@
-"use client";
-
 import { ChapterItem } from "./chapter-item";
 
 interface ChapterSidebarProps {

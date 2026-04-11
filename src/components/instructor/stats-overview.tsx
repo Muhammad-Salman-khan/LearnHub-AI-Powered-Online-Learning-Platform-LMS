@@ -1,5 +1,3 @@
-"use client";
-
 interface StatsOverviewProps {
   stats: {
     totalCourses: number;

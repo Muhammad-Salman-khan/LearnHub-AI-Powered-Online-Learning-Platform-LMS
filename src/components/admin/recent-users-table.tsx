@@ -1,22 +1,29 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import type { RecentUserDTO } from "@/types/dashboard";
 
-interface User {
+interface DisplayUser {
   id: string;
   name: string;
   email: string;
-  role: "Student" | "Instructor" | "Admin";
+  role: string;
   joinDate: string;
   status: "Active" | "Banned";
 }
 
-interface RecentUsersTableProps {
-  users: User[];
+function toDisplayUser(u: RecentUserDTO): DisplayUser {
+  return {
+    id: u.id,
+    name: u.name || "Unknown",
+    email: u.email,
+    role: u.role.charAt(0) + u.role.slice(1).toLowerCase(),
+    joinDate: new Date(u.createdAt).toLocaleDateString(),
+    status: "Active",
+  };
 }
 
-export function RecentUsersTable({ users }: RecentUsersTableProps) {
+export function RecentUsersTable({ users }: { users: RecentUserDTO[] }) {
+  const displayUsers = users.map(toDisplayUser);
   const getRoleBadgeStyle = (role: string) => {
     switch (role) {
       case "Student":
@@ -54,7 +61,7 @@ export function RecentUsersTable({ users }: RecentUsersTableProps) {
             <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
               Recent Users
               <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                {users.length}
+                {displayUsers.length}
               </span>
             </h2>
             <p className="text-xs text-muted-foreground">
@@ -62,7 +69,7 @@ export function RecentUsersTable({ users }: RecentUsersTableProps) {
             </p>
           </div>
         </div>
-        <Link href="/dashboard/admin/users">
+        <Link href="/dashboard/admin/displayUsers">
           <Button
             variant="ghost"
             size="sm"
@@ -98,7 +105,7 @@ export function RecentUsersTable({ users }: RecentUsersTableProps) {
             </tr>
           </thead>
           <tbody className="divide-y divide-border/50">
-            {users.map((user, index) => (
+            {displayUsers.map((user, index) => (
               <tr
                 key={user.id}
                 className="hover:bg-blue-500/5 transition-all duration-300 group/row"

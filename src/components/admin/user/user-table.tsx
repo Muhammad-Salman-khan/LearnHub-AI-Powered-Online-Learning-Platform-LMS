@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { RoleChangeDropdown } from "./role-change-dropdown";
+import Image from "next/image";
 
 interface User {
   id: string;
@@ -106,9 +107,11 @@ export function UserTable({
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-blue-500/20 flex items-center justify-center text-primary font-bold text-sm shrink-0 group-hover/row:scale-110 transition-transform duration-300 shadow-[0_0_10px_rgba(249,115,22,0.2)]">
                         {user.avatar ? (
-                          <img
+                          <Image
                             src={user.avatar}
                             alt={user.name}
+                            width={40}
+                            height={40}
                             className="w-full h-full rounded-full object-cover"
                           />
                         ) : (

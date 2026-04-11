@@ -15,20 +15,20 @@ export default async function StudentDashboard() {
   const session = await getServerSession(authOptions);
   if (!session) redirect("/login");
 
-  const response = await getAllCourses();
-const rawCourses = (response.success ? response.data : []) ?? [];
+  const response = await getAllCourses(1, 100);
+const rawCourses = (response.success && response.data ? response.data.items : []) ?? [];
 
   // --- Functionality: Formatting Data ---
-  const formattedCourses = rawCourses.map((course: any) => ({
+  const formattedCourses = rawCourses.map((course: { title: string; description: string; price: number; isPublished: boolean; thumbnail: string | null; id: string; createdAt: Date; category: string; level: string; instructorId: string; rating: number }) => ({
     ...course,
-    progress: course.progress || 0, // Default 0%
+    progress: 0, // Default 0% until progress tracking is implemented
   }));
 
   // Stats calculate karna
   const stats = {
     enrolled: formattedCourses.length,
-    completed: formattedCourses.filter((c: any) => c.progress === 100).length,
-    inProgress: formattedCourses.filter((c: any) => c.progress < 100).length,
+    completed: formattedCourses.filter((c) => c.progress === 100).length,
+    inProgress: formattedCourses.filter((c) => c.progress < 100).length,
   };
 
   const userName = session?.user?.name || "Student";
@@ -87,7 +87,7 @@ const rawCourses = (response.success ? response.data : []) ?? [];
 
         {formattedCourses.length > 0 ? (
           <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-            {formattedCourses.map((course: any) => (
+            {formattedCourses.map((course) => (
               <CourseCard key={course.id} course={course} variant="grid" />
             ))}
           </div>

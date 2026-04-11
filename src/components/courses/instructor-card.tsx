@@ -1,5 +1,3 @@
-"use client";
-
 interface InstructorCardProps {
   instructor: {
     name: string;

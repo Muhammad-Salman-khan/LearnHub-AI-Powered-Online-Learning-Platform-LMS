@@ -3,6 +3,7 @@ import { CourseHeader } from "@/components/courses/course-header";
 import { CourseSidebar } from "@/components/courses/course-sidebar";
 import { CourseCurriculum } from "@/components/courses/course-curriculum";
 import { CourseTabs } from "@/components/courses/course-tabs";
+import Image from "next/image";
 import { getCourseById } from "@/server/action";
 
 // ✅ REMOVED: import { auth } from "@/lib/auth" — doesn't exist yet
@@ -91,9 +92,11 @@ export default async function CourseDetailPage({
               <div className="flex flex-col sm:flex-row gap-6">
                 <div className="w-20 h-20 rounded-full bg-[#0e0e0e] overflow-hidden flex-shrink-0">
                   {course.instructor.image ?
-                    <img
+                    <Image
                       src={course.instructor.image}
                       alt={course.instructor.name}
+                      width={80}
+                      height={80}
                       className="w-full h-full object-cover"
                     />
                   : <div className="w-full h-full bg-[#2a2a2a] flex items-center justify-center">

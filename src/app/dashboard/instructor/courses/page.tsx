@@ -18,17 +18,17 @@ export default async function InstructorCoursesListPage() {
   }
 
   // Fetching data from your server action
-  const response = await getCourseByInstructor();
-  
+  const response = await getCourseByInstructor(1, 100);
+
   // ✅ Error Prevention: Agar data na mile toh empty array use karein
-  const rawCourses = response && response.success && Array.isArray(response.data) 
-    ? response.data 
+  const rawCourses = response && response.success && response.data && Array.isArray(response.data.items)
+    ? response.data.items
     : [];
 
-  const formattedCourses = rawCourses.map((course: any) => ({
+  const formattedCourses = rawCourses.map((course: { id: string; title: string; isPublished: boolean; createdAt: Date; thumbnail: string | null; description: string; price: number; category: string; level: string; instructorId: string; rating: number }) => ({
     ...course,
     status: course.isPublished ? "published" : "draft",
-    students: course.enrolledStudents || 0,
+    students: 0,
   }));
 
   return (

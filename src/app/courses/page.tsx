@@ -36,15 +36,22 @@ export default async function CoursesPage({
     category?: string;
     level?: string;
     price?: string;
+    page?: string;
   }>;
 }) {
   const params = await searchParams;
-  const courses = await getSearchedCourses(
-    params.search,
-    params.category,
-    params.level,
-    params.price,
-  );
+  const coursesRes = await getSearchedCourses({
+    query: params.search,
+    category: params.category,
+    level: params.level as "BEGINNER" | "INTERMEDIATE" | "ADVANCED",
+    page: params.page ? parseInt(params.page, 10) : 1,
+    pageSize: 12,
+  });
+
+  const courses = coursesRes.success && coursesRes.data ? coursesRes.data.items : [];
+  const total = coursesRes.success && coursesRes.data ? coursesRes.data.total : 0;
+  const totalPages = coursesRes.success && coursesRes.data ? coursesRes.data.totalPages : 0;
+  const currentPage = coursesRes.success && coursesRes.data ? coursesRes.data.page : 1;
 
   return (
     <main className="min-h-screen bg-[#131313] text-[#e2e2e2]">

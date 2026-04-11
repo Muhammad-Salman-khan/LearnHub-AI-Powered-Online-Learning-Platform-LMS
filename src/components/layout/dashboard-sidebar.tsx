@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useSession, signOut } from "next-auth/react"; // ✅ NextAuth hooks for backend connection
 
 interface DashboardSidebarProps {
@@ -101,7 +102,7 @@ export function DashboardSidebar({ role, onClose }: DashboardSidebarProps) {
             {/* User Avatar - Shows Image if exists, else Initial */}
             <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold shrink-0 overflow-hidden">
               {session?.user?.image ? (
-                <img src={session.user.image} alt="profile" className="w-full h-full object-cover" />
+                <Image src={session.user.image} alt="profile" width={40} height={40} className="w-full h-full object-cover" />
               ) : (
                 userInitial
               )}

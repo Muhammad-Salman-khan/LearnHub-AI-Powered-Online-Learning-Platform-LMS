@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import { getCourseById, courseUpdateFields } from "@/server/action";
 import { DashboardSidebar } from "@/components/layout/dashboard-sidebar";
 import { DashboardNavbar } from "@/components/layout/dashboard-navbar";
@@ -86,6 +87,10 @@ export default function EditCoursePage() {
           return;
         }
         const course = result.data;
+        if (!course) {
+          setError("Course data unavailable");
+          return;
+        }
         setFormData({
           title: course.title || "",
           description: course.description || "",
@@ -96,7 +101,7 @@ export default function EditCoursePage() {
         });
         setThumbnail(course.thumbnail || null);
         setChapters(
-          course.chapters?.map((ch: any) => ({
+          course.chapters?.map((ch) => ({
             id: ch.id,
             title: ch.title || "",
             description: ch.description || "",
@@ -569,9 +574,11 @@ export default function EditCoursePage() {
                           className={`aspect-video rounded-lg border-2 overflow-hidden flex items-center justify-center ${thumbnailPreview || thumbnail ? "border-primary amber-glow" : "border-border bg-muted/30"}`}
                         >
                           {thumbnailPreview || thumbnail ? (
-                            <img
+                            <Image
                               src={thumbnailPreview || thumbnail!}
                               alt="Thumbnail"
+                              width={320}
+                              height={180}
                               className="w-full h-full object-cover"
                             />
                           ) : (

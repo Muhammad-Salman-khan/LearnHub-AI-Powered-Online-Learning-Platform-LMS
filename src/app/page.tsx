@@ -1,5 +1,3 @@
-"use client";
-
 /**
  * LearnHub - Homepage
  *
@@ -17,7 +15,7 @@
 
 import Link from "next/link";
 import Header from "@/components/themeProvider/Header/page";
-import { useState } from "react";
+import Image from "next/image";
 
 export default function HomePage() {
   return (
@@ -75,7 +73,7 @@ export default function HomePage() {
           {/* Primary Action Buttons */}
           <div className="flex flex-col sm:flex-row items-start gap-4 mb-12 sm:mb-16 w-full sm:w-auto">
             <Link
-              href="/auth/signup"
+              href="/signup"
               className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-gradient-to-br from-[#ffb690] to-[#f97316] text-[#131313] rounded-lg font-medium hover:opacity-90 transition-all shadow-[0_0_40px_rgba(249,115,22,0.08)]"
             >
               Start Learning
@@ -132,16 +130,20 @@ export default function HomePage() {
               {/* Mentor avatars stack */}
               <div className="flex -space-x-2">
                 <div className="w-10 h-10 rounded-full bg-muted border-2 border-background overflow-hidden flex-shrink-0">
-                  <img
+                  <Image
                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFmkhjDE4bYxGTJjNGYN9GfdGEH_eKWRhVbIojtYt4bVYhqdtmwt4fXYkIQay_oaTq4K7DraJTLtUpQk2zr3ZlSA2Wfv2nhxJoIkGXW0yGirkySKXkLjQvv0qUF0I80OcTSNUOWAqjrJ8VL4GAFfrC9j6-hWSrh7ABRvwYknFDi6-YotHjt5Wf4UOehONWEA6S6TJdPrGkhdICm-xQqwbjmtY619z79STLQDwcMO57P9Dx9nYTEGjzQcUGhWW3O8kNabtmE5i8pU4k"
                     alt="Mentor"
+                    width={40}
+                    height={40}
                     className="w-full h-full object-cover"
                   />
                 </div>
                 <div className="w-10 h-10 rounded-full bg-muted border-2 border-background overflow-hidden flex-shrink-0">
-                  <img
+                  <Image
                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuCz1CfV0oXCShGy1Xs0mj4EQJG76ujbDpIVcyqib8YVcWgRXPRmjdIllWB1Ful7gRFt_Su8Uab1rCY_dK--NGOHf4mmt20xQQm7D5zoGFQMINXwVv85Ie1DDEd7T0bf0StNdceL9TyTRsoCKKbc52HRhWRzZNGPkgy_Rg9ttmnmDfJwu1zNX2Hb7KTU8VHJu0aG73At24yySYUghj-2cGXSGiQAwrxRo2Ye-gdr8EhGHwzKvexTL4N_Dron9U3hUgTrmdwKow-MAS-s"
                     alt="Mentor"
+                    width={40}
+                    height={40}
                     className="w-full h-full object-cover"
                   />
                 </div>
@@ -170,9 +172,11 @@ export default function HomePage() {
               {/* Engine Card: Obsidian */}
               <div className="glass-card rounded-xl p-6 border border-border/50 flex items-center gap-4">
                 <div className="w-24 h-24 rounded-lg overflow-hidden border border-border flex-shrink-0">
-                  <img
+                  <Image
                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuCr6Uw1MI_Opd9B6wtL3Bgv97lzh3l7EEAT3tTMFYDKpULkoU-v85d8fausafoIoY9JPaNcGEv9Lu5nrz6ldQCHTUruO-tpfXsPoU8dy38DA_RYXySf7shIGYN08KDY6skVhmo9ZU1ykDAnrGJpbn00Rs-EZt4CcCymXmw_rG1JR-Gz4ImBn-0ndMQfrVKDQeZkXgLdxUKn__NC7gBPmur4MODPmgvfTY6GZlYKBh26tA7_OFFwZsiZVYhF8NarjYMJhuMi87MeCV2a"
                     alt="Obsidian Engine"
+                    width={96}
+                    height={96}
                     className="w-full h-full object-cover"
                   />
                 </div>
@@ -293,10 +297,12 @@ export default function HomePage() {
               className="glass-card rounded-xl overflow-hidden border border-border/50 hover:border-primary/50 transition-all group block"
             >
               <div className="h-48 overflow-hidden relative">
-                <img
+                <Image
                   src="https://lh3.googleusercontent.com/aida-public/AB6AXuD0TfcVMpP5qQqa2bT0qjOp-YnXgVpcuO9x0YzHEgiStUd9nl7iIWiVUzcwClFy4sXwe7OBlFhI8HQLRZaQkLZBsLFosDgnnY09aWsae4y1iRixamkUMiiO0EpV4gABESa6ojuhPFn9tp5mOxkDZaLslYXf_iv4jByQk4S_bW7GuaxQFq8qXG79QYTgUbNnjUqaGCbAE3iGgNh-VV4-4dDhRic0harrWhyBkbr1hRKPsLiqyXNSFzTatbIQkkxe4Q6h2phFtSQc1cR5"
                   alt="Quantum Security Protocols"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="object-cover group-hover:scale-105 transition-transform"
                 />
                 <span className="absolute bottom-4 left-4 inline-flex px-2 py-1 rounded text-xs font-medium bg-primary text-primary-foreground">
                   Advanced
@@ -325,10 +331,12 @@ export default function HomePage() {
               className="glass-card rounded-xl overflow-hidden border border-border/50 hover:border-primary/50 transition-all group block"
             >
               <div className="h-48 overflow-hidden relative">
-                <img
+                <Image
                   src="https://lh3.googleusercontent.com/aida-public/AB6AXuAS-9XTd03DQVROdxMRSJ-NDiL1Uyc-9SbOG6ItVaXP54kpK_t0hp5gbNfZNhLUaY2EayGMDngBrq1r6bXJ99E_Q_5S2E1Gnk4jeq3Hx5DB6iqCGs7yy_iOOmsUXD2DVWpZ81plZoV8REvtb3gUf53HekxfwPRmFAatG0AmehExyG277JUG_Rnqz8YkIp-RYCW7Qy4-a4XzTxNOb3IgcIUM3mVM6amzdI0WopliMwiiHMBwgi774g6gP1QeZ0Q2Glq7ZKTyMhPK_PWn"
                   alt="Neural Network Architecture"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="object-cover group-hover:scale-105 transition-transform"
                 />
                 <span className="absolute bottom-4 left-4 inline-flex px-2 py-1 rounded text-xs font-medium bg-primary text-primary-foreground">
                   Core
@@ -357,10 +365,12 @@ export default function HomePage() {
               className="glass-card rounded-xl overflow-hidden border border-border/50 hover:border-primary/50 transition-all group block"
             >
               <div className="h-48 overflow-hidden relative">
-                <img
+                <Image
                   src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzCCPVqN3aRtTG7ys3Kc8t7AQUZhpX3anDrvXj9ov0MKMkJ1UggeLCzUH8Fbd73pGBPlepo7X4gX-k6IA0_TVFQX5ekerwggY1aVPTLoRO7FXfcziUHkjdDoPxsaIZDszNQuLDu9IvGCydNt1EnZjBw20aGh135TRccIB--BLVdXxFPjF04DkwLqmUlmh9QorW-7nZ1D5o8wr20S3mWJFMXJLJ37aQR04n78GKe-us0YP8En2vmx7QrFWIc454TU2iWRXopBtJyyP1"
                   alt="Systematic Algo-Trading"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="object-cover group-hover:scale-105 transition-transform"
                 />
                 <span className="absolute bottom-4 left-4 inline-flex px-2 py-1 rounded text-xs font-medium bg-primary text-primary-foreground">
                   Strategic
@@ -431,7 +441,7 @@ export default function HomePage() {
             - No kinetic-gradient or intense glow per design feedback
           */}
           <Link
-            href="/auth/signup"
+            href="/signup"
             className="inline-flex items-center justify-center w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-5 bg-primary text-primary-foreground rounded-lg font-bold text-base sm:text-lg hover:bg-primary/90 transition-colors shadow-[0_2px_10px_rgba(249,115,22,0.15)] hover:shadow-[0_4px_16px_rgba(249,115,22,0.25)]"
           >
             SECURE YOUR SPOT

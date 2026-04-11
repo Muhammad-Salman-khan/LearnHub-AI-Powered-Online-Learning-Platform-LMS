@@ -1,9 +1,8 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import type { RecentCourseDTO } from "@/types/dashboard";
 
-interface Course {
+interface DisplayCourse {
   id: string;
   title: string;
   instructor: string;
@@ -13,11 +12,20 @@ interface Course {
   students: number;
 }
 
-interface RecentCoursesTableProps {
-  courses: Course[];
+function toDisplayCourse(c: RecentCourseDTO): DisplayCourse {
+  return {
+    id: c.id,
+    title: c.title,
+    instructor: c.instructorName || "Unknown",
+    category: c.category,
+    status: c.isPublished ? "Published" : "Draft",
+    createdDate: new Date(c.createdAt).toLocaleDateString(),
+    students: 0,
+  };
 }
 
-export function RecentCoursesTable({ courses }: RecentCoursesTableProps) {
+export function RecentCoursesTable({ courses }: { courses: RecentCourseDTO[] }) {
+  const displayCourses = courses.map(toDisplayCourse);
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       month: "short",
@@ -42,13 +50,13 @@ export function RecentCoursesTable({ courses }: RecentCoursesTableProps) {
             <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
               Recent Courses
               <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-                {courses.length}
+                {displayCourses.length}
               </span>
             </h2>
             <p className="text-xs text-muted-foreground">Last 10 created</p>
           </div>
         </div>
-        <Link href="/dashboard/admin/courses">
+        <Link href="/dashboard/admin/displayCourses">
           <Button
             variant="ghost"
             size="sm"
@@ -84,7 +92,7 @@ export function RecentCoursesTable({ courses }: RecentCoursesTableProps) {
             </tr>
           </thead>
           <tbody className="divide-y divide-border/50">
-            {courses.map((course, index) => (
+            {displayCourses.map((course, index) => (
               <tr
                 key={course.id}
                 className="hover:bg-primary/5 transition-all duration-300 group/row"
