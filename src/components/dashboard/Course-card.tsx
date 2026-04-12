@@ -32,8 +32,16 @@ export default function CourseCard({
     if (course.lastChapterId) {
       router.push(`/courses/${course.id}/learn/${course.lastChapterId}`);
     } else {
+      // Navigate to course page to start from first chapter
       router.push(`/courses/${course.id}`);
     }
+  };
+
+  // Button text based on progress
+  const getButtonText = () => {
+    if (course.progress === 0) return "Start Course";
+    if (course.progress === 100) return "Review Course";
+    return "Resume Course";
   };
 
   return (
@@ -120,11 +128,7 @@ export default function CourseCard({
           onClick={handleContinue}
           className="mt-3 sm:mt-4 w-full kinetic-gradient text-white border-0 hover:opacity-90 text-xs sm:text-sm py-1.5 sm:py-2 h-auto"
         >
-          {course.progress === 0
-            ? "Start Course"
-            : course.progress === 100
-              ? "Review Course"
-              : "Continue Learning"}
+          {getButtonText()}
         </Button>
       </div>
     </Card>

@@ -69,7 +69,7 @@ export function RecentUsersTable({ users }: { users: RecentUserDTO[] }) {
             </p>
           </div>
         </div>
-        <Link href="/dashboard/admin/displayUsers">
+        <Link href="/dashboard/admin/users">
           <Button
             variant="ghost"
             size="sm"

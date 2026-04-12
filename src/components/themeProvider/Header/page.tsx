@@ -2,19 +2,15 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import LogInIcon from "@/components/ui/loginicon";
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  // 🔹 DUMMY USER DATA (Backend dev ke liye placeholder)
-  const dummyUser = {
-    isLoggedIn: false, // ✅ Change to 'true' when backend ready
-    name: "User",
-    email: "user@example.com",
-    avatar: "/placeholder-avatar.jpg",
-  };
+  const { data: session, status } = useSession();
+  const isLoggedIn = status === "authenticated";
+  const userName = session?.user?.name || "User";
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-xl border-b border-border/50">
@@ -48,8 +44,7 @@ export default function Header() {
             {[
               { name: "Home", href: "/" },
               { name: "Courses", href: "/courses" },
-              { name: "Mentors", href: "#mentors" },
-              { name: "Pricing", href: "#pricing" },
+              { name: "Mentors", href: "/mentors" },
             ].map((item) => (
               <Link
                 key={item.name}
@@ -61,10 +56,9 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* Right: 🔹 LOGIN / PROFILE BUTTON */}
+          {/* Right: LOGIN / PROFILE BUTTON */}
           <div className="flex items-center gap-4">
-            {/* ✅ Desktop: Show Login Button if NOT logged in */}
-            {!dummyUser.isLoggedIn ? (
+            {!isLoggedIn ? (
               <Button
                 asChild
                 variant="default"
@@ -78,31 +72,52 @@ export default function Header() {
                 </Link>
               </Button>
             ) : (
-              /* ✅ Desktop: Show Profile if logged in */
               <Link
-                href="/dashboard"
+                href={
+                  session?.user?.role === "ADMIN"
+                    ? "/dashboard/admin"
+                    : session?.user?.role === "INSTRUCTOR"
+                      ? "/dashboard/instructor"
+                      : "/dashboard/student"
+                }
                 className="hidden md:flex items-center gap-2 p-1 pr-3 rounded-full border border-border hover:border-[#f97316] transition-colors"
               >
-                <div className="w-8 h-8 rounded-full bg-[#f97316]/20 flex items-center justify-center">
-                  <span className="text-[#f97316] font-semibold text-sm">
-                    {dummyUser.name.charAt(0)}
-                  </span>
+                <div className="w-8 h-8 rounded-full bg-[#f97316]/20 flex items-center justify-center overflow-hidden">
+                  {session?.user?.image ? (
+                    <img
+                      src={session.user.image}
+                      alt={userName}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-[#f97316] font-semibold text-sm">
+                      {userName.charAt(0).toUpperCase()}
+                    </span>
+                  )}
                 </div>
                 <span className="text-sm font-medium text-foreground">
-                  {dummyUser.name}
+                  {userName}
                 </span>
               </Link>
             )}
 
-            {/* ✅ Mobile: Icon Button */}
+            {/* Mobile: Icon Button */}
             <Link
-              href={!dummyUser.isLoggedIn ? "/login" : "/dashboard"}
+              href={
+                !isLoggedIn
+                  ? "/login"
+                  : session?.user?.role === "ADMIN"
+                    ? "/dashboard/admin"
+                    : session?.user?.role === "INSTRUCTOR"
+                      ? "/dashboard/instructor"
+                      : "/dashboard/student"
+              }
               className="md:hidden p-2 text-[#f97316] hover:bg-muted rounded-full transition-colors"
-              aria-label={!dummyUser.isLoggedIn ? "Login" : "Profile"}
+              aria-label={!isLoggedIn ? "Login" : "Profile"}
               style={{ filter: "drop-shadow(0 0 8px rgba(249, 115, 22, 0.5))" }}
             >
               <span className="material-symbols-outlined text-xl">
-                {!dummyUser.isLoggedIn ? "login" : "account_circle"}
+                {!isLoggedIn ? "login" : "account_circle"}
               </span>
             </Link>
           </div>
@@ -115,8 +130,7 @@ export default function Header() {
               {[
                 { name: "Home", href: "/" },
                 { name: "Courses", href: "/courses" },
-                { name: "Mentors", href: "#mentors" },
-                { name: "Pricing", href: "#pricing" },
+                { name: "Mentors", href: "/mentors" },
               ].map((item) => (
                 <Link
                   key={item.name}
@@ -128,8 +142,7 @@ export default function Header() {
                 </Link>
               ))}
 
-              {/* ✅ Mobile Menu: Login Button */}
-              {!dummyUser.isLoggedIn ? (
+              {!isLoggedIn ? (
                 <Button
                   asChild
                   variant="outline"
@@ -143,7 +156,6 @@ export default function Header() {
                   </Link>
                 </Button>
               ) : (
-                /* ✅ Mobile Menu: Profile Link */
                 <Button
                   asChild
                   variant="default"
@@ -152,7 +164,16 @@ export default function Header() {
                   style={{ backgroundColor: "#f97316", color: "white" }}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  <Link href="/dashboard" className="flex items-center justify-center gap-1.5">
+                  <Link
+                    href={
+                      session?.user?.role === "ADMIN"
+                        ? "/dashboard/admin"
+                        : session?.user?.role === "INSTRUCTOR"
+                          ? "/dashboard/instructor"
+                          : "/dashboard/student"
+                    }
+                    className="flex items-center justify-center gap-1.5"
+                  >
                     <span className="material-symbols-outlined text-base">
                       dashboard
                     </span>

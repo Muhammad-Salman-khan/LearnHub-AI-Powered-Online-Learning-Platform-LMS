@@ -339,6 +339,12 @@ export const getAllInstructors = async (page = 1, pageSize = 20) => {
     const [data, total] = await Promise.all([
       prisma.user.findMany({
         where: { role: "INSTRUCTOR" },
+        include: {
+          courses: {
+            where: { isPublished: true },
+            orderBy: { rating: "desc" },
+          },
+        },
         skip,
         take: pageSize,
       }),
@@ -347,6 +353,41 @@ export const getAllInstructors = async (page = 1, pageSize = 20) => {
     if (data.length === 0) {
       return { success: false, error: `No instructors found` };
     }
+    return {
+      success: true,
+      data: {
+        items: data,
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+      },
+    };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "Something went wrong" };
+  }
+};
+
+// Get all instructors (public - no auth required)
+export const getAllInstructorsPublic = async (page = 1, pageSize = 100) => {
+  try {
+    const skip = (page - 1) * pageSize;
+    const [data, total] = await Promise.all([
+      prisma.user.findMany({
+        where: { role: "INSTRUCTOR" },
+        include: {
+          courses: {
+            where: { isPublished: true },
+            orderBy: { rating: "desc" },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: pageSize,
+      }),
+      prisma.user.count({ where: { role: "INSTRUCTOR" } }),
+    ]);
     return {
       success: true,
       data: {
@@ -640,3 +681,109 @@ export const getCourseProgress = async (userId: string, courseId: string) => {
   }
 };
 // Get course progress summary (end!)
+
+// ─────────────────────────────────────────────────────────────
+// ADMIN COURSE MANAGEMENT ACTIONS
+// ─────────────────────────────────────────────────────────────
+
+// Unpublish/Publish a course (Admin only)
+export const toggleCoursePublish = async (courseId: string) => {
+  const admin = await roleChecker("ADMIN");
+  try {
+    const course = await prisma.course.findUnique({ where: { id: courseId } });
+    if (!course) return { success: false, error: "Course not found" };
+
+    const updated = await prisma.course.update({
+      where: { id: courseId },
+      data: { isPublished: !course.isPublished },
+    });
+
+    revalidatePath("/dashboard/admin/courses");
+    revalidatePath("/courses");
+    return {
+      success: true,
+      message: updated.isPublished ? "Course published" : "Course unpublished",
+    };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "Something went wrong" };
+  }
+};
+
+// Delete a course (Admin only - no ownership check)
+export const deleteCourseByAdmin = async (courseId: string) => {
+  const admin = await roleChecker("ADMIN");
+  try {
+    // Delete related progress records
+    await prisma.progress.deleteMany({
+      where: {
+        chapter: {
+          courseId,
+        },
+      },
+    });
+
+    // Delete related chapters
+    await prisma.chapter.deleteMany({
+      where: { courseId },
+    });
+
+    // Delete related enrollments
+    await prisma.enrollment.deleteMany({
+      where: { courseId },
+    });
+
+    // Delete the course
+    await prisma.course.delete({
+      where: { id: courseId },
+    });
+
+    revalidatePath("/dashboard/admin/courses");
+    revalidatePath("/courses");
+    return { success: true, message: "Course deleted successfully" };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "Something went wrong" };
+  }
+};
+
+// Get all courses with enrollment counts (Admin only)
+export const getAllCoursesWithEnrollments = async (page = 1, pageSize = 100) => {
+  const admin = await roleChecker("ADMIN");
+  try {
+    const skip = (page - 1) * pageSize;
+    const [courses, total] = await Promise.all([
+      prisma.course.findMany({
+        include: {
+          _count: {
+            select: { enrollments: true },
+          },
+          instructor: {
+            select: { name: true },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: pageSize,
+      }),
+      prisma.course.count(),
+    ]);
+
+    return {
+      success: true,
+      data: {
+        items: courses.map((course) => ({
+          ...course,
+          students: course._count.enrollments,
+        })),
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+      },
+    };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "Something went wrong" };
+  }
+};

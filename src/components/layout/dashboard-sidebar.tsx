@@ -29,8 +29,6 @@ const sidebarLinks = {
     { label: "Overview", href: "/dashboard/admin", icon: "dashboard" },
     { label: "Users", href: "/dashboard/admin/users", icon: "group" },
     { label: "Courses", href: "/dashboard/admin/courses", icon: "library_books" },
-    { label: "Analytics", href: "/dashboard/admin/analytics", icon: "analytics", phase: 2 },
-    { label: "Reviews", href: "/dashboard/admin/reviews", icon: "rate_review", phase: 2 },
   ],
 };
 

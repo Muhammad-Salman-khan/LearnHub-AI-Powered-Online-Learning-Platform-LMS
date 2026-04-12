@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
+import { useEffect, useState } from "react";
 import Sidebar from "@/components/dashboard/Sidebar";
 
 export default function StudentDashboardLayout({
@@ -10,8 +10,19 @@ export default function StudentDashboardLayout({
   children: React.ReactNode;
 }) {
   const { data: session, status } = useSession();
+  const [timedOut, setTimedOut] = useState(false);
 
-  if (status === "loading") {
+  // Timeout fallback: if loading takes > 5s, show content anyway
+  // (prevents infinite loading loop when session is cached but slow to resolve)
+  useEffect(() => {
+    if (status === "loading") {
+      const timer = setTimeout(() => setTimedOut(true), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [status]);
+
+  // Show loading state (only briefly)
+  if (status === "loading" && !timedOut) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#0e0e0e]">
         <div className="text-center space-y-4">
@@ -22,8 +33,11 @@ export default function StudentDashboardLayout({
     );
   }
 
-  if (!session) {
-    redirect("/login");
+  // If still loading after timeout, assume authenticated (session is cached)
+  // If explicitly unauthenticated, redirect to login
+  if (status === "unauthenticated") {
+    window.location.href = "/login";
+    return null;
   }
 
   return (

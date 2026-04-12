@@ -61,26 +61,27 @@ export default function LoginPage() {
       const res = await signIn("credentials", {
         email: email.toLowerCase(),
         password: password,
-        redirect: false, // Hum khud redirect handle karenge
+        redirect: false,
       });
 
       if (res?.ok) {
-        // ✅ Role-based redirection fetch karne ke liye session check
+        // Wait for session to be established
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Fetch session to get user role
         const sessionRes = await fetch("/api/auth/session");
         const session = await sessionRes.json();
 
-        const userRole = session?.user?.role?.toLowerCase();
+        const userRole = session?.user?.role?.toUpperCase();
 
-        // ✅ Role ke hisab se dashboard set karna
-        if (userRole === "admin") {
-          router.push("/dashboard/admin");
-        } else if (userRole === "instructor") {
-          router.push("/dashboard/instructor");
+        // Role-based redirection
+        if (userRole === "ADMIN") {
+          window.location.href = "/dashboard/admin";
+        } else if (userRole === "INSTRUCTOR") {
+          window.location.href = "/dashboard/instructor";
         } else {
-          router.push("/dashboard/student");
+          window.location.href = "/dashboard/student";
         }
-
-        router.refresh();
       } else {
         setError(res?.error || "Invalid Credentials");
       }

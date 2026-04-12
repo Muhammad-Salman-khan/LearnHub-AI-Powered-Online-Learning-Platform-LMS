@@ -1,14 +1,14 @@
 "use client";
 
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { FeatureToggle } from "./feature-toggle";
 
 interface Course {
   id: string;
   title: string;
   instructor: string;
   category: string;
-  status: "Published" | "Draft";
+  status: "Published" | "Unpublished" | "Draft";
   createdDate: string;
   students: number;
   isFeatured: boolean;
@@ -20,7 +20,6 @@ interface CourseTableProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
-  onFeatureToggle: (courseId: string, isFeatured: boolean) => void;
   onUnpublishClick: (course: Course) => void;
   onDeleteClick: (course: Course) => void;
 }
@@ -31,7 +30,6 @@ export function CourseTable({
   currentPage,
   totalPages,
   onPageChange,
-  onFeatureToggle,
   onUnpublishClick,
   onDeleteClick,
 }: CourseTableProps) {
@@ -101,9 +99,12 @@ export function CourseTable({
                         {course.title.charAt(0)}
                       </div>
                       <div className="min-w-0">
-                        <p className="font-medium text-foreground truncate max-w-[200px] group-hover/row:text-primary transition-colors">
+                        <Link 
+                          href={`/courses/${course.id}`}
+                          className="font-medium text-foreground truncate max-w-[200px] group-hover/row:text-primary transition-colors hover:underline cursor-pointer"
+                        >
                           {course.title}
-                        </p>
+                        </Link>
                         <p className="text-xs text-muted-foreground lg:hidden">
                           {course.instructor}
                         </p>
@@ -153,23 +154,16 @@ export function CourseTable({
                   </td>
                   <td className="p-4">
                     <div className="flex items-center justify-end gap-2">
-                      <FeatureToggle
-                        isFeatured={course.isFeatured}
-                        courseId={course.id}
-                        onToggle={onFeatureToggle}
-                      />
-                      {course.status === "Published" && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onUnpublishClick(course)}
-                          className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:border-destructive/50 transition-all duration-300 hover:scale-105"
-                        >
-                          <span className="material-symbols-outlined text-base">
-                            visibility_off
-                          </span>
-                        </Button>
-                      )}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onUnpublishClick(course)}
+                        className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:border-destructive/50 transition-all duration-300 hover:scale-105"
+                      >
+                        <span className="material-symbols-outlined text-base">
+                          {course.status === "Published" ? "visibility_off" : "visibility"}
+                        </span>
+                      </Button>
                       <Button
                         variant="outline"
                         size="sm"

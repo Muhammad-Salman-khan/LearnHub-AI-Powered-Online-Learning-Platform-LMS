@@ -138,10 +138,10 @@ export function ErrorDisplay({
               </span>
             </button>
 
-            {/* Secondary Action - Return Home */}
-            <Link
-              href="/"
-              className="group w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 sm:px-10 py-4 sm:py-5 text-[#e2e2e2] font-medium text-base sm:text-lg transition-all duration-300 hover:text-[#F97316] border border-[#584237]/15 hover:border-[#F97316]/30 rounded-md"
+            {/* Secondary Action - Go Back */}
+            <button
+              onClick={() => router.back()}
+              className="group w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 sm:px-10 py-4 sm:py-5 text-[#e2e2e2] font-medium text-base sm:text-lg transition-all duration-300 hover:text-[#F97316] border border-[#584237]/15 hover:border-[#F97316]/30 rounded-md cursor-pointer"
             >
               <svg
                 className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-300"
@@ -156,8 +156,8 @@ export function ErrorDisplay({
                   d="M10 19l-7-7m0 0l7-7m-7 7h18"
                 />
               </svg>
-              <span>RETURN HOME</span>
-            </Link>
+              <span>GO BACK</span>
+            </button>
           </div>
         </div>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 interface Chapter {
   id: string;
@@ -15,6 +16,7 @@ interface Chapter {
 
 interface CourseCurriculumProps {
   chapters: Chapter[];
+  courseId: string;
 }
 
 /**
@@ -26,7 +28,7 @@ interface CourseCurriculumProps {
  * - Surface Hierarchy: Alternating backgrounds for chapters
  * - Card Hover: Tonal shift on chapter rows
  */
-export function CourseCurriculum({ chapters }: CourseCurriculumProps) {
+export function CourseCurriculum({ chapters, courseId }: CourseCurriculumProps) {
   const [expandedChapter, setExpandedChapter] = useState<string | null>(
     chapters[0]?.id || null,
   );
@@ -97,7 +99,7 @@ export function CourseCurriculum({ chapters }: CourseCurriculumProps) {
               </span>
             </button>
 
-            {/* Chapter Details (Expandable) - Uses tonal shift, not border */}
+            {/* Chapter Details (Expandable) */}
             {expandedChapter === chapter.id && (
               <div className="bg-[#0e0e0e] p-4 pl-12 space-y-3">
                 {chapter.description && (
@@ -110,14 +112,21 @@ export function CourseCurriculum({ chapters }: CourseCurriculumProps) {
                     {chapter.content}
                   </div>
                 )}
-                {chapter.videoUrl && (
+                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 text-sm text-[#e0c0b1]">
                     <span className="material-symbols-outlined text-[#f97316]">
                       play_circle
                     </span>
-                    <span>Video lesson • ~15 min</span>
+                    <span>{chapter.videoUrl ? "Video lesson" : "Reading"} • ~15 min</span>
                   </div>
-                )}
+                  <Link
+                    href={`/courses/${courseId}/learn/${chapter.id}`}
+                    className="inline-flex items-center gap-1 text-sm font-medium text-[#f97316] hover:text-[#ffb690] transition-colors"
+                  >
+                    Start Lesson
+                    <span className="material-symbols-outlined text-sm">arrow_right_alt</span>
+                  </Link>
+                </div>
               </div>
             )}
           </div>

@@ -8,6 +8,7 @@ interface StatusFilterTabsProps {
 const tabs = [
   { label: "All", value: "all" },
   { label: "Published", value: "published", color: "text-green-400" },
+  { label: "Unpublished", value: "unpublished", color: "text-yellow-400" },
   { label: "Draft", value: "draft", color: "text-muted-foreground" },
 ];
 

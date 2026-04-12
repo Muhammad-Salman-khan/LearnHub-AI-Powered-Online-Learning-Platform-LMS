@@ -7,10 +7,7 @@
     "build": "npx prisma generate && next build",
     "start": "next start",
     "lint": "eslint .",
-    "analyze": "ANALYZE=true npx prisma generate && next build",
     "type-check": "tsc --noEmit --pretty",
-    "bundle-check": "node scripts/bundle-check.js",
-    "test:e2e": "playwright test",
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
@@ -19,7 +16,6 @@
     "@prisma/adapter-pg": "^7.6.0",
     "@prisma/client": "^7.6.0",
     "ai": "^6.0.138",
-    "axios": "^1.14.0",
     "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "cloudinary": "^2.9.0",
