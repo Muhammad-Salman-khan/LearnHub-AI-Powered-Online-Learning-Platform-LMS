@@ -3,10 +3,15 @@ import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider, {
   CredentialInput,
 } from "next-auth/providers/credentials";
+import { Role } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import FindUser from "@/services/FindEmail";
 import { prisma } from "@/lib/prisma";
-const GENERIC_ERROR = "Invalid email or password.";
+
+const DEFAULT_ROLE = Role.STUDENT;
+
+const normalizeEmail = (email: string): string => email.trim().toLowerCase();
+
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
@@ -28,71 +33,117 @@ export const authOptions: NextAuthOptions = {
       ) {
         try {
           if (!credentials?.email || !credentials?.password) {
-            throw new Error(GENERIC_ERROR);
+            return null;
           }
-          // if not worked use credentials?.identifier
-          const user = await FindUser(credentials?.email);
-          if (!user) {
-            throw new Error(`no user found with this email && password`);
+
+          const user = await FindUser(normalizeEmail(credentials.email));
+
+          if (!user?.password) {
+            return null;
           }
-          if (!user.password) throw new Error(GENERIC_ERROR);
+
           const isValid = await bcrypt.compare(
-            credentials?.password,
-            user?.password,
+            credentials.password,
+            user.password,
           );
+
           if (!isValid) {
-            throw new Error(GENERIC_ERROR);
+            return null;
           }
-          return user;
-        } catch (error: any) {
-          console.log(error);
+
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            image: user.image,
+            role: user.role,
+          };
+        } catch (error) {
+          console.error("Credentials authorize error:", error);
           return null;
         }
       },
     }),
   ],
   callbacks: {
-    async signIn({ user, account }: any) {
-      if (account?.provider === "google") {
-        try {
-          const existAcc = await FindUser(user.email);
-
-          if (!existAcc) {
-            await prisma.user.create({
-              data: {
-                name: user.name,
-                email: user.email,
-                image: user?.image,
-                password: "",
-                role: "STUDENT",
-              },
-            });
-          }
-          return true;
-        } catch (error) {
-          console.log("Google signIn DB error:", error);
-          return false;
-        }
+    async signIn({ user, account }) {
+      if (account?.provider !== "google") {
+        return true;
       }
-      return user;
+
+      if (!user.email) {
+        return false;
+      }
+
+      try {
+        const normalizedEmail = normalizeEmail(user.email);
+        const existingAccount = await FindUser(normalizedEmail);
+
+        if (!existingAccount) {
+          await prisma.user.create({
+            data: {
+              name: user.name ?? "Google User",
+              email: normalizedEmail,
+              image: user.image ?? null,
+              password: "",
+              role: DEFAULT_ROLE,
+            },
+          });
+        }
+
+        return true;
+      } catch (error) {
+        console.error("Google sign-in database error:", error);
+        return false;
+      }
     },
     async jwt({ token, user }) {
+      const emailToLookup =
+        typeof user?.email === "string"
+          ? normalizeEmail(user.email)
+          : typeof token.email === "string"
+            ? normalizeEmail(token.email)
+            : null;
+
+      if (emailToLookup) {
+        try {
+          const existingUser = await FindUser(emailToLookup);
+
+          if (existingUser) {
+            token.id = existingUser.id;
+            token.name = existingUser.name;
+            token.email = existingUser.email;
+            token.role = existingUser.role;
+            token.picture = existingUser.image;
+            return token;
+          }
+        } catch (error) {
+          console.error("JWT callback user lookup error:", error);
+        }
+      }
+
       if (user) {
         token.id = user.id;
         token.name = user.name;
         token.email = user.email;
-        token.role = user?.role;
-        token.picture = user?.image;
+        token.role = user.role ?? DEFAULT_ROLE;
+        token.picture = user.image ?? null;
       }
+
       return token;
     },
     async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id as string;
-        session.user.email = token.email as string;
-        session.user.name = token.name as string;
-        session.user.role = token.role as string;
+      if (!session.user) {
+        return session;
       }
+
+      session.user.id = typeof token.id === "string" ? token.id : "";
+      session.user.email = typeof token.email === "string" ? token.email : null;
+      session.user.name = typeof token.name === "string" ? token.name : null;
+      session.user.role = token.role ?? DEFAULT_ROLE;
+      session.user.image =
+        typeof token.picture === "string" ? token.picture : null;
+
       return session;
     },
   },
@@ -102,5 +153,4 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60,
   },
   secret: process.env.NEXTAUTH_SECRET,
-  // useSecureCookies: true,
 };

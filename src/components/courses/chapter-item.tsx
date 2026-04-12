@@ -1,5 +1,3 @@
-"use client";
-
 interface ChapterItemProps {
   chapter: {
     id: string;

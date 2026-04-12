@@ -4,6 +4,8 @@ import InstructorNameBadge from "@/components/InstructorNameBadge";
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/option";
+import Image from "next/image";
+import Link from "next/link";
 
 interface PageProps {
   params: Promise<{ courseId: string }>;
@@ -72,12 +74,12 @@ export default async function CourseDetailPage({ params }: PageProps) {
           <span className="material-symbols-outlined text-sm">
             chevron_right
           </span>
-          <a
+          <Link
             href="/dashboard/instructor/courses"
             className="hover:text-primary transition-colors"
           >
             Courses
-          </a>
+          </Link>
           <span className="material-symbols-outlined text-sm">
             chevron_right
           </span>
@@ -91,9 +93,11 @@ export default async function CourseDetailPage({ params }: PageProps) {
           {/* Thumbnail */}
           {course?.thumbnail ?
             <div className="relative w-full h-64 sm:h-80 overflow-hidden">
-              <img
+              <Image
                 src={course.thumbnail}
                 alt={course.title}
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 100vw"
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
@@ -195,8 +199,8 @@ export default async function CourseDetailPage({ params }: PageProps) {
               {course?.chapters && course?.chapters?.length > 0 ?
                 <div className="space-y-3">
                   {course?.chapters
-                    .sort((a: any, b: any) => a.position - b.position)
-                    .map((chapter: any, index: number) => (
+                    .sort((a, b) => a.position - b.position)
+                    .map((chapter, index: number) => (
                       <div
                         key={chapter.id}
                         className="p-4 rounded-lg bg-card border border-border/50 hover:border-primary/30 transition-colors"

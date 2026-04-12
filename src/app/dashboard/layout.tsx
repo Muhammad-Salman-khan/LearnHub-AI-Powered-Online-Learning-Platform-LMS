@@ -1,9 +1,11 @@
+import AuthProvider from "@/components/AuthProvider";
+
 const layout = ({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) => {
-  return <div>{children}</div>;
+  return <AuthProvider>{children}</AuthProvider>;
 };
 
 export default layout;

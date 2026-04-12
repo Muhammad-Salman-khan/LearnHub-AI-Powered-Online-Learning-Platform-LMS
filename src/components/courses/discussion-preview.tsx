@@ -1,5 +1,3 @@
-"use client";
-
 export function DiscussionPreview() {
   return (
     <div className="space-y-3">

@@ -17,9 +17,7 @@ export function DeleteCourseDialog({
   course,
   onConfirm,
 }: DeleteCourseDialogProps) {
-  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(
-    null,
-  );
+  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
     setPortalContainer(document.body);
@@ -68,7 +66,7 @@ export function DeleteCourseDialog({
                 {course.title}
               </p>
               <p className="text-sm text-muted-foreground">
-                {course.students} enrolled students
+                {course.students || 0} enrolled students
               </p>
             </div>
           </div>

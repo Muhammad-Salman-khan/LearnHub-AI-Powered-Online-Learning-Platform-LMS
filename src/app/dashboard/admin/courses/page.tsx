@@ -17,10 +17,10 @@ export default async function AdminCoursesPage() {
     redirect("/dashboard/student");
   }
 
-  const response = await getAllCourses();
-  const dbCourses = (response.success ? response.data : []) ?? [];
+  const response = await getAllCourses(1, 100);
+  const dbCourses = (response.success && response.data ? response.data.items : []) ?? [];
 
-  const formattedCourses = dbCourses.map((course: any) => ({
+  const formattedCourses = dbCourses.map((course: { id: string; title: string; category: string; isPublished: boolean; createdAt: Date }) => ({
     id: course.id,
     title: course.title,
     instructor: "Instructor",

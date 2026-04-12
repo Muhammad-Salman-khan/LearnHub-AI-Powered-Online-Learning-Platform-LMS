@@ -9,7 +9,7 @@ export default function StudentDashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // const { session, status } = useSession();
+  const { data: session, status } = useSession();
 
   if (status === "loading") {
     return (
@@ -22,9 +22,9 @@ export default function StudentDashboardLayout({
     );
   }
 
-  // if (!session) {
-  //   redirect("/login");
-  // }
+  if (!session) {
+    redirect("/login");
+  }
 
   return (
     <div className="flex min-h-screen bg-[#0e0e0e] text-gray-200">

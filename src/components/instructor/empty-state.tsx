@@ -1,5 +1,3 @@
-"use client";
-
 import { CreateCourseBtn } from "./create-course-btn";
 
 export function EmptyState() {

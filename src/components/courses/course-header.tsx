@@ -1,5 +1,3 @@
-"use client";
-
 import Image from "next/image";
 
 interface CourseHeaderProps {
@@ -11,7 +9,7 @@ interface CourseHeaderProps {
     students?: number;
     category: string;
     level: string;
-    createdAt: string;
+    createdAt: Date | string;
   };
 }
 

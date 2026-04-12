@@ -5,9 +5,9 @@ import { useState } from "react";
 interface Chapter {
   id: string;
   title: string;
-  description?: string;
-  videoUrl?: string;
-  content?: string;
+  description?: string | null;
+  videoUrl?: string | null;
+  content?: string | null;
   position: number;
   isFree: boolean;
   isPublished: boolean;

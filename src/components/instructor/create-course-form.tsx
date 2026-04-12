@@ -3,6 +3,7 @@
 import { CreateCourse } from "@/server/action";
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import NextImage from "next/image";
 
 // ✅ shadcn/ui components
 import { Button } from "@/components/ui/button";
@@ -176,9 +177,11 @@ export function CreateCourseForm() {
               
               {thumbnailPreview ? (
                 <div className="relative">
-                  <img
+                  <NextImage
                     src={thumbnailPreview}
                     alt="Thumbnail preview"
+                    width={384}
+                    height={192}
                     className="max-h-48 mx-auto rounded-lg shadow-lg object-cover"
                   />
                   <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">

@@ -1,5 +1,3 @@
-"use client";
-
 interface Resource {
   name: string;
   type: string;
