@@ -56,7 +56,7 @@ export function RecentCoursesTable({ courses }: { courses: RecentCourseDTO[] }) 
             <p className="text-xs text-muted-foreground">Last 10 created</p>
           </div>
         </div>
-        <Link href="/dashboard/admin/displayCourses">
+        <Link href="/dashboard/admin/courses">
           <Button
             variant="ghost"
             size="sm"

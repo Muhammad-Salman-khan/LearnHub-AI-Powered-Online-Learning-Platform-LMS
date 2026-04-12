@@ -16,8 +16,13 @@
 import Link from "next/link";
 import Header from "@/components/themeProvider/Header/page";
 import Image from "next/image";
+import { getAllCourses } from "@/server/action";
 
-export default function HomePage() {
+export default async function HomePage() {
+  // Fetch real courses from DB for homepage display
+  const response = await getAllCourses(1, 6);
+  const courses = (response.success && response.data ? response.data.items : []) ?? [];
+
   return (
     <main className="min-h-screen bg-background text-foreground relative overflow-hidden">
       {/* 
@@ -77,12 +82,6 @@ export default function HomePage() {
               className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-gradient-to-br from-[#ffb690] to-[#f97316] text-[#131313] rounded-lg font-medium hover:opacity-90 transition-all shadow-[0_0_40px_rgba(249,115,22,0.08)]"
             >
               Start Learning
-            </Link>
-            <Link
-              href="#curriculum"
-              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-transparent text-[#e2e2e2] rounded-lg font-medium hover:bg-[#1b1b1b] transition-all border border-[#584237]/15"
-            >
-              Explore Curriculum
             </Link>
           </div>
         </div>
@@ -275,124 +274,74 @@ export default function HomePage() {
                 The Selection
               </p>
               <h2 className="font-heading text-3xl sm:text-4xl font-bold">
-                Advanced Track
+                Featured
                 <br />
-                <span className="text-muted-foreground">Modules.</span>
+                <span className="text-muted-foreground">Courses.</span>
               </h2>
             </div>
             <Link
-              href="#courses"
+              href="/courses"
               className="inline-flex items-center gap-1 text-primary font-medium hover:gap-2 transition-all"
             >
-              VIEW ALL TRACKS
+              VIEW ALL COURSES
               <span className="material-symbols-outlined">arrow_right_alt</span>
             </Link>
           </div>
 
-          {/* Course Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Course 1: Quantum Security */}
-            <Link
-              href="#"
-              className="glass-card rounded-xl overflow-hidden border border-border/50 hover:border-primary/50 transition-all group block"
-            >
-              <div className="h-48 overflow-hidden relative">
-                <Image
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuD0TfcVMpP5qQqa2bT0qjOp-YnXgVpcuO9x0YzHEgiStUd9nl7iIWiVUzcwClFy4sXwe7OBlFhI8HQLRZaQkLZBsLFosDgnnY09aWsae4y1iRixamkUMiiO0EpV4gABESa6ojuhPFn9tp5mOxkDZaLslYXf_iv4jByQk4S_bW7GuaxQFq8qXG79QYTgUbNnjUqaGCbAE3iGgNh-VV4-4dDhRic0harrWhyBkbr1hRKPsLiqyXNSFzTatbIQkkxe4Q6h2phFtSQc1cR5"
-                  alt="Quantum Security Protocols"
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  className="object-cover group-hover:scale-105 transition-transform"
-                />
-                <span className="absolute bottom-4 left-4 inline-flex px-2 py-1 rounded text-xs font-medium bg-primary text-primary-foreground">
-                  Advanced
-                </span>
-              </div>
-              <div className="p-6">
-                <h3 className="font-heading font-semibold text-lg mb-2">
-                  Quantum Security Protocols
-                </h3>
-                <p className="text-muted-foreground text-sm mb-4">
-                  Master the cryptographic systems that will define the next
-                  decade of digital sovereignty.
-                </p>
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>12 Weeks • Certification Incl.</span>
-                  <span className="material-symbols-outlined text-[14px]">
-                    north_east
-                  </span>
-                </div>
-              </div>
-            </Link>
-
-            {/* Course 2: Neural Network Architecture */}
-            <Link
-              href="#"
-              className="glass-card rounded-xl overflow-hidden border border-border/50 hover:border-primary/50 transition-all group block"
-            >
-              <div className="h-48 overflow-hidden relative">
-                <Image
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuAS-9XTd03DQVROdxMRSJ-NDiL1Uyc-9SbOG6ItVaXP54kpK_t0hp5gbNfZNhLUaY2EayGMDngBrq1r6bXJ99E_Q_5S2E1Gnk4jeq3Hx5DB6iqCGs7yy_iOOmsUXD2DVWpZ81plZoV8REvtb3gUf53HekxfwPRmFAatG0AmehExyG277JUG_Rnqz8YkIp-RYCW7Qy4-a4XzTxNOb3IgcIUM3mVM6amzdI0WopliMwiiHMBwgi774g6gP1QeZ0Q2Glq7ZKTyMhPK_PWn"
-                  alt="Neural Network Architecture"
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  className="object-cover group-hover:scale-105 transition-transform"
-                />
-                <span className="absolute bottom-4 left-4 inline-flex px-2 py-1 rounded text-xs font-medium bg-primary text-primary-foreground">
-                  Core
-                </span>
-              </div>
-              <div className="p-6">
-                <h3 className="font-heading font-semibold text-lg mb-2">
-                  Neural Network Architecture
-                </h3>
-                <p className="text-muted-foreground text-sm mb-4">
-                  Building scalable transformer models from the ground up using
-                  distributed GPU clusters.
-                </p>
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>8 Weeks • Lab Intense</span>
-                  <span className="material-symbols-outlined text-[14px]">
-                    north_east
-                  </span>
-                </div>
-              </div>
-            </Link>
-
-            {/* Course 3: Systematic Algo-Trading */}
-            <Link
-              href="#"
-              className="glass-card rounded-xl overflow-hidden border border-border/50 hover:border-primary/50 transition-all group block"
-            >
-              <div className="h-48 overflow-hidden relative">
-                <Image
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzCCPVqN3aRtTG7ys3Kc8t7AQUZhpX3anDrvXj9ov0MKMkJ1UggeLCzUH8Fbd73pGBPlepo7X4gX-k6IA0_TVFQX5ekerwggY1aVPTLoRO7FXfcziUHkjdDoPxsaIZDszNQuLDu9IvGCydNt1EnZjBw20aGh135TRccIB--BLVdXxFPjF04DkwLqmUlmh9QorW-7nZ1D5o8wr20S3mWJFMXJLJ37aQR04n78GKe-us0YP8En2vmx7QrFWIc454TU2iWRXopBtJyyP1"
-                  alt="Systematic Algo-Trading"
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  className="object-cover group-hover:scale-105 transition-transform"
-                />
-                <span className="absolute bottom-4 left-4 inline-flex px-2 py-1 rounded text-xs font-medium bg-primary text-primary-foreground">
-                  Strategic
-                </span>
-              </div>
-              <div className="p-6">
-                <h3 className="font-heading font-semibold text-lg mb-2">
-                  Systematic Algo-Trading
-                </h3>
-                <p className="text-muted-foreground text-sm mb-4">
-                  High-frequency trading engineering and market microstructure
-                  analysis for institutional environments.
-                </p>
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>16 Weeks • HFT Ready</span>
-                  <span className="material-symbols-outlined text-[14px]">
-                    north_east
-                  </span>
-                </div>
-              </div>
-            </Link>
-          </div>
+          {/* Course Cards Grid - Real courses from DB */}
+          {courses.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {courses.map((course: any) => (
+                <Link
+                  key={course.id}
+                  href={`/courses/${course.id}`}
+                  className="glass-card rounded-xl overflow-hidden border border-border/50 hover:border-primary/50 transition-all group block"
+                >
+                  <div className="h-48 overflow-hidden relative">
+                    {course.thumbnail ? (
+                      <Image
+                        src={course.thumbnail}
+                        alt={course.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        className="object-cover group-hover:scale-105 transition-transform"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-[#f97316]/20 to-[#1b1b1b] flex items-center justify-center">
+                        <span className="text-[#f97316] text-5xl font-bold">
+                          {course.title.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                    )}
+                    <span className="absolute bottom-4 left-4 inline-flex px-2 py-1 rounded text-xs font-medium bg-primary text-primary-foreground">
+                      {course.level}
+                    </span>
+                  </div>
+                  <div className="p-6">
+                    <h3 className="font-heading font-semibold text-lg mb-2">
+                      {course.title}
+                    </h3>
+                    <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
+                      {course.description}
+                    </p>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>{course.price === 0 ? "Free" : `Rs. ${course.price}`}</span>
+                      <span className="material-symbols-outlined text-[14px]">
+                        north_east
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 glass-card-no-glow rounded-xl">
+              <p className="text-muted-foreground">No courses available yet.</p>
+              <Link href="/courses" className="text-primary font-medium hover:underline mt-2 inline-block">
+                Browse All Courses
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 
@@ -482,10 +431,10 @@ export default function HomePage() {
 
             {/* Navigation Links */}
             <div className="flex flex-wrap items-center justify-center md:justify-end gap-4 sm:gap-6 text-sm">
-              {["Curriculum", "Mentors", "Pricing", "Privacy"].map((item) => (
+              {["Courses", "Mentors", "Privacy"].map((item) => (
                 <Link
                   key={item}
-                  href="#"
+                  href="/courses"
                   className="text-muted-foreground hover:text-primary transition-colors uppercase tracking-wider text-xs"
                 >
                   {item}

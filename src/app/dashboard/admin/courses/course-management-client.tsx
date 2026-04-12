@@ -5,7 +5,7 @@ import { CourseSearchBar } from "@/components/admin/course/course-search-bar";
 import { StatusFilterTabs } from "@/components/admin/course/status-filter-tabs";
 import { UnpublishDialog } from "@/components/admin/course/unpublish-dialog";
 import { DeleteCourseDialog } from "@/components/admin/course/delete-course-dialog";
-import { deleteCourseById } from "@/server/action"; 
+import { toggleCoursePublish, deleteCourseByAdmin } from "@/server/action";
 import { toast } from "sonner";
 import { CourseTable } from "@/components/admin/course/course-table";
 
@@ -28,9 +28,16 @@ export default function CourseManagementClient({
     const matchesSearch = course.title
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" ||
-      course.status.toLowerCase() === statusFilter.toLowerCase();
+    
+    let matchesStatus = true;
+    if (statusFilter === "published") {
+      matchesStatus = course.status === "Published";
+    } else if (statusFilter === "draft") {
+      matchesStatus = course.status === "Draft";
+    } else if (statusFilter === "unpublished") {
+      matchesStatus = course.status === "Unpublished";
+    }
+    
     return matchesSearch && matchesStatus;
   });
 
@@ -39,18 +46,39 @@ export default function CourseManagementClient({
     currentPage * coursesPerPage,
   );
 
-  // Asli Delete Functionality
+  // Real Delete Functionality
   const handleDelete = async () => {
     if (!deleteDialogCourse) return;
 
     startTransition(async () => {
       try {
-        const res = await deleteCourseById(deleteDialogCourse.id);
+        const res = await deleteCourseByAdmin(deleteDialogCourse.id);
         if (res.success) {
           toast.success(res.message || "Course deleted successfully");
           setDeleteDialogCourse(null);
+          window.location.reload();
         } else {
           toast.error(res.error || "Failed to delete course");
+        }
+      } catch (error) {
+        toast.error("An unexpected error occurred");
+      }
+    });
+  };
+
+  // Real Unpublish/Publish Functionality
+  const handleUnpublish = async () => {
+    if (!unpublishDialogCourse) return;
+
+    startTransition(async () => {
+      try {
+        const res = await toggleCoursePublish(unpublishDialogCourse.id);
+        if (res.success) {
+          toast.success(res.message || "Course status updated");
+          setUnpublishDialogCourse(null);
+          window.location.reload();
+        } else {
+          toast.error(res.error || "Failed to update course status");
         }
       } catch (error) {
         toast.error("An unexpected error occurred");
@@ -71,7 +99,6 @@ export default function CourseManagementClient({
           currentPage={currentPage}
           totalPages={Math.ceil(filteredCourses.length / coursesPerPage)}
           onPageChange={setCurrentPage}
-          onFeatureToggle={(id, val) => console.log(id, val)}
           onUnpublishClick={(course) => setUnpublishDialogCourse(course)}
           onDeleteClick={(course) => setDeleteDialogCourse(course)}
         />
@@ -81,7 +108,7 @@ export default function CourseManagementClient({
         open={!!unpublishDialogCourse}
         onOpenChange={(open) => !open && setUnpublishDialogCourse(null)}
         course={unpublishDialogCourse}
-        onConfirm={() => setUnpublishDialogCourse(null)}
+        onConfirm={handleUnpublish}
       />
 
       <DeleteCourseDialog

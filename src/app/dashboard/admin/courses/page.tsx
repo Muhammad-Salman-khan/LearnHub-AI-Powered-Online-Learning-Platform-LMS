@@ -3,8 +3,9 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/option";
 import { redirect } from "next/navigation";
 import { DashboardSidebar } from "@/components/layout/dashboard-sidebar";
 import { DashboardNavbar } from "@/components/layout/dashboard-navbar";
-import { getAllCourses } from "@/server/action";
+import { getAllCoursesWithEnrollments } from "@/server/action";
 import CourseManagementClient from "./course-management-client";
+
 export default async function AdminCoursesPage() {
   const session = await getServerSession(authOptions);
 
@@ -17,17 +18,17 @@ export default async function AdminCoursesPage() {
     redirect("/dashboard/student");
   }
 
-  const response = await getAllCourses(1, 100);
+  const response = await getAllCoursesWithEnrollments(1, 100);
   const dbCourses = (response.success && response.data ? response.data.items : []) ?? [];
 
-  const formattedCourses = dbCourses.map((course: { id: string; title: string; category: string; isPublished: boolean; createdAt: Date }) => ({
+  const formattedCourses = dbCourses.map((course: any) => ({
     id: course.id,
     title: course.title,
-    instructor: "Instructor",
+    instructor: course.instructor?.name || "Unknown",
     category: course.category,
-    status: course.isPublished ? "Published" : "Draft",
+    status: course.isPublished ? "Published" : "Unpublished",
     createdDate: new Date(course.createdAt).toLocaleDateString(),
-    students: 0,
+    students: course.students || 0,
     isFeatured: false,
   }));
 

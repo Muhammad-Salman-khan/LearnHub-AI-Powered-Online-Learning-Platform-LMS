@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import Image from "next/image";
+import EnrollButtonWrapper from "@/app/courses/[courseId]/_components/EnrollButtonWrapper";
 
 interface CourseSidebarProps {
   course: {
@@ -13,28 +13,17 @@ interface CourseSidebarProps {
   };
   enrolled: boolean;
   progress: number;
-  totalChapters: number; // ✅ Updated: chapters, not lessons
+  totalChapters: number;
   totalDuration: number;
 }
 
-/**
- * CourseSidebar - Sticky enrollment sidebar
- *
- * DESIGN.md Compliance:
- * - Surface Hierarchy: surface_container_low (#1b1b1b)
- * - Amber Radiance: Subtle glow on CTA
- * - Kinetic Triggers: Gradient primary button
- * - Molten Spark: Progress bar with amber fill
- * - No-Line Rule: No borders for sectioning (uses spacing + tonal shifts)
- */
 export function CourseSidebar({
   course,
   enrolled,
   progress,
-  totalChapters, // ✅ Updated prop name
+  totalChapters,
   totalDuration,
 }: CourseSidebarProps) {
-  const [isEnrolling, setIsEnrolling] = useState(false);
 
   const formatPrice = (price: number) => {
     if (price === 0) return "Free";
@@ -45,13 +34,6 @@ export function CourseSidebar({
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
     return `${hours}h ${mins}m`;
-  };
-
-  const handleEnroll = async () => {
-    setIsEnrolling(true);
-    // TODO: Call server action to enroll
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsEnrolling(false);
   };
 
   return (
@@ -98,13 +80,7 @@ export function CourseSidebar({
               Continue Learning
             </Link>
           ) : (
-            <button
-              onClick={handleEnroll}
-              disabled={isEnrolling}
-              className="w-full h-12 bg-gradient-to-br from-[#ffb690] to-[#f97316] text-[#131313] font-semibold rounded-[min(var(--radius-md),4px)] hover:opacity-95 transition-all shadow-[0_0_15px_rgba(249,115,22,0.05)] hover:shadow-[0_0_25px_rgba(249,115,22,0.08)] disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isEnrolling ? "Enrolling..." : "Enroll Now"}
-            </button>
+            <EnrollButtonWrapper courseId={course.id} price={course.price} />
           )}
 
           {/* Progress Bar (if enrolled) */}

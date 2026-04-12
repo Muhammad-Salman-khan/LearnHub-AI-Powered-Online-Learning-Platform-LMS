@@ -82,7 +82,7 @@ export default async function CourseDetailPage({
             </div>
 
             {/* Course Curriculum */}
-            <CourseCurriculum chapters={course.chapters} />
+            <CourseCurriculum chapters={course.chapters} courseId={courseId} />
 
             {/* Instructor Section */}
             <div className="bg-[#1b1b1b] rounded-[min(var(--radius-md),4px)] p-6 sm:p-8 mt-8">
