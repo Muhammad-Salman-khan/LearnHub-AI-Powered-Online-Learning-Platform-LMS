@@ -5,7 +5,7 @@ import { UserTable } from "@/components/admin/user/user-table";
 import { UserSearchBar } from "@/components/admin/user/user-search-bar";
 import { RoleFilterTabs } from "@/components/admin/user/role-filter-tabs";
 import { BanUserDialog } from "@/components/admin/user/ban-user-dialog";
-import { roleChangerAdminLevel } from "@/server/action"; 
+import { roleChangerAdminLevel } from "@/server/action";
 import { toast } from "sonner";
 
 export default function UserManagementClient({ initialUsers }: { initialUsers: any[] }) {
@@ -16,9 +16,8 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: a
   const [banDialogUser, setBanDialogUser] = useState<any>(null);
 
   const handleRoleChange = async (userId: string, newRole: string) => {
-    // Backend Enum uppercase mangta hai: "STUDENT", "INSTRUCTOR", "ADMIN"
     const formattedRole = newRole.toUpperCase() as "STUDENT" | "INSTRUCTOR" | "ADMIN";
-    
+
     startTransition(async () => {
       const res = await roleChangerAdminLevel(userId, formattedRole);
       if (res.success) {
@@ -27,6 +26,14 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: a
         toast.error(res.error);
       }
     });
+  };
+
+  const handleBanUser = async () => {
+    if (!banDialogUser) return;
+    
+    // For now, just show a toast since we don't have isBanned field in schema
+    toast.info(`Ban functionality requires database schema update. User: ${banDialogUser.name}`);
+    setBanDialogUser(null);
   };
 
   const filteredUsers = initialUsers.filter((user) => {
@@ -44,14 +51,19 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: a
           users={filteredUsers}
           onRoleChange={handleRoleChange}
           onBanUser={setBanDialogUser}
-          // baqi props...
           totalUsers={filteredUsers.length}
           currentPage={currentPage}
           totalPages={1}
           onPageChange={setCurrentPage}
         />
       </div>
-      {/* BanUserDialog component yahan add karein */}
+      
+      <BanUserDialog
+        open={!!banDialogUser}
+        onOpenChange={(open) => !open && setBanDialogUser(null)}
+        user={banDialogUser}
+        onConfirm={handleBanUser}
+      />
     </>
   );
 }

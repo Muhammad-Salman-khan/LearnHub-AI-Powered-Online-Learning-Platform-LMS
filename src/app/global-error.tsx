@@ -16,7 +16,6 @@ export default function GlobalError({
           statusCode={500}
           title="Internal Server Error"
           message="The obsidian depths are currently unreachable. We're working on restoring the connection to your learning resources."
-          onReset={reset}
         />
       </body>
     </html>

@@ -19,8 +19,8 @@ import Image from "next/image";
 import { getAllCourses } from "@/server/action";
 
 export default async function HomePage() {
-  // Fetch real courses from DB for homepage display
-  const response = await getAllCourses(1, 6);
+  // Fetch real courses from DB for homepage display (only 3)
+  const response = await getAllCourses(1, 3);
   const courses = (response.success && response.data ? response.data.items : []) ?? [];
 
   return (

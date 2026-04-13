@@ -8,7 +8,11 @@ export default async function MentorsPage() {
   const instructors = (response.success && response.data ? response.data.items : []) ?? [];
 
   // Sort by rating (highest first)
-  const sortedInstructors = instructors.sort((a: any, b: any) => (b.courses?.reduce((sum: number, c: any) => sum + c.rating, 0) / Math.max(b.courses?.length || 1, 1)) - (a.courses?.reduce((sum: number, c: any) => sum + c.rating, 0) / Math.max(a.courses?.length || 1, 1)));
+  const sortedInstructors = instructors.sort((a: any, b: any) => {
+    const avgA = a.courses?.length > 0 ? (a.courses.reduce((sum: number, c: any) => sum + c.rating, 0) / a.courses.length) : 0;
+    const avgB = b.courses?.length > 0 ? (b.courses.reduce((sum: number, c: any) => sum + c.rating, 0) / b.courses.length) : 0;
+    return avgB - avgA;
+  });
 
   return (
     <main className="min-h-screen bg-background text-foreground relative overflow-hidden">
@@ -100,16 +104,18 @@ export default async function MentorsPage() {
                             >
                               <div className="flex items-start gap-3">
                                 {course.thumbnail ? (
-                                  <Image
-                                    src={course.thumbnail}
-                                    alt={course.title}
-                                    width={48}
-                                    height={48}
-                                    className="rounded object-cover flex-shrink-0"
-                                  />
+                                  <div className="w-20 h-[45px] rounded overflow-hidden flex-shrink-0 bg-[#0e0e0e]">
+                                    <Image
+                                      src={course.thumbnail}
+                                      alt={course.title}
+                                      width={80}
+                                      height={45}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  </div>
                                 ) : (
-                                  <div className="w-12 h-12 rounded bg-gradient-to-br from-[#f97316]/20 to-[#1b1b1b] flex items-center justify-center flex-shrink-0">
-                                    <span className="text-[#f97316] text-sm font-bold">
+                                  <div className="w-20 h-[45px] rounded bg-gradient-to-br from-[#f97316]/20 to-[#1b1b1b] flex items-center justify-center flex-shrink-0">
+                                    <span className="text-[#f97316] text-xs font-bold">
                                       {course.title.charAt(0).toUpperCase()}
                                     </span>
                                   </div>

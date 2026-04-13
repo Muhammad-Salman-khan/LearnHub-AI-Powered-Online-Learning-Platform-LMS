@@ -32,7 +32,7 @@ export default async function InstructorDashboardPage() {
   // 3. Mapping
   const formattedCourses = rawCourses.map((course: { title: string; id: string; isPublished: boolean; createdAt: Date; thumbnail: string | null; description: string; price: number; category: string; level: string; instructorId: string; rating: number }) => ({
     ...course,
-    status: course.isPublished ? "published" : "draft",
+    status: (course.isPublished ? "published" : "draft") as "published" | "draft",
     students: 0,
   }));
 
@@ -55,8 +55,8 @@ export default async function InstructorDashboardPage() {
         {/* ✅ DashboardNavbar check karein ke role aur title le raha hai */}
         <DashboardNavbar title="Instructor Dashboard" role="instructor" />
 
-        <div className="flex-1 overflow-y-auto p-6 md:p-10">
-          <div className="max-w-7xl mx-auto space-y-8">
+        <div className="flex-1 overflow-y-auto p-0">
+          <div className="w-full px-6 py-6 space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <h1 className="text-3xl font-bold text-foreground">

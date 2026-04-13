@@ -15,6 +15,7 @@ interface CourseSidebarProps {
   progress: number;
   totalChapters: number;
   totalDuration: number;
+  userProgress?: { percentage: number };
 }
 
 export function CourseSidebar({
@@ -23,6 +24,7 @@ export function CourseSidebar({
   progress,
   totalChapters,
   totalDuration,
+  userProgress,
 }: CourseSidebarProps) {
 
   const formatPrice = (price: number) => {
@@ -80,7 +82,11 @@ export function CourseSidebar({
               Continue Learning
             </Link>
           ) : (
-            <EnrollButtonWrapper courseId={course.id} price={course.price} />
+            <EnrollButtonWrapper 
+              courseId={course.id} 
+              price={course.price} 
+              userProgress={enrolled ? { percentage: progress } : undefined}
+            />
           )}
 
           {/* Progress Bar (if enrolled) */}

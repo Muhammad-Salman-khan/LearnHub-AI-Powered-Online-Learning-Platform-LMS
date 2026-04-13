@@ -37,8 +37,12 @@ export default async function LessonPlayerPage({
   let progressData = { completed: 0, total: chapters.length, percentage: 0 };
   if (userId) {
     const progressRes = await getCourseProgress(userId, courseId);
-    if (progressRes.success) {
-      progressData = progressRes.data;
+    if (progressRes.success && progressRes.data) {
+      progressData = {
+        completed: progressRes.data.completed,
+        total: progressRes.data.total,
+        percentage: progressRes.data.percentage,
+      };
     }
   }
 

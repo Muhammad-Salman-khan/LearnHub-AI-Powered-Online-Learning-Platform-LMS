@@ -114,7 +114,13 @@ export function CreateCourseForm() {
     setLoading(true);
 
     try {
-      await CreateCourse(formData);
+      const submitData = {
+        ...formData,
+        price: Number(formData.price) || 0,
+        level: formData.level as "BEGINNER" | "INTERMEDIATE" | "ADVANCED",
+        thumbnail: formData.thumbnail || undefined,
+      };
+      await CreateCourse(submitData);
       router.push("/dashboard/instructor/courses");
       router.refresh();
     } catch (err) {

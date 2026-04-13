@@ -2,21 +2,23 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { enrollInCourse } from "@/server/action";
+import { enrollInCourse, getCourseProgress } from "@/server/action";
 import { toast } from "sonner";
 
-export default function EnrollButton({ courseId, price, isEnrolled: initialEnrolled }: { courseId: string; price: number; isEnrolled?: boolean }) {
+export default function EnrollButton({ courseId, price, userProgress }: { courseId: string; price: number; userProgress?: { percentage: number } }) {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [isEnrolling, setIsEnrolling] = useState(false);
-  const [isEnrolled, setIsEnrolled] = useState(initialEnrolled || false);
+  const [isEnrolled, setIsEnrolled] = useState(false);
+  const [progress, setProgress] = useState(0);
 
-  // Update enrollment status if prop changes
+  // Update enrollment status and progress
   useEffect(() => {
-    if (initialEnrolled) {
+    if (userProgress) {
       setIsEnrolled(true);
+      setProgress(userProgress.percentage || 0);
     }
-  }, [initialEnrolled]);
+  }, [userProgress]);
 
   const handleEnroll = async () => {
     setIsEnrolling(true);
@@ -25,7 +27,6 @@ export default function EnrollButton({ courseId, price, isEnrolled: initialEnrol
       if (result.success) {
         toast.success("Successfully enrolled in the course!");
         setIsEnrolled(true);
-        // Redirect to student dashboard after short delay
         setTimeout(() => {
           router.push("/dashboard/student");
         }, 1500);
@@ -42,6 +43,10 @@ export default function EnrollButton({ courseId, price, isEnrolled: initialEnrol
     } finally {
       setIsEnrolling(false);
     }
+  };
+
+  const handleResume = () => {
+    router.push(`/courses/${courseId}`);
   };
 
   const handleLoginRedirect = () => {
@@ -73,8 +78,32 @@ export default function EnrollButton({ courseId, price, isEnrolled: initialEnrol
     );
   }
 
-  // Already enrolled
+  // Already enrolled with progress
   if (isEnrolled) {
+    if (progress === 100) {
+      return (
+        <button
+          disabled
+          className="w-full h-12 bg-green-500/20 text-green-400 border border-green-500/30 rounded-[min(var(--radius-md),4px)] font-semibold cursor-default flex items-center justify-center gap-2"
+        >
+          <span className="material-symbols-outlined text-base">check_circle</span>
+          Course Completed ✅
+        </button>
+      );
+    }
+    
+    if (progress > 0) {
+      return (
+        <button
+          onClick={handleResume}
+          className="w-full h-12 bg-[#F97316]/20 text-[#F97316] border border-[#F97316]/30 rounded-[min(var(--radius-md),4px)] font-semibold hover:bg-[#F97316]/30 transition-all flex items-center justify-center gap-2"
+        >
+          <span className="material-symbols-outlined text-base">play_circle</span>
+          Resume Progress ({progress}%)
+        </button>
+      );
+    }
+
     return (
       <button
         disabled

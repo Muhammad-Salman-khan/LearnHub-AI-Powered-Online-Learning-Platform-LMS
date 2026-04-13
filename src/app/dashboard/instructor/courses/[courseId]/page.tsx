@@ -347,7 +347,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
                     "I"}
                 </div>
                 {/* add instructor name here  */}
-                <InstructorNameBadge instructorId={instructorID} />
+                <InstructorNameBadge instructorId={instructorID || ""} />
                 {/* end instructor name here  */}
               </div>
             </div>

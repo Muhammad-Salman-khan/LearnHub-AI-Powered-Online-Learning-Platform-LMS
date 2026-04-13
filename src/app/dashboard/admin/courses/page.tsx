@@ -43,8 +43,8 @@ export default async function AdminCoursesPage() {
       <div className="flex-1 flex flex-col overflow-hidden relative z-10">
         <DashboardNavbar title="Course Management" role="admin" />
 
-        <div className="flex-1 overflow-y-auto p-6 md:p-8">
-          <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex-1 overflow-y-auto p-0">
+          <div className="w-full space-y-6 px-6 py-6">
             <CourseManagementClient initialCourses={formattedCourses} />
           </div>
         </div>

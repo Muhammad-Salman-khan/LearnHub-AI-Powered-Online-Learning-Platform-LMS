@@ -27,7 +27,7 @@ export default async function InstructorCoursesListPage() {
 
   const formattedCourses = rawCourses.map((course: { id: string; title: string; isPublished: boolean; createdAt: Date; thumbnail: string | null; description: string; price: number; category: string; level: string; instructorId: string; rating: number }) => ({
     ...course,
-    status: course.isPublished ? "published" : "draft",
+    status: (course.isPublished ? "published" : "draft") as "published" | "draft",
     students: 0,
   }));
 
