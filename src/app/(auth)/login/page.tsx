@@ -65,16 +65,13 @@ export default function LoginPage() {
       });
 
       if (res?.ok) {
-        // Wait for session to be established
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
         // Fetch session to get user role
         const sessionRes = await fetch("/api/auth/session");
         const session = await sessionRes.json();
 
         const userRole = session?.user?.role?.toUpperCase();
 
-        // Role-based redirection
+        // Role-based redirection - instant
         if (userRole === "ADMIN") {
           window.location.href = "/dashboard/admin";
         } else if (userRole === "INSTRUCTOR") {

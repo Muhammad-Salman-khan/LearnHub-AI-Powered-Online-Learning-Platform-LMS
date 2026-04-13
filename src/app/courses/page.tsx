@@ -135,8 +135,17 @@ export default async function CoursesPage({
             {/* Course Cards Grid */}
             {courses.length > 0 ?
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {courses.map((course) => (
-                  <CourseCard key={course.id} course={course} />
+                {courses.map((course: any) => (
+                  <CourseCard 
+                    key={course.id} 
+                    course={{
+                      ...course,
+                      instructor: { 
+                        name: course.instructor?.name || "Unknown", 
+                        image: course.instructor?.image || null 
+                      },
+                    }} 
+                  />
                 ))}
               </div>
             : <div className="text-center py-16">

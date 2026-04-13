@@ -10,7 +10,7 @@ interface Course {
   category: string;
   status: "published" | "draft";
   students: number;
-  thumbnail: string;
+  thumbnail: string | null;
 }
 
 interface CoursesTableProps {

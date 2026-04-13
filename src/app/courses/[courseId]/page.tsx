@@ -1,10 +1,12 @@
 import { notFound } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/option";
 import { CourseHeader } from "@/components/courses/course-header";
 import { CourseSidebar } from "@/components/courses/course-sidebar";
 import { CourseCurriculum } from "@/components/courses/course-curriculum";
 import { CourseTabs } from "@/components/courses/course-tabs";
 import Image from "next/image";
-import { getCourseById } from "@/server/action";
+import { getCourseById, getEnrolledCourses, getCourseProgress } from "@/server/action";
 
 // ✅ REMOVED: import { auth } from "@/lib/auth" — doesn't exist yet
 
@@ -35,12 +37,27 @@ export default async function CourseDetailPage({
   params: Promise<{ courseId: string }>;
 }) {
   const { courseId } = await params;
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id as string | undefined;
+  
   const courseRawData = await getCourseById(courseId);
   const course = courseRawData.data;
   if (!course) notFound();
-  // ✅ TEMPORARY: Assume not enrolled
-  const enrolled = false;
-  const progress = 0;
+  
+  // Check if user is enrolled and get progress
+  let isEnrolled = false;
+  let userProgress = 0;
+  
+  if (userId) {
+    const enrolledRes = await getEnrolledCourses(userId, 1, 100);
+    const enrolledCourses = (enrolledRes.success && enrolledRes.data ? enrolledRes.data.items : []) ?? [];
+    isEnrolled = enrolledCourses.some((c: any) => c.id === courseId);
+    
+    if (isEnrolled) {
+      const progressRes = await getCourseProgress(userId, courseId);
+      userProgress = progressRes.success && progressRes.data ? progressRes.data.percentage : 0;
+    }
+  }
 
   const totalChapters = course.chapters.length;
   const totalDuration = course.chapters.reduce(
@@ -122,15 +139,15 @@ export default async function CourseDetailPage({
             </div>
 
             {/* Tabs: Overview, Reviews, Q&A */}
-            <CourseTabs course={course} enrolled={enrolled} />
+            <CourseTabs course={course} enrolled={isEnrolled} />
           </section>
 
           {/* Right Sidebar - 30% width (sticky) */}
           <aside className="lg:w-96 flex-shrink-0">
             <CourseSidebar
               course={course}
-              enrolled={enrolled}
-              progress={progress}
+              enrolled={isEnrolled}
+              progress={userProgress}
               totalChapters={totalChapters}
               totalDuration={totalDuration}
             />

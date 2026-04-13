@@ -14,16 +14,12 @@ interface DashboardSidebarProps {
 const sidebarLinks = {
   student: [
     { label: "My Courses", href: "/dashboard/student", icon: "library_books" },
-    { label: "Progress", href: "/dashboard/student/progress", icon: "analytics", phase: 2 },
-    { label: "Certificates", href: "/dashboard/student/certificates", icon: "card_membership", phase: 2 },
-    { label: "Notes", href: "/dashboard/student/notes", icon: "note", phase: 2 },
+    { label: "Progress", href: "/dashboard/student/progress", icon: "analytics" },
   ],
   instructor: [
     { label: "Dashboard", href: "/dashboard/instructor", icon: "dashboard" },
     { label: "My Courses", href: "/dashboard/instructor/courses", icon: "library_books" },
-    { label: "Create New", href: "/dashboard/instructor/courses/create", icon: "add_circle" },
-    { label: "Analytics", href: "/dashboard/instructor/analytics", icon: "analytics", phase: 2 },
-    { label: "Earnings", href: "/dashboard/instructor/earnings", icon: "attach_money", phase: 2 },
+    { label: "Create New", href: "/dashboard/instructor/courses/add", icon: "add_circle" },
   ],
   admin: [
     { label: "Overview", href: "/dashboard/admin", icon: "dashboard" },
@@ -68,7 +64,7 @@ export function DashboardSidebar({ role, onClose }: DashboardSidebarProps) {
       <nav className="flex-1 p-2 space-y-1 overflow-y-auto sidebar-scroll">
         {links.map((link) => {
           const isActive = pathname === link.href;
-          const isPhase2 = link.phase === 2;
+          const isPhase2 = false;
 
           return (
             <Link
@@ -117,12 +113,8 @@ export function DashboardSidebar({ role, onClose }: DashboardSidebarProps) {
 
           {/* Settings & Sign Out */}
           <div className={`space-y-1 mt-3 transition-all duration-300 ${isHovered ? "opacity-100 max-h-20" : "opacity-0 max-h-0 overflow-hidden"}`}>
-            <button className="w-full flex items-center gap-2 px-3 py-2 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/30 rounded-lg transition-colors">
-              <span className="material-symbols-outlined text-base">settings</span>
-              Settings
-            </button>
             {/* ✅ Functional Sign Out */}
-            <button 
+            <button
               onClick={() => signOut({ callbackUrl: "/login" })}
               className="w-full flex items-center gap-2 px-3 py-2 text-xs text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
             >

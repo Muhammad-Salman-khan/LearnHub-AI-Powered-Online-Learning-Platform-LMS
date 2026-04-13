@@ -26,7 +26,7 @@ export default async function StudentDashboard() {
   const coursesWithProgress = await Promise.all(
     rawEnrolledCourses.map(async (course: any) => {
       const progressRes = await getCourseProgress(userId, course.id);
-      const progress = progressRes.success ? progressRes.data : { completed: 0, total: 0, percentage: 0 };
+      const progress = (progressRes.success && progressRes.data) ? progressRes.data : { completed: 0, total: 0, percentage: 0 };
       return {
         ...course,
         progress: progress.percentage || 0,
@@ -46,7 +46,7 @@ export default async function StudentDashboard() {
   const userName = session?.user?.name || "Student";
 
   return (
-    <div className="space-y-6 px-4 sm:px-6 lg:px-8 py-6 max-w-[100vw] overflow-x-hidden">
+    <div className="space-y-6 px-6 py-6 max-w-full overflow-x-hidden">
       {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div className="space-y-1">

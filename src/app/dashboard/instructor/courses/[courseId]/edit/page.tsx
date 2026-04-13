@@ -319,6 +319,7 @@ export default function EditCoursePage() {
         {/* Mobile Navbar */}
         <DashboardNavbar
           title="Edit Course"
+          role="instructor"
           sidebarOpen={sidebarOpen}
           setSidebarOpen={setSidebarOpen}
         />
@@ -485,7 +486,7 @@ export default function EditCoursePage() {
                         <Select
                           value={formData.level}
                           onValueChange={(v) =>
-                            setFormData({ ...formData, level: v })
+                            setFormData({ ...formData, level: v as "BEGINNER" | "INTERMEDIATE" | "ADVANCED" })
                           }
                         >
                           <SelectTrigger className="bg-background border-border h-11">
@@ -831,8 +832,8 @@ export default function EditCoursePage() {
             {/* Save Button - Below both columns */}
             <div className="flex justify-end pt-4 pb-8">
               <Button
-                type="submit"
-                onClick={handleSubmit}
+                type="button"
+                onClick={() => handleSubmit(null as any)}
                 disabled={submitting}
                 className="h-14 px-10 font-bold bg-primary text-primary-foreground hover:opacity-90 amber-glow hover:scale-[1.02] transition-all"
               >

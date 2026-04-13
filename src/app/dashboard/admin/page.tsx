@@ -67,8 +67,8 @@ export default async function AdminOverviewPage() {
       <div className="flex-1 flex flex-col overflow-hidden relative z-10">
         <DashboardNavbar title="Platform Overview" role="admin" />
 
-        <div className="flex-1 overflow-y-auto p-6 md:p-8">
-          <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex-1 overflow-y-auto p-0">
+          <div className="w-full px-6 py-6 space-y-6">
             {/* Page Header */}
             <div className="flex items-center justify-between relative">
               <div className="space-y-1">
