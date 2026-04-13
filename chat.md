@@ -52,4 +52,4 @@ After any code change:
 4. Suggest git commit message (conventional format)
 
 ## 🔁 Workflow Loop
-For every task:enhanced it more more and more and more hello
+For every task:enhanced it more more and more and more 
