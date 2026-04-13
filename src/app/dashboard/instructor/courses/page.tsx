@@ -25,10 +25,10 @@ export default async function InstructorCoursesListPage() {
     ? response.data.items
     : [];
 
-  const formattedCourses = rawCourses.map((course: { id: string; title: string; isPublished: boolean; createdAt: Date; thumbnail: string | null; description: string; price: number; category: string; level: string; instructorId: string; rating: number }) => ({
+  const formattedCourses = rawCourses.map((course: any) => ({
     ...course,
     status: (course.isPublished ? "published" : "draft") as "published" | "draft",
-    students: 0,
+    students: course.students || course._count?.enrollments || 0,
   }));
 
   return (

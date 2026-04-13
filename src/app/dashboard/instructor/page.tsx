@@ -30,16 +30,16 @@ export default async function InstructorDashboardPage() {
     : [];
 
   // 3. Mapping
-  const formattedCourses = rawCourses.map((course: { title: string; id: string; isPublished: boolean; createdAt: Date; thumbnail: string | null; description: string; price: number; category: string; level: string; instructorId: string; rating: number }) => ({
+  const formattedCourses = rawCourses.map((course: any) => ({
     ...course,
     status: (course.isPublished ? "published" : "draft") as "published" | "draft",
-    students: 0,
+    students: course.students || course._count?.enrollments || 0,
   }));
 
   const stats = {
     totalCourses: formattedCourses.length,
-    publishedCourses: formattedCourses.filter((c) => c.status === "published").length,
-    totalStudents: formattedCourses.reduce((acc: number, curr) => acc + (curr.students || 0), 0),
+    publishedCourses: formattedCourses.filter((c: any) => c.status === "published").length,
+    totalStudents: formattedCourses.reduce((acc: number, curr: any) => acc + (curr.students || 0), 0),
   };
 
   return (

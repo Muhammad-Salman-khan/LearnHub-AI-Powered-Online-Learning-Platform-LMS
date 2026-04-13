@@ -14,6 +14,7 @@ export default function CourseManagementClient({
 }: {
   initialCourses: any[];
 }) {
+  const [courses, setCourses] = useState(initialCourses);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
@@ -24,7 +25,7 @@ export default function CourseManagementClient({
   const coursesPerPage = 10;
 
   // Filtering Logic
-  const filteredCourses = initialCourses.filter((course) => {
+  const filteredCourses = courses.filter((course) => {
     const matchesSearch = course.title
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
@@ -46,42 +47,72 @@ export default function CourseManagementClient({
     currentPage * coursesPerPage,
   );
 
-  // Real Delete Functionality
+  // Instant Delete - updates local state immediately
   const handleDelete = async () => {
     if (!deleteDialogCourse) return;
 
+    const courseIdToDelete = deleteDialogCourse.id;
+    
+    // Instantly remove from local state
+    setCourses((prev) => prev.filter((c) => c.id !== courseIdToDelete));
+    setDeleteDialogCourse(null);
+
     startTransition(async () => {
       try {
-        const res = await deleteCourseByAdmin(deleteDialogCourse.id);
+        const res = await deleteCourseByAdmin(courseIdToDelete);
         if (res.success) {
           toast.success(res.message || "Course deleted successfully");
-          setDeleteDialogCourse(null);
-          window.location.reload();
         } else {
+          // Revert if server fails
           toast.error(res.error || "Failed to delete course");
+          setCourses((prev) => [...prev, deleteDialogCourse]);
         }
       } catch (error) {
         toast.error("An unexpected error occurred");
+        // Revert if server fails
+        setCourses((prev) => [...prev, deleteDialogCourse]);
       }
     });
   };
 
-  // Real Unpublish/Publish Functionality
+  // Instant Unpublish/Publish - updates local state immediately
   const handleUnpublish = async () => {
     if (!unpublishDialogCourse) return;
 
+    const courseId = unpublishDialogCourse.id;
+    const currentStatus = unpublishDialogCourse.status;
+    const newStatus = currentStatus === "Published" ? "Unpublished" : "Published";
+    
+    // Instantly update local state
+    setCourses((prev) =>
+      prev.map((c) =>
+        c.id === courseId ? { ...c, status: newStatus } : c
+      )
+    );
+    setUnpublishDialogCourse(null);
+
     startTransition(async () => {
       try {
-        const res = await toggleCoursePublish(unpublishDialogCourse.id);
+        const res = await toggleCoursePublish(courseId);
         if (res.success) {
           toast.success(res.message || "Course status updated");
-          setUnpublishDialogCourse(null);
-          window.location.reload();
         } else {
+          // Revert if server fails
           toast.error(res.error || "Failed to update course status");
+          setCourses((prev) =>
+            prev.map((c) =>
+              c.id === courseId ? { ...c, status: currentStatus } : c
+            )
+          );
         }
       } catch (error) {
         toast.error("An unexpected error occurred");
+        // Revert if server fails
+        setCourses((prev) =>
+          prev.map((c) =>
+            c.id === courseId ? { ...c, status: currentStatus } : c
+          )
+        );
       }
     });
   };
@@ -91,18 +122,16 @@ export default function CourseManagementClient({
       <CourseSearchBar value={searchQuery} onChange={setSearchQuery} />
       <StatusFilterTabs value={statusFilter} onChange={setStatusFilter} />
 
-      {/* Loading state visual filter */}
-      <div className={isPending ? "opacity-60 pointer-events-none transition-opacity" : ""}>
-        <CourseTable
-          courses={paginatedCourses}
-          totalCourses={filteredCourses.length}
-          currentPage={currentPage}
-          totalPages={Math.ceil(filteredCourses.length / coursesPerPage)}
-          onPageChange={setCurrentPage}
-          onUnpublishClick={(course) => setUnpublishDialogCourse(course)}
-          onDeleteClick={(course) => setDeleteDialogCourse(course)}
-        />
-      </div>
+      {/* No loading overlay - instant updates */}
+      <CourseTable
+        courses={paginatedCourses}
+        totalCourses={filteredCourses.length}
+        currentPage={currentPage}
+        totalPages={Math.ceil(filteredCourses.length / coursesPerPage)}
+        onPageChange={setCurrentPage}
+        onUnpublishClick={(course) => setUnpublishDialogCourse(course)}
+        onDeleteClick={(course) => setDeleteDialogCourse(course)}
+      />
 
       <UnpublishDialog
         open={!!unpublishDialogCourse}

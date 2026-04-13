@@ -9,6 +9,7 @@ import { roleChangerAdminLevel } from "@/server/action";
 import { toast } from "sonner";
 
 export default function UserManagementClient({ initialUsers }: { initialUsers: any[] }) {
+  const [users, setUsers] = useState(initialUsers);
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
@@ -17,6 +18,19 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: a
 
   const handleRoleChange = async (userId: string, newRole: string) => {
     const formattedRole = newRole.toUpperCase() as "STUDENT" | "INSTRUCTOR" | "ADMIN";
+    
+    // Find the user and store old role for revert
+    const userIndex = users.findIndex((u) => u.id === userId);
+    if (userIndex === -1) return;
+    
+    const oldRole = users[userIndex].role;
+    
+    // Instantly update local state
+    setUsers((prev) =>
+      prev.map((u) =>
+        u.id === userId ? { ...u, role: formattedRole } : u
+      )
+    );
 
     startTransition(async () => {
       const res = await roleChangerAdminLevel(userId, formattedRole);
@@ -24,19 +38,25 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: a
         toast.success(res.message);
       } else {
         toast.error(res.error);
+        // Revert if server fails
+        setUsers((prev) =>
+          prev.map((u) =>
+            u.id === userId ? { ...u, role: oldRole } : u
+          )
+        );
       }
     });
   };
 
   const handleBanUser = async () => {
     if (!banDialogUser) return;
-    
+
     // For now, just show a toast since we don't have isBanned field in schema
     toast.info(`Ban functionality requires database schema update. User: ${banDialogUser.name}`);
     setBanDialogUser(null);
   };
 
-  const filteredUsers = initialUsers.filter((user) => {
+  const filteredUsers = users.filter((user) => {
     const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) || user.email.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesRole = roleFilter === "all" || user.role.toLowerCase() === roleFilter.toLowerCase();
     return matchesSearch && matchesRole;
@@ -46,18 +66,17 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: a
     <>
       <UserSearchBar value={searchQuery} onChange={setSearchQuery} />
       <RoleFilterTabs value={roleFilter} onChange={setRoleFilter} />
-      <div className={isPending ? "opacity-50 pointer-events-none" : ""}>
-        <UserTable
-          users={filteredUsers}
-          onRoleChange={handleRoleChange}
-          onBanUser={setBanDialogUser}
-          totalUsers={filteredUsers.length}
-          currentPage={currentPage}
-          totalPages={1}
-          onPageChange={setCurrentPage}
-        />
-      </div>
-      
+      {/* No loading overlay - instant updates */}
+      <UserTable
+        users={filteredUsers}
+        onRoleChange={handleRoleChange}
+        onBanUser={setBanDialogUser}
+        totalUsers={filteredUsers.length}
+        currentPage={currentPage}
+        totalPages={1}
+        onPageChange={setCurrentPage}
+      />
+
       <BanUserDialog
         open={!!banDialogUser}
         onOpenChange={(open) => !open && setBanDialogUser(null)}
