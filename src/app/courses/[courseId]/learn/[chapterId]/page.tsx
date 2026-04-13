@@ -9,6 +9,7 @@ import { CourseNavigation } from "@/components/courses/course-navigation";
 import { InstructorCard } from "@/components/courses/instructor-card";
 import { ResourcesSection } from "@/components/courses/resources-section";
 import { DiscussionPreview } from "@/components/courses/discussion-preview";
+import AIAssistant from "@/components/courses/ai-assistant";
 import Link from "next/link";
 
 export default async function LessonPlayerPage({
@@ -189,6 +190,17 @@ export default async function LessonPlayerPage({
           />
         </div>
       </div>
+
+      {/* AI Study Assistant - Only for students */}
+      {session && (
+        <AIAssistant
+          chapter={{
+            title: chapter.title,
+            description: chapter.description,
+            content: chapter.content,
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -42,13 +42,14 @@ export default async function HomePage() {
   - ✅ Image sized appropriately for each breakpoint
 */}
       <section className="pt-32 pb-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        {/* 🔹 HERO BACKGROUND IMAGE CONTAINER - Add spacing so it's not jammed */}
+        {/* 🔹 HERO BACKGROUND IMAGE CONTAINER */}
         <div className="absolute top-8 sm:top-12 md:top-16 right-4 sm:right-8 md:right-12 w-[400px] h-[400px] sm:w-[500px] sm:h-[500px] md:w-[600px] md:h-[600px] lg:w-[700px] lg:h-[700px] pointer-events-none overflow-hidden">
           {/* Main Hero Image */}
-          <img
-            src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExY2NkaDQ1cjdsNWN2cTh4dXNvOWV0dmxndWNibXlydHV2Zzk0OWlveCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/gXXFrjHFJIMoqKr8UT/giphy.gif"
+          <Image
+            src="/heropic.png"
             alt="Abstract obsidian texture with amber light"
-            className="absolute top-0 right-0 w-full h-full object-cover opacity-40 mix-blend-screen"
+            fill
+            className="object-cover opacity-40 mix-blend-screen"
           />
           {/* Amber Overlay for brand cohesion */}
           <div className="absolute inset-0 bg-gradient-to-br from-[#f97316]/10 via-transparent to-transparent" />
