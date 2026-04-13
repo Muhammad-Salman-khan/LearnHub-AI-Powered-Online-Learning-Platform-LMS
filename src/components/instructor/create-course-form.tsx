@@ -86,8 +86,8 @@ export function CreateCourseForm() {
     setFormData((prev) => ({ ...prev, category: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     setError(null);
 
     if (!formData.title.trim()) {

@@ -283,6 +283,11 @@ export const getCourseByInstructor = async (page = 1, pageSize = 20) => {
     const [data, total] = await Promise.all([
       prisma.course.findMany({
         where: { instructorId: user.id },
+        include: {
+          _count: {
+            select: { enrollments: true },
+          },
+        },
         skip,
         take: pageSize,
       }),
@@ -295,7 +300,10 @@ export const getCourseByInstructor = async (page = 1, pageSize = 20) => {
     return {
       success: true,
       data: {
-        items: data,
+        items: data.map((course) => ({
+          ...course,
+          students: course._count.enrollments,
+        })),
         total,
         page,
         pageSize,

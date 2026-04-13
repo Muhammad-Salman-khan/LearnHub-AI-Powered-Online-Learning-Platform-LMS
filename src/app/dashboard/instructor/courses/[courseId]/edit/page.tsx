@@ -237,8 +237,8 @@ export default function EditCoursePage() {
   };
 
   // Handle form submission
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: FormEvent<HTMLFormElement>) => {
+    if (e) e.preventDefault();
     if (!validate()) return;
     try {
       setSubmitting(true);
@@ -833,7 +833,7 @@ export default function EditCoursePage() {
             <div className="flex justify-end pt-4 pb-8">
               <Button
                 type="button"
-                onClick={() => handleSubmit(null as any)}
+                onClick={() => handleSubmit()}
                 disabled={submitting}
                 className="h-14 px-10 font-bold bg-primary text-primary-foreground hover:opacity-90 amber-glow hover:scale-[1.02] transition-all"
               >

@@ -89,8 +89,7 @@ export function CoursesTable({ courses }: CoursesTableProps) {
                   </td>
                   <td className="p-4 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      {/* ✅ Solution: Button ko hi Link bana dein 'asChild' use karke, 
-        lekin andar <a> tag mat rakhein */}
+                      {/* Edit Button */}
                       <Button
                         asChild
                         variant="ghost"
@@ -106,14 +105,32 @@ export function CoursesTable({ courses }: CoursesTableProps) {
                         </Link>
                       </Button>
 
+                      {/* Chapter Management Button */}
                       <Button
+                        asChild
+                        variant="ghost"
+                        size="sm"
+                        className="text-blue-400 hover:text-blue-300 hover:bg-blue-400/10"
+                      >
+                        <Link href={`/dashboard/instructor/courses/${course.id}/chapters/manage`}>
+                          <span className="material-symbols-outlined text-base">
+                            menu_book
+                          </span>
+                        </Link>
+                      </Button>
+
+                      {/* Preview (Eye) Button */}
+                      <Button
+                        asChild
                         variant="ghost"
                         size="sm"
                         className="text-muted-foreground hover:text-foreground"
                       >
-                        <span className="material-symbols-outlined text-base">
-                          visibility
-                        </span>
+                        <Link href={`/courses/${course.id}`}>
+                          <span className="material-symbols-outlined text-base">
+                            visibility
+                          </span>
+                        </Link>
                       </Button>
                     </div>
                   </td>
