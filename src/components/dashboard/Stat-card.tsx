@@ -1,60 +1,61 @@
-import { Card } from "@/components/ui/card";
+/**
+ * StatCard — Scholarly Architect Design System
+ *
+ * Tonal stat card: surface-container-lowest on surface-container-low page.
+ * Left-edge 4px primary accent bar per instructor design.
+ * No glow, no amber, no gradients. Manrope for the number value.
+ * Lucide icon + color variant still accepted for API compatibility.
+ * Uses CSS variables for dark mode support.
+ */
+
 import { LucideIcon } from "lucide-react";
 
 interface StatCardProps {
   label: string;
-  value: number;
+  value: number | string;
   icon: LucideIcon;
-  color?: "amber" | "green" | "blue";
+  color?: "amber" | "green" | "blue" | "primary";
 }
 
-const colorVariants = {
-  amber: {
-    bg: "bg-[#F97316]/10",
-    text: "text-[#F97316]",
-    border: "border-[#F97316]/20",
-  },
-  green: {
-    bg: "bg-[#22c55e]/10",
-    text: "text-[#22c55e]",
-    border: "border-[#22c55e]/20",
-  },
-  blue: {
-    bg: "bg-[#3b82f6]/10",
-    text: "text-[#3b82f6]",
-    border: "border-[#3b82f6]/20",
-  },
+/* Map old color names to primary-blue accents in Scholarly system */
+const ACCENT_COLORS: Record<string, string> = {
+  amber:   "var(--primary)",
+  green:   "var(--primary)",
+  blue:    "var(--primary)",
+  primary: "var(--primary)",
 };
 
-export default function StatCard({
-  label,
-  value,
-  icon: Icon,
-  color = "amber",
-}: StatCardProps) {
-  const colors = colorVariants[color];
+export default function StatCard({ label, value, icon: Icon, color = "primary" }: StatCardProps) {
+  const accent = ACCENT_COLORS[color] ?? "var(--primary)";
 
   return (
-    <Card className="glass-card-no-glow rounded-xl w-full overflow-hidden">
-      <div className="p-4 sm:p-6">
-        {/* ✅ min-w-0 allows flex children to shrink and truncate */}
-        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-          <div
-            className={`flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full ${colors.bg} ${colors.text} amber-glow shrink-0`}
-          >
-            <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
-          </div>
-          {/* ✅ min-w-0 + truncate for text overflow */}
-          <div className="min-w-0 flex-1">
-            <p className="text-xs sm:text-sm font-medium text-gray-500 truncate">
-              {label}
-            </p>
-            <p className="text-xl sm:text-2xl font-bold text-gray-200 truncate">
-              {value}
-            </p>
-          </div>
-        </div>
+    <div
+      className="rounded-lg p-5 flex items-start gap-4"
+      style={{
+        backgroundColor: "var(--surface-container-lowest)",
+        borderLeft: `4px solid ${accent}`,
+      }}
+    >
+      {/* Icon */}
+      <div
+        className="w-10 h-10 rounded-sm flex items-center justify-center flex-shrink-0"
+        style={{ backgroundColor: "color-mix(in srgb, var(--primary) 8%, transparent)" }}
+      >
+        <Icon className="h-5 w-5" style={{ color: accent }} />
       </div>
-    </Card>
+
+      {/* Text */}
+      <div className="min-w-0">
+        <p className="text-xs font-medium uppercase tracking-wide mb-1" style={{ color: "var(--on-surface-variant)" }}>
+          {label}
+        </p>
+        <p
+          className="text-2xl font-bold"
+          style={{ fontFamily: "var(--font-headline)", color: "var(--on-surface)" }}
+        >
+          {value}
+        </p>
+      </div>
+    </div>
   );
 }

@@ -5,25 +5,26 @@ import { EmptyState } from "@/components/instructor/empty-state";
 import { CreateCourseBtn } from "@/components/instructor/create-course-btn";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/option";
-import { getCourseByInstructor } from "@/server/action"; 
+import { getCourseByInstructor } from "@/server/action";
 import { redirect } from "next/navigation";
+
+/**
+ * InstructorCoursesListPage — Scholarly Architect Design System
+ *
+ * Course management for instructors.
+ * Background: surface-container-low (#f6f3f2)
+ */
 
 export default async function InstructorCoursesListPage() {
   const session = await getServerSession(authOptions);
-  
   if (!session) redirect("/login");
-  
-  if (session.user.role !== "INSTRUCTOR") {
-    redirect("/dashboard/student");
-  }
+  if (session.user.role !== "INSTRUCTOR") redirect("/dashboard/student");
 
-  // Fetching data from your server action
   const response = await getCourseByInstructor(1, 100);
-
-  // ✅ Error Prevention: Agar data na mile toh empty array use karein
-  const rawCourses = response && response.success && response.data && Array.isArray(response.data.items)
-    ? response.data.items
-    : [];
+  const rawCourses =
+    response && response.success && response.data && Array.isArray(response.data.items)
+      ? response.data.items
+      : [];
 
   const formattedCourses = rawCourses.map((course: any) => ({
     ...course,
@@ -32,21 +33,32 @@ export default async function InstructorCoursesListPage() {
   }));
 
   return (
-    <div className="flex h-screen bg-background text-foreground overflow-hidden relative">
-      {/* Luxurious Glow CSS preserved */}
-      <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
-
-      <div className="hidden md:block w-fit flex-shrink-0 relative z-10">
+    <div className="flex h-screen" style={{ backgroundColor: "#f6f3f2" }}>
+      <div className="hidden md:block flex-shrink-0">
         <DashboardSidebar role="instructor" />
       </div>
 
-      <div className="flex-1 flex flex-col overflow-hidden relative z-10">
+      <div className="flex-1 flex flex-col overflow-hidden">
         <DashboardNavbar title="My Courses" role="instructor" />
 
-        <div className="flex-1 overflow-y-auto p-6 md:p-10">
-          <div className="max-w-7xl mx-auto space-y-8">
+        <div className="flex-1 overflow-y-auto p-6">
+          <div className="max-w-7xl mx-auto space-y-6">
+            {/* Header */}
             <div className="flex items-center justify-between">
-              <h1 className="text-3xl font-bold">Manage Courses</h1>
+              <div>
+                <p
+                  className="text-xs font-semibold uppercase tracking-widest mb-1"
+                  style={{ color: "#0040a1" }}
+                >
+                  Course Management
+                </p>
+                <h1
+                  className="text-2xl md:text-3xl font-bold"
+                  style={{ fontFamily: "var(--font-headline)", color: "#1b1b1c" }}
+                >
+                  Manage Courses
+                </h1>
+              </div>
               <CreateCourseBtn />
             </div>
 

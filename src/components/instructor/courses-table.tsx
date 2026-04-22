@@ -1,7 +1,14 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-// 1. Link import karein
+/**
+ * CoursesTable — Scholarly Architect Design System
+ *
+ * White card table with tonal header.
+ * Status badges: published (primary blue) / draft (muted).
+ * No borders between rows — tonal alternation.
+ * Uses CSS variables for dark mode support.
+ */
+
 import Link from "next/link";
 
 interface Course {
@@ -19,126 +26,110 @@ interface CoursesTableProps {
 
 export function CoursesTable({ courses }: CoursesTableProps) {
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-foreground">My Courses</h2>
-        <span className="text-sm text-muted-foreground">
-          {courses.length} courses found
-        </span>
+    <div className="rounded-lg overflow-hidden" style={{ backgroundColor: "var(--surface-container-lowest)" }}>
+      {/* Header row */}
+      <div
+        className="px-5 py-4 grid grid-cols-12 gap-4 text-xs font-semibold uppercase tracking-wide"
+        style={{ backgroundColor: "var(--surface-container-low)", color: "var(--on-surface-variant)" }}
+      >
+        <div className="col-span-5 md:col-span-4">Course</div>
+        <div className="hidden md:block md:col-span-3">Category</div>
+        <div className="col-span-3 md:col-span-2">Status</div>
+        <div className="hidden md:block md:col-span-2 text-center">Students</div>
+        <div className="col-span-4 md:col-span-1 text-right">Actions</div>
       </div>
 
-      <div className="glass-card-no-glow rounded-xl border border-border overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border bg-muted/20">
-                <th className="text-left p-4 text-sm font-medium text-muted-foreground">
-                  Course
-                </th>
-                <th className="text-left p-4 text-sm font-medium text-muted-foreground hidden md:table-cell">
-                  Category
-                </th>
-                <th className="text-left p-4 text-sm font-medium text-muted-foreground">
-                  Status
-                </th>
-                <th className="text-left p-4 text-sm font-medium text-muted-foreground hidden md:table-cell">
-                  Students
-                </th>
-                <th className="text-right p-4 text-sm font-medium text-muted-foreground">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {courses.map((course) => (
-                <tr
-                  key={course.id}
-                  className="hover:bg-muted/30 transition-colors"
+      {/* Table rows */}
+      <div>
+        {courses.map((course, index) => (
+          <div
+            key={course.id}
+            className="px-5 py-4 grid grid-cols-12 gap-4 items-center"
+            style={{
+              backgroundColor: index % 2 === 0 ? "var(--surface-container-lowest)" : "var(--surface-variant)",
+            }}
+          >
+            {/* Course title + thumbnail placeholder */}
+            <div className="col-span-5 md:col-span-4 flex items-center gap-3">
+              <div
+                className="w-10 h-10 rounded-sm flex items-center justify-center text-sm font-bold flex-shrink-0"
+                style={{ backgroundColor: "color-mix(in srgb, var(--primary) 8%, transparent)", color: "var(--primary)" }}
+              >
+                {course.title.charAt(0).toUpperCase()}
+              </div>
+              <div className="min-w-0">
+                <p
+                  className="font-medium text-sm truncate"
+                  style={{ fontFamily: "var(--font-headline)", color: "var(--on-surface)" }}
                 >
-                  <td className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
-                        {course.title.charAt(0)}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="font-medium text-foreground truncate max-w-[200px]">
-                          {course.title}
-                        </p>
-                        <p className="text-xs text-muted-foreground md:hidden">
-                          {course.category}
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="p-4 text-sm text-muted-foreground hidden md:table-cell">
-                    {course.category}
-                  </td>
-                  <td className="p-4">
-                    <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        course.status === "published"
-                          ? "bg-green-500/10 text-green-500 border border-green-500/20"
-                          : "bg-muted text-muted-foreground border border-border"
-                      }`}
-                    >
-                      {course.status === "published" ? "Published" : "Draft"}
-                    </span>
-                  </td>
-                  <td className="p-4 text-sm text-muted-foreground hidden md:table-cell">
-                    {course.students}
-                  </td>
-                  <td className="p-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      {/* Edit Button */}
-                      <Button
-                        asChild
-                        variant="ghost"
-                        size="sm"
-                        className="text-primary hover:text-primary hover:bg-primary/10 cursor-pointer"
-                      >
-                        <Link
-                          href={`/dashboard/instructor/courses/${course.id}/edit`}
-                        >
-                          <span className="material-symbols-outlined text-base">
-                            edit
-                          </span>
-                        </Link>
-                      </Button>
+                  {course.title}
+                </p>
+                <p className="text-xs md:hidden" style={{ color: "var(--on-surface-variant)" }}>
+                  {course.category}
+                </p>
+              </div>
+            </div>
 
-                      {/* Chapter Management Button */}
-                      <Button
-                        asChild
-                        variant="ghost"
-                        size="sm"
-                        className="text-blue-400 hover:text-blue-300 hover:bg-blue-400/10"
-                      >
-                        <Link href={`/dashboard/instructor/courses/${course.id}/chapters/manage`}>
-                          <span className="material-symbols-outlined text-base">
-                            menu_book
-                          </span>
-                        </Link>
-                      </Button>
+            {/* Category (hidden on mobile) */}
+            <div className="hidden md:block md:col-span-3 text-sm" style={{ color: "var(--on-surface-variant)" }}>
+              {course.category}
+            </div>
 
-                      {/* Preview (Eye) Button */}
-                      <Button
-                        asChild
-                        variant="ghost"
-                        size="sm"
-                        className="text-muted-foreground hover:text-foreground"
-                      >
-                        <Link href={`/courses/${course.id}`}>
-                          <span className="material-symbols-outlined text-base">
-                            visibility
-                          </span>
-                        </Link>
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            {/* Status badge */}
+            <div className="col-span-3 md:col-span-2">
+              <span
+                className="inline-flex px-2.5 py-1 rounded-full text-xs font-medium"
+                style={{
+                  backgroundColor:
+                    course.status === "published"
+                      ? "var(--primary-container)/15"
+                      : "var(--surface-container-high)",
+                  color: course.status === "published" ? "var(--primary)" : "var(--on-surface-variant)",
+                }}
+              >
+                {course.status === "published" ? "Published" : "Draft"}
+              </span>
+            </div>
+
+            {/* Students (hidden on mobile) */}
+            <div
+              className="hidden md:block md:col-span-2 text-center text-sm"
+              style={{ color: "var(--on-surface-variant)" }}
+            >
+              {course.students}
+            </div>
+
+            {/* Actions */}
+            <div className="col-span-4 md:col-span-1 flex items-center justify-end gap-2">
+              <Link
+                href={`/dashboard/instructor/courses/${course.id}/edit`}
+                className="p-2 rounded-sm transition-colors hover:bg-[var(--surface-container)]"
+                style={{ color: "var(--primary)" }}
+                aria-label="Edit"
+              >
+                <span className="material-symbols-outlined text-base">edit</span>
+              </Link>
+
+              <Link
+                href={`/dashboard/instructor/courses/${course.id}/chapters/manage`}
+                className="p-2 rounded-sm transition-colors hover:bg-[var(--surface-container)]"
+                style={{ color: "var(--on-surface-variant)" }}
+                aria-label="Chapters"
+              >
+                <span className="material-symbols-outlined text-base">menu_book</span>
+              </Link>
+
+              <Link
+                href={`/courses/${course.id}`}
+                className="p-2 rounded-sm transition-colors hover:bg-[var(--surface-container)]"
+                style={{ color: "var(--on-surface-variant)" }}
+                aria-label="Preview"
+              >
+                <span className="material-symbols-outlined text-base">visibility</span>
+              </Link>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

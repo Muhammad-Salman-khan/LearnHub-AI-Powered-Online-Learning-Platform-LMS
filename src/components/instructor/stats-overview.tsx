@@ -1,3 +1,12 @@
+/**
+ * StatsOverview (Instructor) — Scholarly Architect Design System
+ *
+ * 3-col stat row for instructor dashboard.
+ * Cards: surface-container-lowest bg, left-edge 4px primary accent.
+ * No glow, no gradients, no borders. Manrope for numbers.
+ * Uses CSS variables for dark mode support.
+ */
+
 interface StatsOverviewProps {
   stats: {
     totalCourses: number;
@@ -7,45 +16,40 @@ interface StatsOverviewProps {
 }
 
 export function StatsOverview({ stats }: StatsOverviewProps) {
-  const statCards = [
-    {
-      label: "Total Courses",
-      value: stats.totalCourses,
-      icon: "library_books",
-      color: "text-primary",
-    },
-    {
-      label: "Total Students",
-      value: stats.totalStudents.toLocaleString(),
-      icon: "group",
-      color: "text-green-500",
-    },
-    {
-      label: "Published Courses",
-      value: stats.publishedCourses,
-      icon: "check_circle",
-      color: "text-primary",
-    },
+  const cards = [
+    { label: "Total Courses", value: stats.totalCourses, icon: "library_books" },
+    { label: "Total Students", value: stats.totalStudents.toLocaleString(), icon: "group" },
+    { label: "Published", value: stats.publishedCourses, icon: "check_circle" },
   ];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      {statCards.map((stat, index) => (
+      {cards.map((card) => (
         <div
-          key={index}
-          className="glass-card-no-glow rounded-xl p-5 border border-border hover:border-primary/50 transition-all duration-300 hover:amber-glow group"
+          key={card.label}
+          className="rounded-lg p-5 flex items-start gap-4"
+          style={{
+            backgroundColor: "var(--surface-container-lowest)",
+            borderLeft: "4px solid var(--primary)",
+          }}
         >
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-muted-foreground text-sm font-medium">
-              {stat.label}
-            </span>
-            <span
-              className={`material-symbols-outlined ${stat.color} group-hover:scale-110 transition-transform`}
+          <span
+            className="material-symbols-outlined text-2xl"
+            style={{ color: "var(--primary)" }}
+          >
+            {card.icon}
+          </span>
+          <div>
+            <p className="text-xs uppercase tracking-wide mb-1" style={{ color: "var(--on-surface-variant)" }}>
+              {card.label}
+            </p>
+            <p
+              className="text-2xl font-bold"
+              style={{ fontFamily: "var(--font-headline)", color: "var(--on-surface)" }}
             >
-              {stat.icon}
-            </span>
+              {card.value}
+            </p>
           </div>
-          <p className="text-3xl font-bold text-foreground">{stat.value}</p>
         </div>
       ))}
     </div>

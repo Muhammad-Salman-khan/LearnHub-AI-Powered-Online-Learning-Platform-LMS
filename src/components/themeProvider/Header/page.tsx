@@ -1,190 +1,184 @@
 "use client";
 
+/**
+ * Header — Scholarly Architect Design System
+ *
+ * Sticky top navigation for public pages.
+ * Background: surface (#fcf9f8), no border separator.
+ * Brand: account_balance icon + LearnHub text.
+ * Nav: Explore (active), My Learning, Resources.
+ * Right: Search icon + Theme Toggle + Profile avatar.
+ */
+
 import Link from "next/link";
 import { useState } from "react";
 import { useSession } from "next-auth/react";
-import { Button } from "@/components/ui/button";
-import LogInIcon from "@/components/ui/loginicon";
+import { ThemeToggle } from "../theme-toggle";
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { data: session, status } = useSession();
   const isLoggedIn = status === "authenticated";
   const userName = session?.user?.name || "User";
+  const userRole = session?.user?.role || "student";
+
+  // Determine dashboard route based on role
+  const dashboardRoute =
+    userRole === "ADMIN"
+      ? "/dashboard/admin"
+      : userRole === "INSTRUCTOR"
+        ? "/dashboard/instructor"
+        : "/dashboard/student";
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-xl border-b border-border/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Left: Menu + Logo */}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 text-[#f97316] hover:bg-muted rounded-lg transition-colors"
-              aria-label="Toggle menu"
-            >
-              <span className="material-symbols-outlined text-xl">menu</span>
-            </button>
+    <header
+      className="w-full top-0 sticky z-50"
+      style={{ backgroundColor: "var(--background)" }}
+    >
+      <nav className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
+        {/* Brand */}
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-2xl font-extrabold tracking-tighter"
+          style={{ fontFamily: "var(--font-headline)", color: "var(--on-surface)" }}
+        >
+          <span
+            className="material-symbols-outlined text-2xl"
+            style={{ color: "var(--primary)" }}
+          >
+            account_balance
+          </span>
+          LearnHub
+        </Link>
 
-            <Link href="/" className="flex items-center gap-2 group">
-              <span className="material-symbols-outlined text-[#f97316] text-2xl logo-glow group-hover:scale-110 transition-transform">
-                school
-              </span>
-              <span
-                className="font-heading font-bold text-xl tracking-tight logo-glow"
-                style={{ color: "#f97316" }}
-              >
-                LearnHub
-              </span>
-            </Link>
-          </div>
-
-          {/* Center: Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-8">
-            {[
-              { name: "Home", href: "/" },
-              { name: "Courses", href: "/courses" },
-              { name: "Mentors", href: "/mentors" },
-            ].map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="text-sm font-medium text-muted-foreground hover:text-[#f97316] transition-colors"
-              >
-                {item.name}
-              </Link>
-            ))}
-          </nav>
-
-          {/* Right: LOGIN / PROFILE BUTTON */}
-          <div className="flex items-center gap-4">
-            {!isLoggedIn ? (
-              <Button
-                asChild
-                variant="default"
-                size="sm"
-                className="hidden md:flex h-9 gap-2 text-sm font-medium transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-none focus:ring-0 focus:outline-none"
-                style={{ backgroundColor: "#f97316", color: "white" }}
-              >
-                <Link href="/login" className="flex items-center gap-1.5">
-                  <LogInIcon size={14} color="currentColor" strokeWidth={2.5} />
-                  <span>Login</span>
-                </Link>
-              </Button>
-            ) : (
-              <Link
-                href={
-                  session?.user?.role === "ADMIN"
-                    ? "/dashboard/admin"
-                    : session?.user?.role === "INSTRUCTOR"
-                      ? "/dashboard/instructor"
-                      : "/dashboard/student"
-                }
-                className="hidden md:flex items-center gap-2 p-1 pr-3 rounded-full border border-border hover:border-[#f97316] transition-colors"
-              >
-                <div className="w-8 h-8 rounded-full bg-[#f97316]/20 flex items-center justify-center overflow-hidden">
-                  {session?.user?.image ? (
-                    <img
-                      src={session.user.image}
-                      alt={userName}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-[#f97316] font-semibold text-sm">
-                      {userName.charAt(0).toUpperCase()}
-                    </span>
-                  )}
-                </div>
-                <span className="text-sm font-medium text-foreground">
-                  {userName}
-                </span>
-              </Link>
-            )}
-
-            {/* Mobile: Icon Button */}
-            <Link
-              href={
-                !isLoggedIn
-                  ? "/login"
-                  : session?.user?.role === "ADMIN"
-                    ? "/dashboard/admin"
-                    : session?.user?.role === "INSTRUCTOR"
-                      ? "/dashboard/instructor"
-                      : "/dashboard/student"
-              }
-              className="md:hidden p-2 text-[#f97316] hover:bg-muted rounded-full transition-colors"
-              aria-label={!isLoggedIn ? "Login" : "Profile"}
-              style={{ filter: "drop-shadow(0 0 8px rgba(249, 115, 22, 0.5))" }}
-            >
-              <span className="material-symbols-outlined text-xl">
-                {!isLoggedIn ? "login" : "account_circle"}
-              </span>
-            </Link>
-          </div>
+        {/* Desktop Nav */}
+        <div className="hidden md:flex items-center gap-8">
+          <Link
+            href="/courses"
+            className="font-bold text-lg tracking-tight border-b-2 pb-1 transition-colors"
+            style={{
+              fontFamily: "var(--font-headline)",
+              color: "var(--primary)",
+              borderColor: "var(--primary)",
+            }}
+          >
+            Explore
+          </Link>
+          <Link
+            href={isLoggedIn ? dashboardRoute : "/login"}
+            className="font-bold text-lg tracking-tight hover:opacity-70 transition-opacity"
+            style={{ fontFamily: "var(--font-headline)", color: "var(--on-surface-variant)" }}
+          >
+            My Learning
+          </Link>
+          <Link
+            href="/resources"
+            className="font-bold text-lg tracking-tight hover:opacity-70 transition-opacity"
+            style={{ fontFamily: "var(--font-headline)", color: "var(--on-surface-variant)" }}
+          >
+            Resources
+          </Link>
         </div>
 
-        {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-border/50">
-            <nav className="flex flex-col gap-4">
-              {[
-                { name: "Home", href: "/" },
-                { name: "Courses", href: "/courses" },
-                { name: "Mentors", href: "/mentors" },
-              ].map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="text-sm font-medium text-muted-foreground hover:text-[#f97316] transition-colors py-2"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              ))}
+        {/* Right side: Search + Theme + Profile */}
+        <div className="flex items-center gap-4">
+          {/* Search - hidden on mobile */}
+          <button
+            className="hidden md:flex material-symbols-outlined cursor-pointer transition-opacity hover:opacity-70"
+            style={{ color: "var(--on-surface-variant)" }}
+            aria-label="Search"
+          >
+            search
+          </button>
 
-              {!isLoggedIn ? (
-                <Button
-                  asChild
-                  variant="outline"
-                  size="sm"
-                  className="w-full gap-2 text-sm border-[#f97316] text-[#f97316] hover:bg-[#f97316] hover:text-white transition-all"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <Link href="/login" className="flex items-center justify-center gap-1.5">
-                    <LogInIcon size={14} />
-                    <span>Login</span>
-                  </Link>
-                </Button>
+          {/* Theme Toggle */}
+          <ThemeToggle />
+
+          {/* Mobile menu toggle */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="md:hidden material-symbols-outlined cursor-pointer"
+            style={{ color: "var(--on-surface-variant)" }}
+            aria-label="Menu"
+          >
+            menu
+          </button>
+
+          {/* Profile / Login */}
+          {isLoggedIn ? (
+            <Link
+              href={dashboardRoute}
+              className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center transition-opacity hover:opacity-80"
+              style={{ backgroundColor: "var(--surface-container-high)" }}
+            >
+              {session?.user?.image ? (
+                <img
+                  src={session.user.image}
+                  alt={userName}
+                  className="w-full h-full object-cover"
+                />
               ) : (
-                <Button
-                  asChild
-                  variant="default"
-                  size="sm"
-                  className="w-full gap-2 text-sm"
-                  style={{ backgroundColor: "#f97316", color: "white" }}
-                  onClick={() => setIsMobileMenuOpen(false)}
+                <span
+                  className="material-symbols-outlined"
+                  style={{ color: "var(--on-surface-variant)" }}
                 >
-                  <Link
-                    href={
-                      session?.user?.role === "ADMIN"
-                        ? "/dashboard/admin"
-                        : session?.user?.role === "INSTRUCTOR"
-                          ? "/dashboard/instructor"
-                          : "/dashboard/student"
-                    }
-                    className="flex items-center justify-center gap-1.5"
-                  >
-                    <span className="material-symbols-outlined text-base">
-                      dashboard
-                    </span>
-                    <span>Dashboard</span>
-                  </Link>
-                </Button>
+                  person
+                </span>
               )}
-            </nav>
-          </div>
-        )}
-      </div>
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className="flex items-center gap-2 px-4 py-2 rounded font-bold text-sm tracking-tight transition-opacity hover:opacity-90"
+              style={{
+                fontFamily: "var(--font-headline)",
+                backgroundColor: "var(--primary)",
+                color: "var(--on-primary)",
+              }}
+            >
+              Sign In
+            </Link>
+          )}
+        </div>
+      </nav>
+
+      {/* Mobile Menu */}
+      {isMobileMenuOpen && (
+        <div
+          className="md:hidden px-6 py-4"
+          style={{
+            backgroundColor: "var(--background)",
+            borderTop: "1px solid var(--surface-container)",
+          }}
+        >
+          <nav className="flex flex-col gap-4">
+            <Link
+              href="/courses"
+              className="font-bold text-base py-2"
+              style={{ fontFamily: "var(--font-headline)", color: "var(--primary)" }}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Explore
+            </Link>
+            <Link
+              href={isLoggedIn ? dashboardRoute : "/login"}
+              className="font-bold text-base py-2"
+              style={{ fontFamily: "var(--font-headline)", color: "var(--on-surface-variant)" }}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              My Learning
+            </Link>
+            <Link
+              href="/resources"
+              className="font-bold text-base py-2"
+              style={{ fontFamily: "var(--font-headline)", color: "var(--on-surface-variant)" }}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Resources
+            </Link>
+          </nav>
+        </div>
+      )}
     </header>
   );
 }

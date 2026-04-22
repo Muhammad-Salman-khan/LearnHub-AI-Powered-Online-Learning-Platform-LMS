@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 
 interface CourseNavigationProps {
@@ -11,11 +13,12 @@ interface CourseNavigationProps {
 
 export function CourseNavigation({ hasPrev, hasNext, prevHref, nextHref, isCourseComplete, courseId }: CourseNavigationProps) {
   return (
-    <div className="flex justify-between items-center pt-8 border-t border-border">
+    <div className="flex justify-between items-center pt-8" style={{ borderTop: "1px solid var(--border)" }}>
       {hasPrev && prevHref ? (
         <Link
           href={prevHref}
-          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+          className="flex items-center gap-2 transition-colors"
+          style={{ color: "var(--on-surface-variant)" }}
         >
           <span className="material-symbols-outlined">arrow_back</span>
           Previous
@@ -23,7 +26,8 @@ export function CourseNavigation({ hasPrev, hasNext, prevHref, nextHref, isCours
       ) : (
         <button
           disabled
-          className="flex items-center gap-2 text-muted-foreground opacity-30 cursor-not-allowed"
+          className="flex items-center gap-2 opacity-30 cursor-not-allowed"
+          style={{ color: "var(--on-surface-variant)" }}
         >
           <span className="material-symbols-outlined">arrow_back</span>
           Previous
@@ -34,14 +38,16 @@ export function CourseNavigation({ hasPrev, hasNext, prevHref, nextHref, isCours
         <div className="flex items-center gap-3">
           <Link
             href={`/dashboard/student`}
-            className="flex items-center gap-2 text-green-400 hover:text-green-300 transition-colors font-medium"
+            className="flex items-center gap-2 transition-colors font-medium"
+            style={{ color: "var(--success, #22c55e)" }}
           >
             <span className="material-symbols-outlined">home</span>
             Return to Dashboard
           </Link>
           <Link
             href="/courses"
-            className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors font-medium"
+            className="flex items-center gap-2 transition-colors font-medium"
+            style={{ color: "var(--primary)" }}
           >
             Browse More Courses
             <span className="material-symbols-outlined">arrow_forward</span>
@@ -50,7 +56,8 @@ export function CourseNavigation({ hasPrev, hasNext, prevHref, nextHref, isCours
       ) : hasNext && nextHref ? (
         <Link
           href={nextHref}
-          className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors font-medium"
+          className="flex items-center gap-2 transition-colors font-medium"
+          style={{ color: "var(--primary)" }}
         >
           Next
           <span className="material-symbols-outlined">arrow_forward</span>
@@ -58,7 +65,8 @@ export function CourseNavigation({ hasPrev, hasNext, prevHref, nextHref, isCours
       ) : (
         <button
           disabled
-          className="flex items-center gap-2 text-primary opacity-30 cursor-not-allowed font-medium"
+          className="flex items-center gap-2 opacity-30 cursor-not-allowed font-medium"
+          style={{ color: "var(--primary)" }}
         >
           Next
           <span className="material-symbols-outlined">arrow_forward</span>

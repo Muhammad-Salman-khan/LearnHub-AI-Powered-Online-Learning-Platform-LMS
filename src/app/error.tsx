@@ -1,25 +1,106 @@
 "use client";
 
-import { useEffect } from "react";
-import { ErrorDisplay } from "@/components/errors/error-display";
+/**
+ * Error — Scholarly Architect Design System
+ *
+ * 500 error page with retry functionality.
+ * Background: surface (#fcf9f8)
+ * Accent: error (#ba1a1a)
+ */
 
-export default function Error({
-  error,
-  reset,
-}: {
+import Link from "next/link";
+import { useEffect } from "react";
+
+interface ErrorProps {
   error: Error & { digest?: string };
   reset: () => void;
-}) {
+}
+
+export default function Error({ error, reset }: ErrorProps) {
   useEffect(() => {
-    console.error("Application Error:", error);
+    console.error(error);
   }, [error]);
 
   return (
-    <ErrorDisplay
-      statusCode={500}
-      title="Internal Server Error"
-      message="The obsidian depths are currently unreachable. We're working on restoring the connection to your learning resources."
-      onRetry={reset}
-    />
+    <div
+      className="min-h-screen flex flex-col items-center justify-center px-6"
+      style={{ backgroundColor: "#fcf9f8" }}
+    >
+      {/* Brand */}
+      <Link
+        href="/"
+        className="absolute top-6 left-6 flex items-center gap-2 text-2xl font-extrabold tracking-tighter"
+        style={{ fontFamily: "var(--font-headline)", color: "#1b1b1c" }}
+      >
+        <span className="material-symbols-outlined text-2xl" style={{ color: "#0040a1" }}>
+          account_balance
+        </span>
+        LearnHub
+      </Link>
+
+      {/* Error Content */}
+      <div className="text-center max-w-lg">
+        {/* Status Code */}
+        <h1
+          className="text-[120px] sm:text-[160px] font-extrabold leading-none tracking-tighter mb-4"
+          style={{ fontFamily: "var(--font-headline)", color: "#ba1a1a" }}
+        >
+          500
+        </h1>
+
+        <p
+          className="text-sm uppercase tracking-widest mb-6"
+          style={{ color: "#ba1a1a", fontFamily: "var(--font-body)" }}
+        >
+          Server Error
+        </p>
+
+        <h2
+          className="text-2xl sm:text-3xl font-bold mb-4"
+          style={{ fontFamily: "var(--font-headline)", color: "#1b1b1c" }}
+        >
+          Something went wrong
+        </h2>
+
+        <p className="text-base mb-8" style={{ color: "#424654" }}>
+          We apologize for the inconvenience. An unexpected error has occurred.
+          Please try again or contact support if the problem persists.
+        </p>
+
+        {/* Actions */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <button
+            onClick={reset}
+            className="px-8 py-3 rounded font-semibold text-sm transition-all hover:opacity-90"
+            style={{ backgroundColor: "#0040a1", color: "#ffffff" }}
+          >
+            Try Again
+          </button>
+
+          <Link
+            href="/"
+            className="px-8 py-3 rounded font-semibold text-sm transition-all hover:bg-[#e5e2e1]"
+            style={{ backgroundColor: "#f0eded", color: "#1b1b1c" }}
+          >
+            Go Home
+          </Link>
+        </div>
+
+        {/* Error ID */}
+        {error.digest && (
+          <p className="mt-8 text-xs" style={{ color: "#737785" }}>
+            Error ID: {error.digest}
+          </p>
+        )}
+      </div>
+
+      {/* Footer */}
+      <footer
+        className="absolute bottom-6 text-center"
+        style={{ color: "#737785" }}
+      >
+        <p className="text-xs">© 2024 LearnHub. All rights reserved.</p>
+      </footer>
+    </div>
   );
 }

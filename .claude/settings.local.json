@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(stitch-design)",
+      "mcp__stitch__create_project",
+      "mcp__stitch__create_design_system",
+      "Bash(mkdir -p C:/Users/muham/Desktop/hackathon/frontend/app/\\\\\\(auth\\\\\\) C:/Users/muham/Desktop/hackathon/frontend/app/onboarding C:/Users/muham/Desktop/hackathon/frontend/app/dashboard C:/Users/muham/Desktop/hackathon/frontend/app/explore C:/Users/muham/Desktop/hackathon/frontend/app/request/create \"C:/Users/muham/Desktop/hackathon/frontend/app/request/[id]\" C:/Users/muham/Desktop/hackathon/frontend/app/messages C:/Users/muham/Desktop/hackathon/frontend/app/leaderboard C:/Users/muham/Desktop/hackathon/frontend/app/ai-center C:/Users/muham/Desktop/hackathon/frontend/app/notifications \"C:/Users/muham/Desktop/hackathon/frontend/app/profile/[id]\" C:/Users/muham/Desktop/hackathon/frontend/app/admin C:/Users/muham/Desktop/hackathon/frontend/components/ui C:/Users/muham/Desktop/hackathon/frontend/components/layout C:/Users/muham/Desktop/hackathon/frontend/components/dashboard C:/Users/muham/Desktop/hackathon/frontend/components/explore C:/Users/muham/Desktop/hackathon/frontend/components/request C:/Users/muham/Desktop/hackathon/frontend/components/ai C:/Users/muham/Desktop/hackathon/frontend/lib C:/Users/muham/Desktop/hackathon/frontend/hooks C:/Users/muham/Desktop/hackathon/frontend/types C:/Users/muham/Desktop/hackathon/frontend/styles C:/Users/muham/Desktop/hackathon/frontend/public)",
+      "Bash(mkdir -p C:/Users/muham/Desktop/hackathon/backend/src/config C:/Users/muham/Desktop/hackathon/backend/src/models C:/Users/muham/Desktop/hackathon/backend/src/routes C:/Users/muham/Desktop/hackathon/backend/src/controllers C:/Users/muham/Desktop/hackathon/backend/src/middleware C:/Users/muham/Desktop/hackathon/backend/src/utils)",
+      "mcp__stitch__generate_screen_from_text",
+      "Bash(npm install *)",
+      "Bash(npx tsc *)",
+      "Bash(node_modules/.bin/tsc --noEmit)",
+      "Bash(./node_modules/.bin/tsc --noEmit)",
+      "Bash(node_modules/.bin/next build *)",
+      "Bash(node_modules/.bin/next dev *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)",
+      "mcp__plugin_playwright_playwright__browser_navigate",
+      "mcp__plugin_playwright_playwright__browser_take_screenshot",
+      "mcp__plugin_playwright_playwright__browser_snapshot",
+      "mcp__plugin_playwright_playwright__browser_click",
+      "Bash(curl -s -m 10 http://localhost:3002/request/r1)",
+      "Bash(curl -v -m 15 http://localhost:3002/request/r1)",
+      "Bash(curl -s -m 5 http://localhost:3002/)",
+      "Bash(netstat -ano)",
+      "Bash(taskkill *)",
+      "Bash(cmd *)",
+      "Bash(npm run *)",
+      "Bash(curl -s -m 5 http://localhost:3002/request/r1)",
+      "Bash(curl -v -m 20 http://localhost:3002/request/r1)",
+      "Bash(kill -9 11164)",
+      "Bash(powershell *)",
+      "Bash(curl -s -m 5 http://localhost:3002/auth)",
+      "mcp__plugin_playwright_playwright__browser_fill_form",
+      "mcp__plugin_playwright_playwright__browser_console_messages",
+      "mcp__plugin_playwright_playwright__browser_type",
+      "mcp__plugin_playwright_playwright__browser_wait_for",
+      "mcp__plugin_playwright_playwright__browser_close",
+      "Bash(curl -s http://localhost:3000)"
+    ]
+  }
+}

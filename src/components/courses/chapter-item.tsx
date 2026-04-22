@@ -1,3 +1,15 @@
+"use client";
+
+/**
+ * ChapterItem — Scholarly Architect Design System
+ *
+ * Single lesson row in the chapter sidebar.
+ * Active (current):  primary bg + on-primary text
+ * Completed:         check_circle icon in primary blue
+ * Locked:            muted, lock icon
+ * No border on the item itself — tonal bg shift communicates state.
+ */
+
 interface ChapterItemProps {
   chapter: {
     id: string;
@@ -10,59 +22,68 @@ interface ChapterItemProps {
 }
 
 export function ChapterItem({ chapter, position, onClick }: ChapterItemProps) {
-  const isCompleted = chapter.status === "completed";
-  const isCurrent = chapter.status === "current";
-  const isLocked = chapter.status === "locked";
+  const { status } = chapter;
+  const isCurrent   = status === "current";
+  const isCompleted = status === "completed";
+  const isLocked    = status === "locked";
 
   return (
     <div
-      onClick={onClick}
-      className={`
-        group relative flex items-center gap-3 p-3 rounded-lg text-sm transition-all duration-300
-        ${isCurrent ? "bg-primary/5" : "hover:bg-muted/30"}
-        ${isLocked ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
-        ${isCurrent ? "border border-primary/30 shadow-[0_0_15px_rgba(249,115,22,0.15)]" : "border border-transparent"}
-      `}
+      role="button"
+      tabIndex={isLocked ? -1 : 0}
+      onClick={isLocked ? undefined : onClick}
+      className="flex items-center gap-3 px-3 py-3 rounded-sm text-sm transition-all duration-150"
+      style={{
+        backgroundColor: isCurrent ? "var(--primary)" : "transparent",
+        color: isCurrent ? "var(--on-primary)" : "var(--on-surface)",
+        opacity: isLocked ? 0.45 : 1,
+        cursor: isLocked ? "not-allowed" : "pointer",
+      }}
+      onMouseEnter={(e) => {
+        if (!isCurrent && !isLocked)
+          (e.currentTarget as HTMLElement).style.backgroundColor = "var(--surface-container)";
+      }}
+      onMouseLeave={(e) => {
+        if (!isCurrent)
+          (e.currentTarget as HTMLElement).style.backgroundColor = "transparent";
+      }}
     >
-      {/* Left Accent Bar (Only for Current) */}
-      {isCurrent && (
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-primary rounded-r-full shadow-[0_0_10px_rgba(249,115,22,0.8)]" />
-      )}
-
-      {/* Status Icon */}
+      {/* Status icon */}
       <span
-        className={`
-        material-symbols-outlined text-base shrink-0 transition-colors
-        ${isCompleted ? "text-green-500" : ""}
-        ${isCurrent ? "text-primary animate-pulse" : ""}
-        ${isLocked ? "text-muted-foreground" : ""}
-      `}
+        className="material-symbols-outlined text-base flex-shrink-0"
+        style={{
+          color: isCurrent
+            ? "var(--on-primary)"
+            : isCompleted
+            ? "var(--primary)"
+            : "var(--outline)",
+        }}
       >
-        {isCompleted && "check_circle"}
-        {isCurrent && "play_circle"}
-        {isLocked && "lock"}
+        {isCompleted ? "check_circle" : isCurrent ? "play_circle" : "lock"}
       </span>
 
-      {/* Content */}
-      <div className="flex-1 min-w-0 flex flex-col gap-0.5">
-        {/* Row 1: Position + Title */}
-        <div className="flex items-center gap-2">
+      {/* Title + duration */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5">
           <span
-            className={`text-[10px] font-mono ${isCurrent ? "text-primary" : "text-muted-foreground"}`}
+            className="text-[10px] font-mono flex-shrink-0"
+            style={{ color: isCurrent ? "rgba(255,255,255,0.6)" : "var(--on-surface-variant)" }}
           >
-            {position < 10 ? `0${position}` : position}
+            {String(position).padStart(2, "0")}
           </span>
           <span
-            className={`truncate font-medium ${isCurrent ? "text-primary" : "text-foreground"}`}
+            className="truncate font-medium text-sm"
+            style={{ color: isCurrent ? "var(--on-primary)" : "var(--on-surface)" }}
           >
             {chapter.title}
           </span>
         </div>
-
-        {/* Row 2: Duration */}
         {chapter.duration && (
-          <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-            <span className="material-symbols-outlined text-[10px]">
+          <span
+            className="text-[10px] flex items-center gap-0.5 mt-0.5"
+            style={{ color: isCurrent ? "rgba(255,255,255,0.6)" : "var(--on-surface-variant)" }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: "10px" }}>
               schedule
             </span>
             {chapter.duration}
