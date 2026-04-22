@@ -13,6 +13,8 @@ import { roleChecker } from "@/services/authCheckers";
 import { UploadCourseThumbnail } from "@/services/UploadFile";
 import { revalidatePath } from "next/cache";
 import { notFound } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/option";
 type ActionResponse =
   | { success: true; message: string }
   | { success: false; error: string };
@@ -563,20 +565,27 @@ export const getSearchedCourses = async (params: { query?: string; category?: st
 
 // Enroll user in a course (start!)
 export const enrollInCourse = async (courseId: string) => {
-  const user = await roleChecker("STUDENT");
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return { success: false, error: "Not authenticated" };
+    }
+    if (session.user.role !== "STUDENT") {
+      return { success: false, error: "Only students can enroll" };
+    }
+
     const course = await prisma.course.findUnique({
       where: { id: courseId, isPublished: true },
     });
     if (!course) return { success: false, error: "Course not found" };
 
     const existing = await prisma.enrollment.findUnique({
-      where: { userId_courseId: { userId: user.id, courseId } },
+      where: { userId_courseId: { userId: session.user.id, courseId } },
     });
     if (existing) return { success: false, error: "Already enrolled" };
 
     await prisma.enrollment.create({
-      data: { userId: user.id, courseId },
+      data: { userId: session.user.id, courseId },
     });
     revalidatePath("/dashboard/student");
     return { success: true, message: "Enrolled successfully" };

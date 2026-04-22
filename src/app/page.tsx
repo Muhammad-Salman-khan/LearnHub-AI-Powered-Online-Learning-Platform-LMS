@@ -1,463 +1,569 @@
 /**
- * LearnHub - Homepage
+ * LearnHub — Homepage
  *
- * Structure:
- * - Hero Section: Main CTA with headline + buttons
- * - Features Section: 3-column grid showcasing platform capabilities
- * - Stats Bar: Key metrics displayed in 4-column grid
- * - Course Tracks: Featured courses with images and metadata
- * - CTA Section: Final conversion prompt with gradient background
- * - Footer: Navigation links and branding
+ * Design System: The Scholarly Architect
+ * Palette: primary #0040a1, background #fcf9f8, cream surfaces
+ * Typography: Manrope (headlines) + Inter (body)
+ * Rule: No 1px borders for structure — use background color shifts
  *
- * Theme: Dark Amber (oklch color space)
- * Components: glass-card, glass-card-no-glow, Material Symbols, shadcn/ui
+ * Sections:
+ * 1. TopNavBar   — sticky header with nav + auth buttons + theme toggle
+ * 2. Hero        — 12-col grid, headline + CTA + architectural image
+ * 3. Standards   — 3-col feature grid on surface-container-low
+ * 4. Modules     — course cards from DB on surface
+ * 5. Newsletter  — primary-background CTA section
+ * 6. Footer      — 4-col on surface-container-low
+ * 7. AI Chatbot  — persistent floating trigger (only element breaking grid)
  */
 
 import Link from "next/link";
-import Header from "@/components/themeProvider/Header/page";
 import Image from "next/image";
 import { getAllCourses } from "@/server/action";
+import { ThemeToggle } from "@/components/themeProvider/theme-toggle";
+
+/* ─── AI Chatbot Widget ─────────────────────────────────────
+   Floats above all content. Full (9999px) roundedness per spec.
+   "Deep Breath" ambient shadow: blur 32px, 6% opacity.
+──────────────────────────────────────────────────────────── */
+function AIChatbotWidget() {
+  return (
+    <div className="fixed bottom-8 right-8 z-[100]">
+      <button
+        aria-label="Open Architect Assistant"
+        className="p-4 rounded-full flex items-center justify-center transition-transform hover:scale-105 active:scale-95 group ambient-shadow"
+        style={{ backgroundColor: "var(--surface-container-high)", color: "var(--primary)" }}
+      >
+        <span className="material-symbols-outlined text-3xl">auto_awesome</span>
+        {/* Tooltip label appears on hover */}
+        <span className="absolute right-full mr-4 px-4 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap text-sm font-bold shadow-sm"
+          style={{ backgroundColor: "var(--surface-container-high)", color: "var(--on-surface)" }}>
+          Architect Assistant
+        </span>
+      </button>
+    </div>
+  );
+}
 
 export default async function HomePage() {
-  // Fetch real courses from DB for homepage display (only 3)
+  /* Fetch up to 3 real courses from DB for the Elite Modules section */
   const response = await getAllCourses(1, 3);
-  const courses = (response.success && response.data ? response.data.items : []) ?? [];
+  const courses =
+    response.success && response.data ? response.data.items : [];
 
   return (
-    <main className="min-h-screen bg-background text-foreground relative overflow-hidden">
-      {/* 
-        Header Component
-        - Contains navigation, auth buttons, mobile menu
-        - Included only on homepage per design spec
-      */}
-      <Header />
+    <div className="antialiased"
+      style={{ backgroundColor: "var(--background)", color: "var(--on-surface)" }}
+    >
 
-      {/* 
-  ========================================
-  HERO SECTION
-  ========================================
-  - Responsive background image (smaller, contained)
-  - Primary headline with amber accent text
-  - Dual CTA buttons (primary + secondary)
-  - ✅ Image sized appropriately for each breakpoint
-*/}
-      <section className="pt-32 pb-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        {/* 🔹 HERO BACKGROUND IMAGE CONTAINER */}
-        <div className="absolute top-8 sm:top-12 md:top-16 right-4 sm:right-8 md:right-12 w-[400px] h-[400px] sm:w-[500px] sm:h-[500px] md:w-[600px] md:h-[600px] lg:w-[700px] lg:h-[700px] pointer-events-none overflow-hidden">
-          {/* Main Hero Image */}
-          <Image
-            src="/heropic.png"
-            alt="Abstract obsidian texture with amber light"
-            fill
-            className="object-cover opacity-40 mix-blend-screen"
-          />
-          {/* Amber Overlay for brand cohesion */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[#f97316]/10 via-transparent to-transparent" />
-          {/* Blur for atmospheric depth */}
-          <div className="absolute inset-0 blur-3xl" />
-        </div>
-
-        {/* 🔹 SECONDARY GLOW - Align with new spacing */}
-        <div className="absolute top-24 sm:top-32 md:top-40 right-8 sm:right-16 md:right-24 w-[200px] h-[200px] sm:w-[300px] sm:h-[300px] md:w-[400px] md:h-[400px] bg-[#f97316]/10 rounded-full pointer-events-none blur-2xl" />
-
-        {/* Hero Content - Higher z-index to stay above background */}
-        <div className="max-w-7xl mx-auto relative z-10">
-          {/* Hero Headline */}
-          <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight mb-6 leading-tight">
-            Master the <span className="text-[#f97316] text-glow">Future</span>
-            <br />
-            of Human Capital.
-          </h1>
-
-          {/* Hero Subheadline */}
-          <p className="text-base sm:text-lg md:text-xl text-[#e0c0b1] mb-8 sm:mb-10 max-w-2xl">
-            A deep-tech learning environment designed for precision, speed, and
-            absolute mastery. Curated by industry titans for the next generation
-            of engineers.
-          </p>
-
-          {/* Primary Action Buttons */}
-          <div className="flex flex-col sm:flex-row items-start gap-4 mb-12 sm:mb-16 w-full sm:w-auto">
+      {/* ═══════════════════════════════════════════════════
+          TOP NAV BAR
+          Sticky, same background as hero — no border separator.
+          Brand uses section gap to separate, not a 1px line.
+      ═══════════════════════════════════════════════════ */}
+      <header className="w-full top-0 sticky z-50"
+        style={{ backgroundColor: "var(--background)" }}
+      >
+        <nav className="flex items-center justify-between px-8 md:px-12 py-4 max-w-[1440px] mx-auto">
+          {/* Brand + Primary Nav */}
+          <div className="flex items-center gap-12">
             <Link
-              href="/signup"
-              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-gradient-to-br from-[#ffb690] to-[#f97316] text-[#131313] rounded-lg font-medium hover:opacity-90 transition-all shadow-[0_0_40px_rgba(249,115,22,0.08)]"
+              href="/"
+              className="text-2xl font-extrabold tracking-tighter"
+              style={{ fontFamily: "var(--font-headline, Manrope)", color: "var(--primary)" }}
             >
-              Start Learning
+              LearnHub
             </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* 
-        ========================================
-        FEATURES SECTION
-        ========================================
-        - 3-column grid on desktop, stacked on mobile
-        - Each feature card uses glass-card styling
-        - Icons from Material Symbols library
-        - Hover effects: subtle border color change
-      */}
-      <section id="curriculum" className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Feature 1: Neural Curriculum Design */}
-            <div className="glass-card rounded-xl p-6 border border-border/50">
-              <span className="material-symbols-outlined text-primary text-3xl mb-4">
-                neurology
-              </span>
-              <h3 className="font-heading font-semibold text-lg mb-2">
-                Neural Curriculum Design
-              </h3>
-              <p className="text-muted-foreground text-sm">
-                Our AI adapts your learning path in real-time, focusing on
-                high-impact skills that the market demands right now.
-              </p>
-            </div>
-
-            {/* Feature 2: Hyper-Speed Mentoring */}
-            <div className="glass-card rounded-xl p-6 border border-border/50">
-              <span className="material-symbols-outlined text-primary text-3xl mb-4">
-                bolt
-              </span>
-              <h3 className="font-heading font-semibold text-lg mb-2">
-                Hyper-Speed Mentoring
-              </h3>
-              <p className="text-muted-foreground text-sm mb-4">
-                Connect with industry experts in real-time. Get instant
-                feedback, code reviews, and career guidance when you need it
-                most.
-              </p>
-              {/* Mentor avatars stack */}
-              <div className="flex -space-x-2">
-                <div className="w-10 h-10 rounded-full bg-muted border-2 border-background overflow-hidden flex-shrink-0">
-                  <Image
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFmkhjDE4bYxGTJjNGYN9GfdGEH_eKWRhVbIojtYt4bVYhqdtmwt4fXYkIQay_oaTq4K7DraJTLtUpQk2zr3ZlSA2Wfv2nhxJoIkGXW0yGirkySKXkLjQvv0qUF0I80OcTSNUOWAqjrJ8VL4GAFfrC9j6-hWSrh7ABRvwYknFDi6-YotHjt5Wf4UOehONWEA6S6TJdPrGkhdICm-xQqwbjmtY619z79STLQDwcMO57P9Dx9nYTEGjzQcUGhWW3O8kNabtmE5i8pU4k"
-                    alt="Mentor"
-                    width={40}
-                    height={40}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="w-10 h-10 rounded-full bg-muted border-2 border-background overflow-hidden flex-shrink-0">
-                  <Image
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCz1CfV0oXCShGy1Xs0mj4EQJG76ujbDpIVcyqib8YVcWgRXPRmjdIllWB1Ful7gRFt_Su8Uab1rCY_dK--NGOHf4mmt20xQQm7D5zoGFQMINXwVv85Ie1DDEd7T0bf0StNdceL9TyTRsoCKKbc52HRhWRzZNGPkgy_Rg9ttmnmDfJwu1zNX2Hb7KTU8VHJu0aG73At24yySYUghj-2cGXSGiQAwrxRo2Ye-gdr8EhGHwzKvexTL4N_Dron9U3hUgTrmdwKow-MAS-s"
-                    alt="Mentor"
-                    width={40}
-                    height={40}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="w-10 h-10 rounded-full bg-primary border-2 border-background flex items-center justify-center text-xs font-medium text-primary-foreground flex-shrink-0">
-                  +42
-                </div>
-              </div>
-            </div>
-
-            {/* Feature 3: Split layout for stats + engine */}
-            <div className="grid grid-rows-2 gap-6">
-              {/* Stat Card: Latency */}
-              <div className="glass-card-no-glow rounded-xl p-6 border border-border/50 flex items-center justify-between">
-                <div>
-                  <h3 className="font-heading font-semibold text-lg mb-1">
-                    0.2ms Latency
-                  </h3>
-                  <p className="text-muted-foreground text-sm">
-                    Real-time collaboration across 40 global regions.
-                  </p>
-                </div>
-                <span className="material-symbols-outlined text-primary text-3xl">
-                  public
-                </span>
-              </div>
-              {/* Engine Card: Obsidian */}
-              <div className="glass-card rounded-xl p-6 border border-border/50 flex items-center gap-4">
-                <div className="w-24 h-24 rounded-lg overflow-hidden border border-border flex-shrink-0">
-                  <Image
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCr6Uw1MI_Opd9B6wtL3Bgv97lzh3l7EEAT3tTMFYDKpULkoU-v85d8fausafoIoY9JPaNcGEv9Lu5nrz6ldQCHTUruO-tpfXsPoU8dy38DA_RYXySf7shIGYN08KDY6skVhmo9ZU1ykDAnrGJpbn00Rs-EZt4CcCymXmw_rG1JR-Gz4ImBn-0ndMQfrVKDQeZkXgLdxUKn__NC7gBPmur4MODPmgvfTY6GZlYKBh26tA7_OFFwZsiZVYhF8NarjYMJhuMi87MeCV2a"
-                    alt="Obsidian Engine"
-                    width={96}
-                    height={96}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div>
-                  <h3 className="font-heading font-semibold text-lg mb-1">
-                    The Obsidian Engine
-                  </h3>
-                  <p className="text-muted-foreground text-sm">
-                    Proprietary architecture that powers your virtual labs,
-                    built on the fastest silicon available today.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 
-        ========================================
-        STATS BAR
-        ========================================
-        - Dark background section with 4 key metrics
-        - Each stat: icon + value + label
-        - Uses glass-card-no-glow for subtle depth
-        - Responsive: 2-col mobile, 4-col desktop
-      */}
-      <section className="py-12 px-4 sm:px-6 lg:px-8 border-y border-border/50 bg-black/95">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8">
-            {/* Stat: Latency */}
-            <div className="text-center glass-card-no-glow p-4 rounded-xl">
-              <div className="flex items-center justify-center gap-1 text-primary mb-1">
-                <span className="material-symbols-outlined text-sm">speed</span>
-                <span className="font-heading font-bold text-xl sm:text-2xl">
-                  0.2ms
-                </span>
-              </div>
-              <p className="text-xs text-muted-foreground">Latency</p>
-            </div>
-            {/* Stat: Global Regions */}
-            <div className="text-center glass-card-no-glow p-4 rounded-xl">
-              <div className="flex items-center justify-center gap-1 text-primary mb-1">
-                <span className="material-symbols-outlined text-sm">
-                  public
-                </span>
-                <span className="font-heading font-bold text-xl sm:text-2xl">
-                  40+
-                </span>
-              </div>
-              <p className="text-xs text-muted-foreground">Global Regions</p>
-            </div>
-            {/* Stat: Active Learners */}
-            <div className="text-center glass-card-no-glow p-4 rounded-xl">
-              <div className="flex items-center justify-center gap-1 text-primary mb-1">
-                <span className="material-symbols-outlined text-sm">
-                  groups
-                </span>
-                <span className="font-heading font-bold text-xl sm:text-2xl">
-                  10k+
-                </span>
-              </div>
-              <p className="text-xs text-muted-foreground">Active Learners</p>
-            </div>
-            {/* Stat: Success Rate */}
-            <div className="text-center glass-card-no-glow p-4 rounded-xl">
-              <div className="flex items-center justify-center gap-1 text-primary mb-1">
-                <span className="material-symbols-outlined text-sm">
-                  verified
-                </span>
-                <span className="font-heading font-bold text-xl sm:text-2xl">
-                  98%
-                </span>
-              </div>
-              <p className="text-xs text-muted-foreground">Success Rate</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 
-        ========================================
-        COURSE TRACKS SECTION
-        ========================================
-        - Section header with title + "View All" link
-        - 3-column grid of course cards
-        - Each card: image, tag, title, description, metadata
-        - Hover effects: image scale + border color change
-      */}
-      <section className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          {/* Section Header */}
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8 sm:mb-12">
-            <div>
-              <p className="text-xs uppercase tracking-wider text-primary mb-2">
-                The Selection
-              </p>
-              <h2 className="font-heading text-3xl sm:text-4xl font-bold">
-                Featured
-                <br />
-                <span className="text-muted-foreground">Courses.</span>
-              </h2>
-            </div>
-            <Link
-              href="/courses"
-              className="inline-flex items-center gap-1 text-primary font-medium hover:gap-2 transition-all"
-            >
-              VIEW ALL COURSES
-              <span className="material-symbols-outlined">arrow_right_alt</span>
-            </Link>
-          </div>
-
-          {/* Course Cards Grid - Real courses from DB */}
-          {courses.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {courses.map((course: any) => (
-                <Link
-                  key={course.id}
-                  href={`/courses/${course.id}`}
-                  className="glass-card rounded-xl overflow-hidden border border-border/50 hover:border-primary/50 transition-all group block"
-                >
-                  <div className="h-48 overflow-hidden relative">
-                    {course.thumbnail ? (
-                      <Image
-                        src={course.thumbnail}
-                        alt={course.title}
-                        fill
-                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        className="object-cover group-hover:scale-105 transition-transform"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-[#f97316]/20 to-[#1b1b1b] flex items-center justify-center">
-                        <span className="text-[#f97316] text-5xl font-bold">
-                          {course.title.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                    )}
-                    <span className="absolute bottom-4 left-4 inline-flex px-2 py-1 rounded text-xs font-medium bg-primary text-primary-foreground">
-                      {course.level}
-                    </span>
-                  </div>
-                  <div className="p-6">
-                    <h3 className="font-heading font-semibold text-lg mb-2">
-                      {course.title}
-                    </h3>
-                    <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
-                      {course.description}
-                    </p>
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>{course.price === 0 ? "Free" : `Rs. ${course.price}`}</span>
-                      <span className="material-symbols-outlined text-[14px]">
-                        north_east
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12 glass-card-no-glow rounded-xl">
-              <p className="text-muted-foreground">No courses available yet.</p>
-              <Link href="/courses" className="text-primary font-medium hover:underline mt-2 inline-block">
-                Browse All Courses
+            <div className="hidden md:flex gap-8 items-center">
+              {/* Active link gets bottom border accent */}
+              <Link
+                href="/courses"
+                className="font-bold text-sm tracking-tight border-b-2 pb-1 transition-colors"
+                style={{ fontFamily: "var(--font-headline, Manrope)", color: "var(--primary)", borderColor: "var(--primary)" }}
+              >
+                Courses
+              </Link>
+              <Link
+                href="/mentors"
+                className="font-bold text-sm tracking-tight transition-colors hover:opacity-70"
+                style={{ fontFamily: "var(--font-headline, Manrope)", color: "var(--on-surface)" }}
+              >
+                Mentors
               </Link>
             </div>
-          )}
-        </div>
-      </section>
+          </div>
 
-      {/* 
-        ========================================
-        CTA SECTION
-        ========================================
-        - Full-width conversion section with gradient background
-        - Headline with amber accent text
-        - Single primary CTA button with subtle shadow
-        - Background glows use blur + low opacity for depth
-      */}
-      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        {/* Background accent glows - subtle, layered */}
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[500px] bg-gradient-to-t from-[#f97316]/50 via-[#f97316]/20 to-transparent pointer-events-none blur-2xl" />
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[400px] h-[300px] bg-[#f97316]/30 rounded-full pointer-events-none blur-xl" />
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-[300px] h-[200px] bg-[#ffb690]/40 rounded-full pointer-events-none blur-lg" />
-
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          {/* CTA Headline */}
-          <h2 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 leading-tight">
-            Ready to leave the <br className="sm:hidden" />
-            <span
-              className="text-[#f97316]"
-              style={{
-                textShadow:
-                  "0 0 40px rgba(249, 115, 22, 1), 0 0 80px rgba(249, 115, 22, 0.5), 0 0 120px rgba(249, 115, 22, 0.3)",
-              }}
+          {/* Auth Buttons + Theme Toggle */}
+          <div className="flex items-center gap-4">
+            <ThemeToggle />
+            <Link
+              href="/login"
+              className="font-bold text-sm tracking-tight px-4 py-2 rounded-sm transition-all duration-200 active:scale-95 hover:opacity-70"
+              style={{ fontFamily: "var(--font-headline, Manrope)", color: "var(--on-surface)" }}
             >
-              standard
-            </span>{" "}
-            behind?
-          </h2>
+              Sign In
+            </Link>
+            {/* Primary button: sharp 0.25rem radius per design spec */}
+            <Link
+              href="/signup"
+              className="px-6 py-2 rounded font-bold text-sm tracking-tight transition-all duration-200 active:scale-95 hover:opacity-90"
+              style={{ backgroundColor: "var(--primary)", color: "var(--on-primary)", fontFamily: "var(--font-headline, Manrope)" }}
+            >
+              Sign Up
+            </Link>
+          </div>
+        </nav>
+      </header>
 
-          {/* CTA Subheadline */}
-          <p className="text-muted-foreground mb-6 sm:mb-8 max-w-2xl mx-auto text-base sm:text-lg">
-            The next intake begins in{" "}
-            <span className="text-[#f97316] font-semibold">72 hours</span>. Your
-            transformation into a technical architect starts with a single
-            click.
-          </p>
+      <main>
 
-          {/* 
-            Primary CTA Button
-            - Solid amber background with subtle hover shadow
-            - No kinetic-gradient or intense glow per design feedback
-          */}
-          <Link
-            href="/signup"
-            className="inline-flex items-center justify-center w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-5 bg-primary text-primary-foreground rounded-lg font-bold text-base sm:text-lg hover:bg-primary/90 transition-colors shadow-[0_2px_10px_rgba(249,115,22,0.15)] hover:shadow-[0_4px_16px_rgba(249,115,22,0.25)]"
-          >
-            SECURE YOUR SPOT
-          </Link>
-        </div>
-      </section>
+        {/* ═══════════════════════════════════════════════════
+            HERO SECTION
+            12-col asymmetric grid: 7 content / 5 image
+            Background: surface — base canvas layer
+        ═══════════════════════════════════════════════════ */}
+        <section className="relative overflow-hidden pt-20 pb-32"
+          style={{ backgroundColor: "var(--background)" }}
+        >
+          <div className="max-w-[1440px] mx-auto px-8 md:px-12 grid grid-cols-12 gap-8 items-center">
 
-      {/* 
-        ========================================
-        FOOTER
-        ========================================
-        - Branding + navigation links
-        - Logo uses clean amber text (no glow)
-        - Social/utility icons on right
-        - Subtle top gradient accent
-      */}
-      <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-border/50 relative">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[100px] bg-gradient-to-b from-primary/10 to-transparent pointer-events-none blur-xl" />
+            {/* Left: Editorial Headline + CTAs */}
+            <div className="col-span-12 lg:col-span-7">
+              {/* Eyebrow — uppercase tracking for editorial voice */}
+              <span className="font-bold tracking-[0.2em] uppercase text-xs mb-4 block"
+                style={{ color: "var(--primary)" }}
+              >
+                Redefining Academic Excellence
+              </span>
 
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
-            {/* Branding */}
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                {/* Logo Icon - clean amber, no glow */}
-                <span className="material-symbols-outlined text-primary">
-                  school
-                </span>
-                {/* Logo Text - clean amber, no glow */}
-                <span className="font-heading font-bold text-primary">
-                  LearnHub
-                </span>
+              {/* Display headline — Manrope, extrabold, tight tracking */}
+              <h1
+                className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tighter leading-[1.05] mb-8"
+                style={{ fontFamily: "var(--font-headline, Manrope)", color: "var(--on-surface)" }}
+              >
+                The Blueprint for <br />
+                <span style={{ color: "var(--primary)" }}>Elite Learning.</span>
+              </h1>
+
+              {/* Body copy — Inter, generous line-height */}
+              <p className="text-xl max-w-xl mb-10 leading-relaxed"
+                style={{ color: "var(--on-surface-variant)" }}
+              >
+                Access a curated ecosystem of scholarly resources designed for
+                high-impact professional and academic growth. Structured by
+                architects of education.
+              </p>
+
+              {/* CTA row — primary button + secondary surface button */}
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link
+                  href="/courses"
+                  className="px-8 py-4 rounded font-bold transition-all active:scale-95 hover:opacity-90"
+                  style={{ fontFamily: "var(--font-headline, Manrope)", backgroundColor: "var(--primary)", color: "var(--on-primary)" }}
+                >
+                  Explore Catalog
+                </Link>
+                <Link
+                  href="/signup"
+                  className="px-8 py-4 rounded font-bold transition-all active:scale-95 hover:opacity-90"
+                  style={{ fontFamily: "var(--font-headline, Manrope)", backgroundColor: "var(--surface-container-high)", color: "var(--on-surface)" }}
+                >
+                  Get Started Free
+                </Link>
               </div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider">
-                © 2024 LearnHub. The Kinetic Monolith.
+            </div>
+
+            {/* Right: Architectural image — 4/5 aspect ratio */}
+            <div className="col-span-12 lg:col-span-5 relative">
+              <div className="aspect-[4/5] rounded-xl overflow-hidden"
+                style={{ backgroundColor: "var(--surface-container-low)" }}
+              >
+                <Image
+                  src="/heropic.png"
+                  alt="Architectural learning environment"
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════
+            INSTITUTIONAL STANDARDS
+            Background shifts to surface-container-low
+            — architectural sectioning without borders
+        ═══════════════════════════════════════════════════ */}
+        <section className="py-24"
+          style={{ backgroundColor: "var(--surface-container-low)" }}
+        >
+          <div className="max-w-[1440px] mx-auto px-8 md:px-12">
+            {/* Section header with primary accent bar */}
+            <div className="flex flex-col md:flex-row justify-between items-end mb-16">
+              <div>
+                <h2
+                  className="text-4xl font-extrabold tracking-tight mb-4"
+                  style={{ fontFamily: "var(--font-headline, Manrope)", color: "var(--on-surface)" }}
+                >
+                  Institutional Standards
+                </h2>
+                {/* Primary accent line replaces any border/rule */}
+                <div className="h-1 w-20" style={{ backgroundColor: "var(--primary)" }} />
+              </div>
+              <p className="max-w-md text-right mt-6 md:mt-0"
+                style={{ color: "var(--on-surface-variant)" }}
+              >
+                Our curriculum is built upon rigorous pedagogical frameworks
+                recognized by global leaders in education.
               </p>
             </div>
 
-            {/* Navigation Links */}
-            <div className="flex flex-wrap items-center justify-center md:justify-end gap-4 sm:gap-6 text-sm">
-              {["Courses", "Mentors", "Privacy"].map((item) => (
-                <Link
-                  key={item}
-                  href="/courses"
-                  className="text-muted-foreground hover:text-primary transition-colors uppercase tracking-wider text-xs"
+            {/* 3-col feature grid — separated by white space, no dividers */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+              {/* Feature 1 */}
+              <div className="space-y-6">
+                <div style={{ color: "var(--primary)" }}>
+                  <span className="material-symbols-outlined text-4xl">
+                    account_balance
+                  </span>
+                </div>
+                <h3
+                  className="text-xl font-bold tracking-tight"
+                  style={{ fontFamily: "var(--font-headline, Manrope)", color: "var(--on-surface)" }}
                 >
-                  {item}
-                </Link>
-              ))}
+                  Accredited Pedagogy
+                </h3>
+                <p className="leading-relaxed"
+                  style={{ color: "var(--on-surface-variant)" }}
+                >
+                  Courses structured using verified academic blueprints that
+                  ensure knowledge retention and practical application.
+                </p>
+              </div>
+
+              {/* Feature 2 */}
+              <div className="space-y-6">
+                <div style={{ color: "var(--primary)" }}>
+                  <span className="material-symbols-outlined text-4xl">
+                    architecture
+                  </span>
+                </div>
+                <h3
+                  className="text-xl font-bold tracking-tight"
+                  style={{ fontFamily: "var(--font-headline, Manrope)", color: "var(--on-surface)" }}
+                >
+                  Structured Hierarchy
+                </h3>
+                <p className="leading-relaxed"
+                  style={{ color: "var(--on-surface-variant)" }}
+                >
+                  A clear, multi-layered learning path that guides students
+                  from foundational concepts to expert mastery.
+                </p>
+              </div>
+
+              {/* Feature 3 */}
+              <div className="space-y-6">
+                <div style={{ color: "var(--primary)" }}>
+                  <span className="material-symbols-outlined text-4xl">
+                    verified
+                  </span>
+                </div>
+                <h3
+                  className="text-xl font-bold tracking-tight"
+                  style={{ fontFamily: "var(--font-headline, Manrope)", color: "var(--on-surface)" }}
+                >
+                  Verified Mentors
+                </h3>
+                <p className="leading-relaxed"
+                  style={{ color: "var(--on-surface-variant)" }}
+                >
+                  Learn from leading architects of industry who bring
+                  real-world complexity into a controlled learning environment.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════
+            ELITE MODULES (course cards)
+            Background returns to surface — layering effect
+            Cards are surface-container-low with image hover scale
+        ═══════════════════════════════════════════════════ */}
+        <section className="py-24"
+          style={{ backgroundColor: "var(--background)" }}
+        >
+          <div className="max-w-[1440px] mx-auto px-8 md:px-12">
+            {/* Section header — left-aligned per "Architectural" grid rule */}
+            <div className="mb-16">
+              <h2
+                className="text-4xl font-extrabold tracking-tight mb-2"
+                style={{ fontFamily: "var(--font-headline, Manrope)", color: "var(--on-surface)" }}
+              >
+                Elite Modules
+              </h2>
+              <p style={{ color: "var(--on-surface-variant)" }}>
+                Selected masterclasses for high-performance individuals.
+              </p>
             </div>
 
-            {/* Utility Icons */}
-            <div className="flex items-center justify-center md:justify-end gap-4 text-muted-foreground">
-              <span className="material-symbols-outlined text-sm">
-                language
+            {/* Course cards grid — 3 columns */}
+            {courses.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {courses.map((course: any) => (
+                  /* Course card — no border, uses surface-container-low bg */
+                  <Link
+                    key={course.id}
+                    href={`/courses/${course.id}`}
+                    className="group cursor-pointer"
+                  >
+                    <div className="aspect-video rounded-xl mb-6 overflow-hidden relative"
+                      style={{ backgroundColor: "var(--surface-container-low)" }}
+                    >
+                      {course.thumbnail ? (
+                        <Image
+                          src={course.thumbnail}
+                          alt={course.title}
+                          fill
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      ) : (
+                        /* Placeholder when no thumbnail */
+                        <div className="w-full h-full flex items-center justify-center"
+                          style={{ backgroundColor: "var(--surface-container)" }}
+                        >
+                          <span className="material-symbols-outlined text-5xl"
+                            style={{ color: "var(--outline-variant)" }}
+                          >
+                            play_circle
+                          </span>
+                        </div>
+                      )}
+                      {/* Level badge */}
+                      <div className="absolute top-4 left-4 text-[10px] font-bold px-3 py-1 rounded uppercase tracking-wider"
+                        style={{ backgroundColor: "var(--primary)", color: "var(--on-primary)" }}
+                      >
+                        {course.level || "Course"}
+                      </div>
+                    </div>
+
+                    {/* Card meta */}
+                    <h4
+                      className="text-lg font-bold mb-2 transition-colors"
+                      style={{ fontFamily: "var(--font-headline, Manrope)", color: "var(--on-surface)" }}
+                    >
+                      {course.title}
+                    </h4>
+                    <p className="text-sm mb-4 line-clamp-2"
+                      style={{ color: "var(--on-surface-variant)" }}
+                    >
+                      {course.description}
+                    </p>
+                    <div className="flex items-center gap-4 text-xs font-semibold"
+                      style={{ color: "var(--on-surface-variant)" }}>
+                      <span className="flex items-center gap-1">
+                        <span className="material-symbols-outlined text-base">
+                          group
+                        </span>
+                        {course.price === 0
+                          ? "Free"
+                          : `Rs. ${course.price}`}
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              /* Empty state */
+              <div className="text-center py-12 rounded-xl"
+                style={{ backgroundColor: "var(--surface-container-low)" }}
+              >
+                <p style={{ color: "var(--on-surface-variant)" }}>No courses available yet.</p>
+              </div>
+            )}
+
+            {/* View all link — primary color, arrow hover animation */}
+            <div className="mt-16 text-center">
+              <Link
+                href="/courses"
+                className="inline-flex items-center gap-2 font-bold group"
+                style={{ fontFamily: "var(--font-headline, Manrope)", color: "var(--primary)" }}
+              >
+                View Entire Curriculum
+                <span className="material-symbols-outlined transition-transform group-hover:translate-x-1">
+                  arrow_forward
+                </span>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════
+            NEWSLETTER / CTA SECTION
+            Background: primary — bold full-bleed block
+            Text: on_primary
+            No gradients — pure solid architectural color block
+        ═══════════════════════════════════════════════════ */}
+        <section className="py-24"
+          style={{ backgroundColor: "var(--primary)", color: "var(--on-primary)" }}
+        >
+          <div className="max-w-[1440px] mx-auto px-8 md:px-12 grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+            {/* Left: Headline */}
+            <div>
+              <h2
+                className="text-5xl font-extrabold tracking-tighter mb-6"
+                style={{ fontFamily: "var(--font-headline, Manrope)" }}
+              >
+                Stay ahead of the <br />
+                academic curve.
+              </h2>
+              <p className="text-lg max-w-md opacity-90"
+                style={{ color: "var(--on-primary-container)" }}
+              >
+                Join our exclusive mailing list for early access to modules and
+                institutional insights.
+              </p>
+            </div>
+
+            {/* Right: Email form */}
+            <div>
+              <form className="flex flex-col gap-4">
+                <input
+                  type="email"
+                  placeholder="Institutional Email Address"
+                  className="w-full border-none px-6 py-4 rounded focus:ring-2 outline-none"
+                  style={{
+                    backgroundColor: "var(--on-primary)",
+                    color: "var(--primary)",
+                  }}
+                />
+                <button
+                  type="submit"
+                  className="font-bold py-4 rounded transition-colors hover:opacity-90"
+                  style={{ fontFamily: "var(--font-headline, Manrope)", backgroundColor: "var(--on-primary)", color: "var(--primary)" }}
+                >
+                  Request Invitation
+                </button>
+              </form>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {/* ═══════════════════════════════════════════════════
+          FOOTER
+          Background: surface-container-low — architectural section
+          4-col grid, no top border — color shift provides separation
+      ═══════════════════════════════════════════════════ */}
+      <footer className="w-full py-12"
+        style={{ backgroundColor: "var(--surface-container-low)" }}
+      >
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 px-8 md:px-12 max-w-[1440px] mx-auto">
+          {/* Brand column */}
+          <div className="col-span-1">
+            <span
+              className="font-bold text-lg mb-4 block"
+              style={{ fontFamily: "var(--font-headline, Manrope)", color: "var(--on-surface)" }}
+            >
+              LearnHub
+            </span>
+            <p className="text-xs leading-relaxed"
+              style={{ color: "var(--on-surface-variant)" }}
+            >
+              Developing the next generation of industry architects through
+              structured, scholarly education.
+            </p>
+          </div>
+
+          {/* Platform links */}
+          <div className="flex flex-col gap-3">
+            <span className="font-bold text-sm mb-2"
+              style={{ color: "var(--on-surface)" }}
+            >
+              Platform
+            </span>
+            <Link
+              href="/courses"
+              className="text-xs hover:opacity-70 hover:underline underline-offset-4 transition-opacity"
+              style={{ color: "var(--on-surface-variant)" }}
+            >
+              Browse Courses
+            </Link>
+            <Link
+              href="/mentors"
+              className="text-xs hover:opacity-70 hover:underline underline-offset-4 transition-opacity"
+              style={{ color: "var(--on-surface-variant)" }}
+            >
+              Find Mentors
+            </Link>
+          </div>
+
+          {/* Resources links */}
+          <div className="flex flex-col gap-3">
+            <span className="font-bold text-sm mb-2"
+              style={{ color: "var(--on-surface)" }}
+            >
+              Resources
+            </span>
+            <a
+              href="#"
+              className="text-xs hover:opacity-70 hover:underline underline-offset-4 transition-opacity"
+              style={{ color: "var(--on-surface-variant)" }}
+            >
+              Contact Support
+            </a>
+            <a
+              href="#"
+              className="text-xs hover:opacity-70 hover:underline underline-offset-4 transition-opacity"
+              style={{ color: "var(--on-surface-variant)" }}
+            >
+              Privacy Policy
+            </a>
+          </div>
+
+          {/* Social icons */}
+          <div className="flex flex-col gap-3">
+            <span className="font-bold text-sm mb-2"
+              style={{ color: "var(--on-surface)" }}
+            >
+              Connect
+            </span>
+            <div className="flex gap-4">
+              <span className="material-symbols-outlined cursor-pointer transition-colors hover:opacity-70"
+                style={{ color: "var(--on-surface-variant)" }}
+              >
+                public
               </span>
-              <span className="material-symbols-outlined text-sm">
-                monitoring
+              <span className="material-symbols-outlined cursor-pointer transition-colors hover:opacity-70"
+                style={{ color: "var(--on-surface-variant)" }}
+              >
+                share
               </span>
-              <span className="material-symbols-outlined text-sm">
-                terminal
+              <span className="material-symbols-outlined cursor-pointer transition-colors hover:opacity-70"
+                style={{ color: "var(--on-surface-variant)" }}
+              >
+                mail
               </span>
             </div>
           </div>
         </div>
+
+        {/* Copyright row — ghost border separates from columns */}
+        <div className="max-w-[1440px] mx-auto px-8 md:px-12 mt-12 pt-8"
+          style={{ borderTop: "1px solid rgba(195, 198, 214, 0.2)" }}
+        >
+          <p className="text-xs"
+            style={{ color: "var(--on-surface-variant)" }}
+          >
+            © 2024 LearnHub. The Scholarly Architect.
+          </p>
+        </div>
       </footer>
-    </main>
+
+      {/* Persistent AI Chatbot Widget — only element that breaks the grid */}
+      <AIChatbotWidget />
+    </div>
   );
 }

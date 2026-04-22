@@ -1,10 +1,20 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
+/**
+ * CourseCard (Dashboard) — Scholarly Architect Design System
+ *
+ * Used in the student dashboard for enrolled courses.
+ * Card: surface-container-lowest on surface-container-low page.
+ * Tonal layering: image placeholder → surface-container-high.
+ * Progress bar: primary blue fill.
+ * CTA button: primary sharp radius.
+ * No amber, no glow, no gradients.
+ * Uses CSS variables for dark mode support.
+ *
+ * Props unchanged — same interface for API compatibility.
+ */
+
 import Image from "next/image";
-import { Badge } from "@/components/ui/badge";
 import { useRouter } from "next/navigation";
 
 interface Course {
@@ -22,115 +32,109 @@ interface CourseCardProps {
   variant?: "horizontal" | "grid";
 }
 
-export default function CourseCard({
-  course,
-  variant = "grid",
-}: CourseCardProps) {
+export default function CourseCard({ course, variant = "grid" }: CourseCardProps) {
   const router = useRouter();
 
   const handleContinue = () => {
     if (course.lastChapterId) {
       router.push(`/courses/${course.id}/learn/${course.lastChapterId}`);
     } else {
-      // Navigate to course page to start from first chapter
       router.push(`/courses/${course.id}`);
     }
   };
 
-  // Button text based on progress
-  const getButtonText = () => {
-    if (course.progress === 0) return "Start Course";
-    if (course.progress === 100) return "Review Course";
-    return "Resume Course";
-  };
+  const buttonLabel =
+    course.progress === 0
+      ? "Start Course"
+      : course.progress === 100
+      ? "Review Course"
+      : "Resume Course";
 
   return (
-    <Card
-      className={`glass-card rounded-xl overflow-hidden transition-all w-full max-w-full ${
-        variant === "horizontal"
-          ? "w-[280px] sm:w-[300px] flex-shrink-0"
-          : "w-full"
+    <div
+      className={`scholar-card rounded-lg overflow-hidden ${
+        variant === "horizontal" ? "w-[280px] sm:w-[300px] flex-shrink-0" : "w-full"
       }`}
     >
-      {/* Thumbnail - 16:9 Aspect Ratio */}
-      <div className="aspect-video w-full bg-[#1a1a1a] relative group overflow-hidden">
+      {/* Thumbnail */}
+      <div
+        className="aspect-video w-full relative overflow-hidden group"
+        style={{ backgroundColor: "var(--surface-container-high)" }}
+      >
         {course.thumbnail ? (
           <Image
             src={course.thumbnail}
             alt={course.title}
             fill
-            sizes="(max-width: 640px) 100vw, 280px"
-            className="w-full h-full object-cover transition-transform group-hover:scale-105"
-            onError={(e) => {
-              (e.target as HTMLImageElement).style.display = "none";
-            }}
+            sizes="(max-width: 640px) 100vw, 300px"
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center kinetic-gradient">
-            <span className="text-white text-2xl sm:text-3xl font-bold drop-shadow-lg px-2 text-center break-words">
+          /* Monogram placeholder — tonal, no gradient */
+          <div
+            className="absolute inset-0 flex items-center justify-center"
+            style={{ backgroundColor: "var(--surface-dim)" }}
+          >
+            <span
+              className="text-3xl font-bold"
+              style={{ fontFamily: "var(--font-headline)", color: "var(--primary)" }}
+            >
               {course.title.charAt(0).toUpperCase()}
             </span>
           </div>
         )}
 
-        {/* Category Badge */}
+        {/* Category chip */}
         {course.category && (
-          <Badge className="absolute top-2 left-2 bg-black/90 text-[#F97316] border-[#F97316]/30 hover:bg-black text-[10px] sm:text-xs">
-            {course.category}
-          </Badge>
-        )}
-
-        {/* Hover Overlay - Desktop Only */}
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center hidden sm:flex">
-          <Button
-            size="sm"
-            className="kinetic-gradient text-white border-0 hover:opacity-90"
+          <span
+            className="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-full text-xs font-medium"
+            style={{ backgroundColor: "var(--surface-container-lowest)/92", color: "var(--primary)" }}
           >
-            {course.progress === 0 ? "Start" : "Continue"}
-          </Button>
-        </div>
+            {course.category}
+          </span>
+        )}
       </div>
 
-      {/* Content */}
-      <div className="p-3 sm:p-4 min-w-0">
-        {/* Title - Truncated to 2 lines */}
-        <h3 className="font-semibold text-gray-200 line-clamp-2 mb-1 group-hover:text-[#F97316] transition-colors min-w-0 break-words">
+      {/* Card body */}
+      <div className="p-4">
+        <h3
+          className="font-semibold text-sm line-clamp-2 mb-1"
+          style={{ fontFamily: "var(--font-headline)", color: "var(--on-surface)" }}
+        >
           {course.title}
         </h3>
-
-        {/* Instructor - Truncated */}
-        <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4 truncate">
+        <p className="text-xs truncate mb-4" style={{ color: "var(--on-surface-variant)" }}>
           {course.instructor}
         </p>
 
-        {/* Progress Section */}
-        <div className="space-y-2">
-          <div className="flex justify-between text-[10px] sm:text-xs font-medium">
-            <span className="text-gray-400">{course.progress}% Complete</span>
-            <span
-              className={
-                course.progress === 100 ? "text-[#22c55e]" : "text-[#F97316]"
-              }
-            >
-              {course.progress === 100 ? "✓ Completed" : `${course.progress}%`}
-            </span>
+        {/* Progress bar */}
+        <div className="space-y-1.5 mb-4">
+          <div className="flex justify-between text-xs">
+            <span style={{ color: "var(--on-surface-variant)" }}>{course.progress}% complete</span>
+            {course.progress === 100 && (
+              <span
+                className="font-medium"
+                style={{ color: "var(--primary)" }}
+              >
+                Completed
+              </span>
+            )}
           </div>
-
-          {/* Progress Bar */}
-          <Progress
-            value={course.progress}
-            className="h-1.5 sm:h-2 bg-[#1a1a1a] [&>div]:bg-gradient-to-r [&>div]:from-[#F97316] [&>div]:to-[#ffb690]"
-          />
+          <div className="progress-bar">
+            <div className="progress-fill" style={{ width: `${course.progress}%` }} />
+          </div>
         </div>
 
-        {/* Continue Button */}
-        <Button
+        {/* CTA */}
+        <button
+          type="button"
           onClick={handleContinue}
-          className="mt-3 sm:mt-4 w-full kinetic-gradient text-white border-0 hover:opacity-90 text-xs sm:text-sm py-1.5 sm:py-2 h-auto"
+          className="w-full h-9 text-xs font-medium rounded-sm transition-all duration-200 hover:opacity-90 active:scale-[0.99]"
+          style={{ backgroundColor: "var(--primary)", color: "var(--on-primary)" }}
         >
-          {getButtonText()}
-        </Button>
+          {buttonLabel}
+        </button>
       </div>
-    </Card>
+    </div>
   );
 }

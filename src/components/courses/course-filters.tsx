@@ -1,7 +1,16 @@
 "use client";
 
+/**
+ * CourseFilters — Scholarly Architect Design System
+ *
+ * Filter sidebar for the course catalog.
+ * No-Line Rule: no 1px borders for sectioning; background shifts define groups.
+ * Primary blue (#0040a1) used for active/checked states.
+ * Mobile: collapsible panel via toggle button.
+ */
+
 import { useRouter, usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 interface CourseFiltersProps {
   categories: string[];
@@ -15,15 +24,6 @@ interface CourseFiltersProps {
   };
 }
 
-/**
- * CourseFilters - Client-side filter component
- *
- * DESIGN.md Compliance:
- * - No-Line Rule: No 1px borders for sectioning
- * - Surface Hierarchy: Uses tonal layering
- * - Amber Accent: Focus states use primary_container
- * - Molten Spark: Input focus has bottom-only amber line
- */
 export function CourseFilters({
   categories,
   levels,
@@ -34,164 +34,179 @@ export function CourseFilters({
   const pathname = usePathname();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
-  // Update URL params when filters change
+  /* Update a single URL query param (or remove if empty/all) */
   const updateFilter = (key: string, value: string) => {
-    const params = new URLSearchParams(currentParams as any);
-    if (value === "all" || !value) {
-      params.delete(key);
-    } else {
-      params.set(key, value);
-    }
+    const params = new URLSearchParams(currentParams as Record<string, string>);
+    if (value === "all" || !value) params.delete(key);
+    else params.set(key, value);
     router.push(`${pathname}?${params.toString()}`);
   };
 
-  // Clear all filters
-  const clearFilters = () => {
-    router.push(pathname);
-  };
+  const clearFilters = () => router.push(pathname);
+
+  /* ── Shared label component (inline to avoid extra file) ─────────── */
+  const FilterLabel = ({ title }: { title: string }) => (
+    <p
+      className="text-xs font-semibold uppercase tracking-widest mb-3"
+      style={{ color: "#737785" }}
+    >
+      {title}
+    </p>
+  );
 
   return (
     <>
-      {/* Mobile Filter Toggle */}
+      {/* Mobile toggle button — visible only < lg */}
       <button
+        type="button"
         onClick={() => setIsMobileOpen(!isMobileOpen)}
-        className="lg:hidden w-full flex items-center justify-between p-4 bg-[#1b1b1b] mb-4"
+        className="lg:hidden w-full flex items-center justify-between px-4 py-3 mb-3 rounded-sm"
+        style={{ backgroundColor: "#f0eded", color: "#1b1b1c" }}
       >
-        <span className="text-sm font-medium text-[#e2e2e2]">Filters</span>
-        <span className="material-symbols-outlined text-[#f97316]">
+        <span className="text-sm font-medium">Filters</span>
+        <span className="material-symbols-outlined text-lg" style={{ color: "#0040a1" }}>
           {isMobileOpen ? "expand_less" : "expand_more"}
         </span>
       </button>
 
-      {/* Filters Panel */}
+      {/* Filter panel — hidden on mobile unless toggled */}
       <div
-        className={`${isMobileOpen ? "block" : "hidden"} lg:block bg-[#1b1b1b] rounded-[min(var(--radius-md),4px)] overflow-hidden`}
+        className={`${isMobileOpen ? "block" : "hidden"} lg:block rounded-lg overflow-hidden`}
+        style={{ backgroundColor: "#ffffff" }}
       >
-        {/* Header */}
-        <div className="p-4 border-b border-[#584237]/10 flex items-center justify-between">
-          <h3 className="text-sm font-medium text-[#e2e2e2]">Filters</h3>
+        {/* Panel header */}
+        <div
+          className="px-5 py-4 flex items-center justify-between"
+          style={{ backgroundColor: "#f6f3f2" }}
+        >
+          <h3
+            className="text-sm font-semibold"
+            style={{ fontFamily: "var(--font-headline)", color: "#1b1b1c" }}
+          >
+            Refine results
+          </h3>
           <button
+            type="button"
             onClick={clearFilters}
-            className="text-xs text-[#f97316] hover:text-[#ffb690] transition-colors"
+            className="text-xs scholar-link"
           >
             Clear all
           </button>
         </div>
 
-        <div className="p-4 space-y-6">
-          {/* Price Filter */}
+        <div className="p-5 space-y-7">
+
+          {/* ── Price ───────────────────────────────────────────────────── */}
           <div>
-            <h4 className="text-xs uppercase tracking-[0.15em] text-[#8a8a8a] mb-3">
-              Price
-            </h4>
-            <div className="space-y-2">
-              {priceOptions.map((option) => (
-                <label
-                  key={option.value}
-                  className="flex items-center gap-3 cursor-pointer group"
-                >
-                  <input
-                    type="radio"
-                    name="price"
-                    value={option.value}
-                    checked={
-                      currentParams.price === option.value ||
-                      (!currentParams.price && option.value === "all")
-                    }
-                    onChange={(e) => updateFilter("price", e.target.value)}
-                    className="w-4 h-4 rounded-full border-[#584237]/30 bg-[#0e0e0e] text-[#f97316] focus:ring-[#f97316] focus:ring-offset-0"
-                  />
-                  <span className="text-sm text-[#e2e2e2] group-hover:text-[#f97316] transition-colors">
-                    {option.label}
-                  </span>
-                </label>
-              ))}
+            <FilterLabel title="Price" />
+            <div className="space-y-2.5">
+              {priceOptions.map((option) => {
+                const isChecked =
+                  currentParams.price === option.value ||
+                  (!currentParams.price && option.value === "all");
+                return (
+                  <label
+                    key={option.value}
+                    className="flex items-center gap-3 cursor-pointer"
+                  >
+                    <input
+                      type="radio"
+                      name="price"
+                      value={option.value}
+                      checked={isChecked}
+                      onChange={(e) => updateFilter("price", e.target.value)}
+                      className="w-4 h-4 accent-[#0040a1]"
+                    />
+                    <span className="text-sm" style={{ color: isChecked ? "#0040a1" : "#424654" }}>
+                      {option.label}
+                    </span>
+                  </label>
+                );
+              })}
             </div>
           </div>
 
-          {/* Category Filter */}
+          {/* ── Category ─────────────────────────────────────────────────── */}
           <div>
-            <h4 className="text-xs uppercase tracking-[0.15em] text-[#8a8a8a] mb-3">
-              Category
-            </h4>
-            <div className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
-              {categories.map((category) => (
-                <label
-                  key={category}
-                  className="flex items-center gap-3 cursor-pointer group"
-                >
-                  <input
-                    type="checkbox"
-                    value={category}
-                    checked={currentParams.category === category}
-                    onChange={(e) =>
-                      updateFilter("category", e.target.checked ? category : "")
-                    }
-                    className="w-4 h-4 rounded border-[#584237]/30 bg-[#0e0e0e] text-[#f97316] focus:ring-[#f97316] focus:ring-offset-0"
-                  />
-                  <span className="text-sm text-[#e2e2e2] group-hover:text-[#f97316] transition-colors">
-                    {category}
-                  </span>
-                </label>
-              ))}
+            <FilterLabel title="Category" />
+            <div className="space-y-2.5 max-h-52 overflow-y-auto sidebar-scroll pr-1">
+              {categories.map((category) => {
+                const isChecked = currentParams.category === category;
+                return (
+                  <label
+                    key={category}
+                    className="flex items-center gap-3 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      value={category}
+                      checked={isChecked}
+                      onChange={(e) =>
+                        updateFilter("category", e.target.checked ? category : "")
+                      }
+                      className="w-4 h-4 rounded-sm accent-[#0040a1]"
+                    />
+                    <span className="text-sm" style={{ color: isChecked ? "#0040a1" : "#424654" }}>
+                      {category}
+                    </span>
+                  </label>
+                );
+              })}
             </div>
           </div>
 
-          {/* Level Filter */}
+          {/* ── Level ────────────────────────────────────────────────────── */}
           <div>
-            <h4 className="text-xs uppercase tracking-[0.15em] text-[#8a8a8a] mb-3">
-              Level
-            </h4>
-            <div className="space-y-2">
-              {levels.map((level) => (
-                <label
-                  key={level}
-                  className="flex items-center gap-3 cursor-pointer group"
-                >
-                  <input
-                    type="checkbox"
-                    value={level}
-                    checked={currentParams.level === level}
-                    onChange={(e) =>
-                      updateFilter("level", e.target.checked ? level : "")
-                    }
-                    className="w-4 h-4 rounded border-[#584237]/30 bg-[#0e0e0e] text-[#f97316] focus:ring-[#f97316] focus:ring-offset-0"
-                  />
-                  <span className="text-sm text-[#e2e2e2] group-hover:text-[#f97316] transition-colors">
-                    {level}
-                  </span>
-                </label>
-              ))}
+            <FilterLabel title="Level" />
+            <div className="space-y-2.5">
+              {levels.map((level) => {
+                const isChecked = currentParams.level === level;
+                return (
+                  <label
+                    key={level}
+                    className="flex items-center gap-3 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      value={level}
+                      checked={isChecked}
+                      onChange={(e) =>
+                        updateFilter("level", e.target.checked ? level : "")
+                      }
+                      className="w-4 h-4 rounded-sm accent-[#0040a1]"
+                    />
+                    <span className="text-sm" style={{ color: isChecked ? "#0040a1" : "#424654" }}>
+                      {level}
+                    </span>
+                  </label>
+                );
+              })}
             </div>
           </div>
 
-          {/* Rating Filter (Optional) */}
+          {/* ── Rating ───────────────────────────────────────────────────── */}
           <div>
-            <h4 className="text-xs uppercase tracking-[0.15em] text-[#8a8a8a] mb-3">
-              Minimum Rating
-            </h4>
-            <div className="space-y-2">
-              {[4, 3, 2, 1].map((rating) => (
-                <label
-                  key={rating}
-                  className="flex items-center gap-3 cursor-pointer group"
-                >
+            <FilterLabel title="Minimum Rating" />
+            <div className="space-y-2.5">
+              {[4, 3, 2].map((rating) => (
+                <label key={rating} className="flex items-center gap-3 cursor-pointer">
                   <input
                     type="radio"
                     name="rating"
                     value={rating}
-                    className="w-4 h-4 rounded-full border-[#584237]/30 bg-[#0e0e0e] text-[#f97316] focus:ring-[#f97316] focus:ring-offset-0"
+                    className="w-4 h-4 accent-[#0040a1]"
                   />
-                  <div className="flex items-center gap-1">
-                    {[...Array(5)].map((_, i) => (
+                  <div className="flex items-center gap-0.5">
+                    {Array.from({ length: 5 }).map((_, i) => (
                       <span
                         key={i}
-                        className={`material-symbols-outlined text-sm ${i < rating ? "text-[#f97316]" : "text-[#5a5a5a]"}`}
+                        className={`material-symbols-outlined text-sm ${i < rating ? "fill-icon" : ""}`}
+                        style={{ color: i < rating ? "#0040a1" : "#c3c6d6" }}
                       >
                         star
                       </span>
                     ))}
-                    <span className="text-sm text-[#e2e2e2] ml-1">& up</span>
+                    <span className="text-xs ml-1" style={{ color: "#424654" }}>& up</span>
                   </div>
                 </label>
               ))}

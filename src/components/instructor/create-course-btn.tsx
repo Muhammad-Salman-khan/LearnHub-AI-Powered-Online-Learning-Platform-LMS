@@ -1,18 +1,26 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+/**
+ * CreateCourseBtn — Scholarly Architect Design System
+ *
+ * Primary CTA for instructor dashboard.
+ * Sharp radius, primary blue, no glow.
+ */
+
 import { useRouter } from "next/navigation";
 
 export function CreateCourseBtn() {
   const router = useRouter();
 
   return (
-    <Button
+    <button
+      type="button"
       onClick={() => router.push("/dashboard/instructor/courses/create")}
-      className="bg-primary text-primary-foreground hover:opacity-90 amber-glow h-12 px-6 font-bold"
+      className="inline-flex items-center gap-2 h-12 px-6 text-sm font-medium rounded-sm transition-all duration-200 hover:opacity-90 active:scale-[0.99]"
+      style={{ backgroundColor: "#0040a1", color: "#ffffff" }}
     >
-      <span className="material-symbols-outlined mr-2">add_circle</span>
+      <span className="material-symbols-outlined text-base">add_circle</span>
       Create New Course
-    </Button>
+    </button>
   );
 }
