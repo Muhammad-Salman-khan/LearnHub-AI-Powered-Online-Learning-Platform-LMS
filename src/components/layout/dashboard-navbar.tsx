@@ -1,61 +1,82 @@
-  "use client";
+"use client";
 
-  import { Button } from "@/components/ui/button";
-  import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-  import { DashboardSidebar } from "./dashboard-sidebar";
+/**
+ * DashboardNavbar — Scholarly Architect Design System
+ *
+ * Sticky top bar for instructor/admin dashboards.
+ * Background: surface-container-lowest with subtle border.
+ * Left: hamburger (mobile) + page title.
+ * Right: role badge (primary blue pill).
+ * Uses CSS variables for dark mode support.
+ *
+ * Backend: Sheet for mobile sidebar preserved.
+ */
 
-  interface DashboardNavbarProps {
-    title: string;
-    role: "student" | "instructor" | "admin";
-    // ✅ Ye props add karna zaroori hain taake parent page se link ho sakein
-    sidebarOpen?: boolean;
-    setSidebarOpen?: (open: boolean) => void;
-  }
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { DashboardSidebar } from "./dashboard-sidebar";
+import { ThemeToggle } from "@/components/themeProvider/theme-toggle";
+import { useState } from "react";
 
-  export function DashboardNavbar({ 
-    title, 
-    role, 
-    sidebarOpen, 
-    setSidebarOpen 
-  }: DashboardNavbarProps) {
-    return (
-      <header className="h-16 border-b border-border flex items-center justify-between px-6 bg-background/95 backdrop-blur-md sticky top-0 z-50 w-full">
-        <div className="flex items-center gap-4">
-          {/* ✅ Mobile Menu Trigger (Sirf Mobile par dikhega) */}
-          <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-            <SheetTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="md:hidden text-foreground hover:bg-muted/50 transition-colors"
-              >
-                <span className="material-symbols-outlined">menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent
-              side="left"
-              className="w-[240px] p-0 bg-background border-r border-border"
+interface DashboardNavbarProps {
+  title: string;
+  role: "student" | "instructor" | "admin";
+}
+
+export function DashboardNavbar({ title, role }: DashboardNavbarProps) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <header
+      className="h-16 flex items-center justify-between px-6 sticky top-0 z-50"
+      style={{
+        backgroundColor: "var(--surface-container-lowest)",
+        borderBottom: "1px solid var(--border)",
+      }}
+    >
+      <div className="flex items-center gap-4">
+        {/* Mobile menu trigger */}
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden"
+              style={{ color: "var(--on-surface)" }}
             >
-              {/* Sidebar ko role pass karna zaroori hai backend data ke liye */}
-              <DashboardSidebar 
-                role={role} 
-                onClose={() => setSidebarOpen?.(false)} 
-              />
-            </SheetContent>
-          </Sheet>
+              <span className="material-symbols-outlined">menu</span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent
+            side="left"
+            className="w-[240px] p-0 border-r-0"
+          >
+            <DashboardSidebar role={role} onClose={() => setOpen(false)} />
+          </SheetContent>
+        </Sheet>
 
-          {/* ✅ Title: Ab ye Desktop aur Mobile dono par dikhega */}
-          <h1 className="font-bold text-xl text-foreground truncate max-w-[250px] md:max-w-none">
-            {title}
-          </h1>
-        </div>
+        {/* Page title */}
+        <h1
+          className="font-bold text-lg truncate max-w-[200px] md:max-w-none"
+          style={{ fontFamily: "var(--font-headline)", color: "var(--on-surface)" }}
+        >
+          {title}
+        </h1>
+      </div>
 
-        {/* Right Side: Profile ya Notifications (Optional) */}
-        <div className="flex items-center gap-3">
-          <div className="hidden sm:block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
-            {role}
-          </div>
+      {/* Role badge + Theme Toggle */}
+      <div className="flex items-center gap-3">
+        <div
+          className="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide"
+          style={{
+            backgroundColor: "var(--primary-container)/15",
+            color: "var(--primary)",
+          }}
+        >
+          {role}
         </div>
-      </header>
-    );
-  }
+        <ThemeToggle />
+      </div>
+    </header>
+  );
+}

@@ -1,5 +1,15 @@
 "use client";
 
+/**
+ * CourseCurriculum — Scholarly Architect Design System
+ *
+ * Expandable curriculum accordion.
+ * No-Line / No-Divider rules: spacing + background tonal shifts only.
+ * Chapter numbers are large editorial numerals (Manrope) per design.
+ * Active (expanded) chapter: surface-container-low inset.
+ * Free preview chip: primary blue tonal pill.
+ */
+
 import { useState } from "react";
 import Link from "next/link";
 
@@ -19,122 +29,133 @@ interface CourseCurriculumProps {
   courseId: string;
 }
 
-/**
- * CourseCurriculum - Expandable chapters list
- *
- * DESIGN.md Compliance:
- * - No-Line Rule: No borders between chapters, uses tonal shifts + spacing
- * - Amber Accent: Expand/collapse indicators
- * - Surface Hierarchy: Alternating backgrounds for chapters
- * - Card Hover: Tonal shift on chapter rows
- */
 export function CourseCurriculum({ chapters, courseId }: CourseCurriculumProps) {
-  const [expandedChapter, setExpandedChapter] = useState<string | null>(
-    chapters[0]?.id || null,
-  );
+  const [expanded, setExpanded] = useState<string | null>(chapters[0]?.id ?? null);
 
   return (
-    <div className="bg-[#1b1b1b] rounded-[min(var(--radius-md),4px)] overflow-hidden">
-      {/* Header - Uses spacing, not border */}
-      <div className="p-6 pb-4">
-        <h2 className="text-xl font-bold text-[#e2e2e2]">Course Curriculum</h2>
-        <p className="text-sm text-[#8a8a8a] mt-1">
+    <div className="rounded-lg overflow-hidden" style={{ backgroundColor: "var(--surface-container-lowest)" }}>
+
+      {/* Header */}
+      <div className="px-6 py-5" style={{ backgroundColor: "var(--surface-container-low)" }}>
+        <h2
+          className="text-xl font-bold"
+          style={{ fontFamily: "var(--font-headline)", color: "var(--on-surface)" }}
+        >
+          Course Curriculum
+        </h2>
+        <p className="text-sm mt-0.5" style={{ color: "var(--on-surface-variant)" }}>
           {chapters.length} chapters
         </p>
       </div>
 
-      {/* Chapters List - Uses spacing + tonal shifts, NOT divide-y borders */}
-      <div className="space-y-1 p-2">
-        {chapters.map((chapter, index) => (
-          <div
-            key={chapter.id}
-            className={`rounded-[min(var(--radius-md),4px)] overflow-hidden transition-all duration-300 ${
-              index % 2 === 1 ? "bg-[#131313]/50" : ""
-            }`}
-          >
-            {/* Chapter Header */}
-            <button
-              onClick={() =>
-                setExpandedChapter(
-                  expandedChapter === chapter.id ? null : chapter.id,
-                )
-              }
-              className="w-full flex items-center justify-between p-4 hover:bg-[#2a2a2a] transition-colors"
+      {/* Chapter accordion — no divider lines; spacing + tonal alternation */}
+      <div className="p-4 space-y-2">
+        {chapters.map((chapter, index) => {
+          const isOpen = expanded === chapter.id;
+
+          return (
+            <div
+              key={chapter.id}
+              className="rounded-sm overflow-hidden transition-colors duration-200"
+              style={{
+                backgroundColor: index % 2 === 0 ? "var(--surface-container-lowest)" : "var(--surface-variant)",
+              }}
             >
-              <div className="flex items-center gap-3">
+              {/* Chapter toggle button */}
+              <button
+                type="button"
+                onClick={() => setExpanded(isOpen ? null : chapter.id)}
+                className="w-full flex items-center gap-4 px-5 py-4 text-left transition-colors duration-150"
+                style={{
+                  backgroundColor: isOpen ? "var(--surface-container-low)" : "transparent",
+                }}
+                onMouseEnter={(e) => {
+                  if (!isOpen)
+                    (e.currentTarget as HTMLElement).style.backgroundColor = "var(--surface-container)";
+                }}
+                onMouseLeave={(e) => {
+                  if (!isOpen)
+                    (e.currentTarget as HTMLElement).style.backgroundColor = "transparent";
+                }}
+              >
+                {/* Large chapter number — editorial Manrope */}
                 <span
-                  className="material-symbols-outlined text-[#f97316] text-lg transition-transform duration-300"
+                  className="text-3xl font-extrabold leading-none w-10 flex-shrink-0 select-none"
                   style={{
-                    transform:
-                      expandedChapter === chapter.id
-                        ? "rotate(180deg)"
-                        : "rotate(0deg)",
+                    fontFamily: "var(--font-headline)",
+                    color: isOpen ? "var(--primary)" : "var(--primary-fixed-dim)",
+                  }}
+                >
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+
+                <div className="flex-1 min-w-0">
+                  <p
+                    className="text-sm font-semibold leading-snug"
+                    style={{ color: "var(--on-surface)" }}
+                  >
+                    {chapter.title}
+                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-xs" style={{ color: "var(--on-surface-variant)" }}>
+                      {chapter.videoUrl ? "Video" : "Reading"} · ~15 min
+                    </span>
+                    {chapter.isFree && (
+                      <span
+                        className="px-2 py-0.5 rounded-full text-xs font-medium"
+                        style={{
+                          backgroundColor: "var(--primary-container)",
+                          color: "var(--on-primary-container)",
+                        }}
+                      >
+                        Free Preview
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <span
+                  className="material-symbols-outlined text-lg flex-shrink-0 transition-transform duration-200"
+                  style={{
+                    color: "var(--on-surface-variant)",
+                    transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
                   }}
                 >
                   expand_more
                 </span>
-                <div className="text-left">
-                  <h3 className="text-sm font-medium text-[#e2e2e2]">
-                    Chapter {index + 1}: {chapter.title}
-                  </h3>
-                  <p className="text-xs text-[#8a8a8a] flex items-center gap-2">
-                    {chapter.videoUrl && (
-                      <span className="material-symbols-outlined text-xs">
-                        play_circle
-                      </span>
-                    )}
-                    {chapter.content && !chapter.videoUrl && (
-                      <span className="material-symbols-outlined text-xs">
-                        description
-                      </span>
-                    )}
-                    {chapter.isFree && (
-                      <span className="text-[#f97316]">Free Preview</span>
-                    )}
-                  </p>
-                </div>
-              </div>
-              <span className="text-xs text-[#8a8a8a]">
-                {chapter.videoUrl ? "Video" : "Reading"}
-              </span>
-            </button>
+              </button>
 
-            {/* Chapter Details (Expandable) */}
-            {expandedChapter === chapter.id && (
-              <div className="bg-[#0e0e0e] p-4 pl-12 space-y-3">
-                {chapter.description && (
-                  <p className="text-sm text-[#e0c0b1]">
-                    {chapter.description}
-                  </p>
-                )}
-                {chapter.content && !chapter.videoUrl && (
-                  <div className="text-sm text-[#e0c0b1] prose prose-invert prose-sm max-w-none">
-                    {chapter.content}
-                  </div>
-                )}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 text-sm text-[#e0c0b1]">
-                    <span className="material-symbols-outlined text-[#f97316]">
-                      play_circle
-                    </span>
-                    <span>{chapter.videoUrl ? "Video lesson" : "Reading"} • ~15 min</span>
-                  </div>
+              {/* Expanded content — surface-container-low inset */}
+              {isOpen && (
+                <div
+                  className="px-5 pb-5 pt-2 ml-14"
+                  style={{ backgroundColor: "var(--surface-container-low)" }}
+                >
+                  {chapter.description && (
+                    <p className="text-sm mb-4 leading-relaxed" style={{ color: "var(--on-surface-variant)" }}>
+                      {chapter.description}
+                    </p>
+                  )}
+                  {chapter.content && !chapter.videoUrl && (
+                    <p className="text-sm mb-4 leading-relaxed" style={{ color: "var(--on-surface-variant)" }}>
+                      {chapter.content}
+                    </p>
+                  )}
+
+                  {/* Start lesson link */}
                   <Link
                     href={`/courses/${courseId}/learn/${chapter.id}`}
-                    className="inline-flex items-center gap-1 text-sm font-medium text-[#f97316] hover:text-[#ffb690] transition-colors"
+                    className="inline-flex items-center gap-1.5 text-sm font-medium scholar-link"
                   >
-                    Start Lesson
+                    Start lesson
                     <span className="material-symbols-outlined text-sm">arrow_right_alt</span>
                   </Link>
                 </div>
-              </div>
-            )}
-          </div>
-        ))}
+              )}
+            </div>
+          );
+        })}
       </div>
-
-      {/* Amber Accent Line - slides in on hover (DESIGN.md card hover spec) */}
-      <div className="h-0.5 bg-gradient-to-r from-[#f97316] to-transparent w-0 hover:w-full transition-all duration-300" />
     </div>
   );
 }

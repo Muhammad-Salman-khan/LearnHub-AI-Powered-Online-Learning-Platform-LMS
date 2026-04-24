@@ -34,6 +34,8 @@ export default function EnrollButton({ courseId, price, userProgress }: { course
         if (result.error === "Already enrolled") {
           toast.info("You are already enrolled in this course.");
           setIsEnrolled(true);
+        } else if (result.error === "Not authenticated") {
+          router.push(`/login?callbackUrl=/courses/${courseId}`);
         } else {
           toast.error(result.error || "Enrollment failed.");
         }
@@ -58,7 +60,8 @@ export default function EnrollButton({ courseId, price, userProgress }: { course
     return (
       <button
         disabled
-        className="px-6 py-3 bg-[#F97316]/50 text-white rounded-lg font-medium cursor-wait animate-pulse"
+        className="w-full h-12 font-semibold rounded cursor-wait animate-pulse flex items-center justify-center gap-2"
+        style={{ backgroundColor: "#f0eded", color: "#424654" }}
       >
         Checking...
       </button>
@@ -70,7 +73,8 @@ export default function EnrollButton({ courseId, price, userProgress }: { course
     return (
       <button
         onClick={handleLoginRedirect}
-        className="w-full h-12 bg-gradient-to-br from-[#ffb690] to-[#f97316] text-[#131313] font-semibold rounded-[min(var(--radius-md),4px)] hover:opacity-95 transition-all shadow-[0_0_15px_rgba(249,115,22,0.05)] hover:shadow-[0_0_25px_rgba(249,115,22,0.08)] flex items-center justify-center gap-2"
+        className="w-full h-12 font-semibold rounded transition-all flex items-center justify-center gap-2"
+        style={{ backgroundColor: "#0040a1", color: "#ffffff" }}
       >
         <span className="material-symbols-outlined text-base">login</span>
         Log in to Enroll
@@ -84,19 +88,25 @@ export default function EnrollButton({ courseId, price, userProgress }: { course
       return (
         <button
           disabled
-          className="w-full h-12 bg-green-500/20 text-green-400 border border-green-500/30 rounded-[min(var(--radius-md),4px)] font-semibold cursor-default flex items-center justify-center gap-2"
+          className="w-full h-12 font-semibold cursor-default rounded flex items-center justify-center gap-2"
+          style={{
+            backgroundColor: "rgba(0, 64, 161, 0.08)",
+            color: "#0040a1",
+            border: "1px solid rgba(0, 64, 161, 0.2)",
+          }}
         >
           <span className="material-symbols-outlined text-base">check_circle</span>
-          Course Completed ✅
+          Course Completed
         </button>
       );
     }
-    
+
     if (progress > 0) {
       return (
         <button
           onClick={handleResume}
-          className="w-full h-12 bg-[#F97316]/20 text-[#F97316] border border-[#F97316]/30 rounded-[min(var(--radius-md),4px)] font-semibold hover:bg-[#F97316]/30 transition-all flex items-center justify-center gap-2"
+          className="w-full h-12 font-semibold rounded transition-all flex items-center justify-center gap-2"
+          style={{ backgroundColor: "#0040a1", color: "#ffffff" }}
         >
           <span className="material-symbols-outlined text-base">play_circle</span>
           Resume Progress ({progress}%)
@@ -107,10 +117,15 @@ export default function EnrollButton({ courseId, price, userProgress }: { course
     return (
       <button
         disabled
-        className="w-full h-12 bg-green-500/20 text-green-400 border border-green-500/30 rounded-[min(var(--radius-md),4px)] font-semibold cursor-default flex items-center justify-center gap-2"
+        className="w-full h-12 font-semibold cursor-default rounded flex items-center justify-center gap-2"
+        style={{
+          backgroundColor: "rgba(0, 64, 161, 0.08)",
+          color: "#0040a1",
+          border: "1px solid rgba(0, 64, 161, 0.2)",
+        }}
       >
         <span className="material-symbols-outlined text-base">check_circle</span>
-        Already Enrolled ✅
+        Already Enrolled
       </button>
     );
   }
@@ -120,7 +135,8 @@ export default function EnrollButton({ courseId, price, userProgress }: { course
     <button
       onClick={handleEnroll}
       disabled={isEnrolling}
-      className="w-full h-12 bg-gradient-to-br from-[#ffb690] to-[#f97316] text-[#131313] font-semibold rounded-[min(var(--radius-md),4px)] hover:opacity-95 transition-all shadow-[0_0_15px_rgba(249,115,22,0.05)] hover:shadow-[0_0_25px_rgba(249,115,22,0.08)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+      className="w-full h-12 font-semibold rounded transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+      style={{ backgroundColor: "#0040a1", color: "#ffffff" }}
     >
       {isEnrolling ? (
         <>
@@ -130,7 +146,7 @@ export default function EnrollButton({ courseId, price, userProgress }: { course
       ) : (
         <>
           <span className="material-symbols-outlined text-base">menu_book</span>
-          <span>Enroll Now {price === 0 ? "(Free)" : `— Rs. ${price}`}</span>
+          <span>Enroll Now {price === 0 ? "(Free)" : `— $${price}`}</span>
         </>
       )}
     </button>
