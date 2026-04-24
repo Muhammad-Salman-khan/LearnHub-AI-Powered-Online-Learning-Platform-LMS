@@ -21,10 +21,15 @@ import { useState } from "react";
 interface DashboardNavbarProps {
   title: string;
   role: "student" | "instructor" | "admin";
+  sidebarOpen?: boolean;
+  setSidebarOpen?: (open: boolean) => void;
 }
 
-export function DashboardNavbar({ title, role }: DashboardNavbarProps) {
-  const [open, setOpen] = useState(false);
+export function DashboardNavbar({ title, role, sidebarOpen, setSidebarOpen }: DashboardNavbarProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+
+  const open = sidebarOpen !== undefined ? sidebarOpen : internalOpen;
+  const onOpenChange = setSidebarOpen !== undefined ? setSidebarOpen : setInternalOpen;
 
   return (
     <header
@@ -36,7 +41,7 @@ export function DashboardNavbar({ title, role }: DashboardNavbarProps) {
     >
       <div className="flex items-center gap-4">
         {/* Mobile menu trigger */}
-        <Sheet open={open} onOpenChange={setOpen}>
+        <Sheet open={open} onOpenChange={onOpenChange}>
           <SheetTrigger asChild>
             <Button
               variant="ghost"
@@ -51,7 +56,7 @@ export function DashboardNavbar({ title, role }: DashboardNavbarProps) {
             side="left"
             className="w-[240px] p-0 border-r-0"
           >
-            <DashboardSidebar role={role} onClose={() => setOpen(false)} />
+            <DashboardSidebar role={role} onClose={() => onOpenChange(false)} />
           </SheetContent>
         </Sheet>
 
