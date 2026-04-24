@@ -33,7 +33,7 @@ export default async function InstructorCoursesListPage() {
   }));
 
   return (
-    <div className="flex h-screen" style={{ backgroundColor: "#f6f3f2" }}>
+    <div className="flex h-screen" style={{ backgroundColor: "var(--surface-container-low)" }}>
       <div className="hidden md:block flex-shrink-0">
         <DashboardSidebar role="instructor" />
       </div>
@@ -48,13 +48,13 @@ export default async function InstructorCoursesListPage() {
               <div>
                 <p
                   className="text-xs font-semibold uppercase tracking-widest mb-1"
-                  style={{ color: "#0040a1" }}
+                  style={{ color: "var(--primary)" }}
                 >
                   Course Management
                 </p>
                 <h1
                   className="text-2xl md:text-3xl font-bold"
-                  style={{ fontFamily: "var(--font-headline)", color: "#1b1b1c" }}
+                  style={{ fontFamily: "var(--font-headline)", color: "var(--on-surface)" }}
                 >
                   Manage Courses
                 </h1>
